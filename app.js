@@ -57,58 +57,29 @@ app.use((err, req, res, next) => {
 
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
-// let UserAddress;
-// let userPrivateKey;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
-const web3 = new Web3(
-  "https://polygon-mumbai.g.alchemy.com/v2/ZAh-n81Q9OudAr1YvmaA0QG5gmbQmEna"
-);
+const web3 = new Web3(process.env.RPC_PROVIDER);
 
-const provider = new ethers.providers.JsonRpcProvider(
-  "https://polygon-mumbai.g.alchemy.com/v2/ZAh-n81Q9OudAr1YvmaA0QG5gmbQmEna"
-);
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-// const contract = new ethers.Contract(
-//   DintTokenAddress.toLowerCase(),
-//   DintTokenAbBI,
-//   signer
-// );
 
-const getUserDetails = async (transactionData) => {
-  console.log("userdetails", transactionData);
-
-  client.query(
-    `select wallet_private_key from auth_user where id = ${transactionData.id};`,
-    (err, res) => {
-      if (err) console.log(err.stack);
-      else {
-        console.log(res.rows);
-      }
-    }
-  );
-};
-const gnerate = async (
-  userPrivateKey,
-  UserAddress,
-  recieverAddress,
-  amount
-) => {
+const generate = async (data, amount) => {
   const nonce = 0;
   if (amount >= 0) {
+    const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
       ownerSigner
     );
-
-    const domainName = "dint"; // put your token name
-    const domainVersion = "MMT_0.1"; // leave this to "1"
-    const chainId = 80001; // this is for the chain's ID. value is 1 for remix
+    const domainName = "dint"; // token name
+    const domainVersion = "MMT_0.1";
+    const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
-    var account = UserAddress.toLowerCase();
+    var account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
       version: domainVersion,
@@ -121,9 +92,15 @@ const gnerate = async (
       { name: "chainId", type: "uint256" },
       { name: "verifyingContract", type: "address" },
     ];
-
+    const Permit = [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+    ];
     const currentApproval = await contract.allowance(
-      UserAddress,
+      data.userAddress,
       DintDistributerAddress
     );
 
@@ -138,22 +115,12 @@ const gnerate = async (
         nonce: newNonce,
         deadline,
       };
-      const Permit = [
-        { name: "owner", type: "address" },
-        { name: "spender", type: "address" },
-        { name: "value", type: "uint256" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" },
-      ];
-
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
         permit
       );
-
       let sig = await ethers.utils.splitSignature(generatedSig);
-
       const res = await contract.permit(
         account,
         spender,
@@ -164,9 +131,8 @@ const gnerate = async (
         sig.s,
         { gasLimit: 1000000, gasPrice: 30000000000 }
       );
-
       console.log("Approval Hash", res.hash);
-      send(value, reciever);
+      send(data, amount);
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
@@ -177,22 +143,12 @@ const gnerate = async (
         nonce: newNonce,
         deadline,
       };
-      const Permit = [
-        { name: "owner", type: "address" },
-        { name: "spender", type: "address" },
-        { name: "value", type: "uint256" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" },
-      ];
-
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
         permit
       );
-
       let sig = await ethers.utils.splitSignature(generatedSig);
-
       const res = await contract.permit(
         account,
         spender,
@@ -203,10 +159,6 @@ const gnerate = async (
         sig.s,
         { gasLimit: 1000000, gasPrice: 30000000000 }
       );
-
-      const updatednonce = await contract.nonces(account);
-      const newUpdatedNonce = updatednonce.toNumber();
-
       const value = amount;
       const permitNew = {
         owner: account,
@@ -215,17 +167,12 @@ const gnerate = async (
         nonce: newNonce + 1,
         deadline,
       };
-
-      console.log("currentnonce", currentnonce.toNumber());
       const generatedNewSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
         permitNew
       );
-
       let sigNew = await ethers.utils.splitSignature(generatedNewSig);
-      console.log("sign", sigNew);
-
       const resPermit = await contract.permit(
         account,
         spender,
@@ -236,118 +183,98 @@ const gnerate = async (
         sigNew.s,
         { gasLimit: 1000000, gasPrice: 30000000000 }
       );
-
       console.log("Approval Hash", resPermit.hash);
-
-      send(value, reciever);
     }
   }
 };
 
-const send = async (userPrivateKey, UserAddress, recieverAddress, amount) => {
-  console.log("sending Dint", value);
-  // const recieverAddress = reciever;
+const send = async (data, amount) => {
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
+  await dintDistContract
+    .sendDint(data.userAddress, data.recieverAddress, amount, {
+      gasLimit: 1000000,
+      gasPrice: 30000000000,
+    })
+    .then((res) => {
+      console.log("Transaction Hash", res.hash);
 
-  const sendToken = await dintDistContract.sendDint(
-    UserAddress,
-    recieverAddress,
-    value,
-    { gasLimit: 1000000, gasPrice: 30000000000 }
-  );
-  console.log("Send Dint Transaction Hash", sendToken.hash);
+      // const filter = {
+      //   address: DintDistributerAddress,
+      //   topics: [
+      //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+      //   ],
+      // };
+      // provider.on(filter, async (data) => {
+      //   console.log("data123", data);
+      // });
+    });
 };
 
-const test = async (sender_id, reciever_id, amount) => {
-  let userPrivateKey;
-  let UserAddress;
-  let recieverAddress;
-
-  client.query(
-    `select wallet_private_key from auth_user where id = ${sender_id};`,
-    async (err, res) => {
-      if (err) console.log(err.stack);
-      else {
-        var buf = Buffer.from(res.rows[0].wallet_private_key);
-        var secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
-        var token = new fernet.Token({
-          secret: secret,
-          token: buf.toString(),
-          ttl: 0,
-        });
-        userPrivateKey = token.decode();
-
-        // console.log(token.decode());
-
-        // console.log("userPrivateKey 1", userPrivateKey);
+const getData = async (sender_id, reciever_id, amount) => {
+  return new Promise((resolve, reject) => {
+    client.query(
+      `select wallet_private_key, wallet_address, id from auth_user where id = ${sender_id} or id = ${reciever_id};`,
+      async (err, res) => {
+        if (err) console.log(err.stack);
+        else {
+          const data = res.rows;
+          let sender = data.find((el) => {
+            return el.id === sender_id;
+          });
+          let reciever = data.find((el) => {
+            return el.id === reciever_id;
+          });
+          const secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
+          const bufUserPvt = Buffer.from(sender.wallet_private_key);
+          const tokenUserPvt = new fernet.Token({
+            secret: secret,
+            token: bufUserPvt.toString(),
+            ttl: 0,
+          });
+          const userPrivateKey = tokenUserPvt.decode();
+          const bufUserAdd = Buffer.from(sender.wallet_address);
+          const tokenUserAdd = new fernet.Token({
+            secret: secret,
+            token: bufUserAdd.toString(),
+            ttl: 0,
+          });
+          const userAddress = tokenUserAdd.decode();
+          const bufRecieverAdd = Buffer.from(reciever.wallet_address);
+          const tokenRecieverAdd = new fernet.Token({
+            secret: secret,
+            token: bufRecieverAdd.toString(),
+            ttl: 0,
+          });
+          const recieverAddress = tokenRecieverAdd.decode();
+          resolve({ userPrivateKey, userAddress, recieverAddress });
+        }
       }
-    }
-  );
-
-  client.query(
-    `select wallet_address from auth_user where id = ${sender_id};`,
-    (err, res) => {
-      if (err) console.log(err.stack);
-      else {
-        var buf = Buffer.from(res.rows[0].wallet_address);
-        var secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
-        var token = new fernet.Token({
-          secret: secret,
-          token: buf.toString(),
-          ttl: 0,
-        });
-        token.decode();
-
-        console.log(token.decode());
-
-        UserAddress = token.decode();
-      }
-    }
-  );
-  client.query(
-    `select wallet_address from auth_user where id = ${reciever_id};`,
-    (err, res) => {
-      if (err) console.log(err.stack);
-      else {
-        var buf = Buffer.from(res.rows[0].wallet_address);
-        var secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
-        var token = new fernet.Token({
-          secret: secret,
-          token: buf.toString(),
-          ttl: 0,
-        });
-        token.decode();
-
-        console.log(token.decode());
-        recieverAddress = token.decode();
-      }
-    }
-  );
+    );
+  });
 };
 
-app.post("/api/signature/:apiKey", async (req, res) => {
+app.post("/api/send-dint/:apiKey", async (req, res) => {
   if (req.params.apiKey !== process.env.SECURITY_KEY) {
     return res.send({ success: false, message: "invalid api key" });
   }
-  if (!process.env.USER_PRIVATE_KEY) {
+  if (!process.env.OWNER_PRIVATE_KEY) {
     return res.send({ success: false, message: "private key not found" });
   }
   const { sender_id, reciever_id, amount } = req.body;
 
   try {
-    test(sender_id, reciever_id, amount);
+    getData(sender_id, reciever_id, amount).then((data) => {
+      generate(data, amount);
+    });
+
+    res.send(req.body);
   } catch (error) {
     res.status(500).json({ message: "Something went wrong." });
   }
-  // const { reciever } = req.body;
-  // const { sender } = req.body
-  // const { id } = req.body
-
-  // gnerate(amount, reciever);
 });
 
 app.listen(PORT, (error) => {
