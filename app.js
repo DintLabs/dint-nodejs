@@ -63,6 +63,18 @@ const web3 = new Web3(process.env.RPC_PROVIDER);
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
+// const a = ethers.utils.defaultAbiCoder.decode(
+//   ["address", "address", "address"],
+//   "0x4a6728b900000000000000000000000078191244b4f21d1e034a7fb4b3bb3294c9aa5d39000000000000000000000000d0f5c2cd900ff5cf9ea3f3eae28fc094fd5fc3b8000000000000000000000000000000000000000000000000000000000000000a"
+// );
+// console.log("event=====", a);
+const a = provider.getTransaction(
+  "0x01c9513a7559fa74f173cf1db0ed912e86f088594d53e02b2954445d2af4665f"
+);
+try {
+} catch (err) {
+  console.log(err);
+}
 
 const generate = async (data, amount) => {
   const nonce = 0;
@@ -121,18 +133,24 @@ const generate = async (data, amount) => {
         permit
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
-      const res = await contract.permit(
-        account,
-        spender,
-        value,
-        deadline,
-        sig.v,
-        sig.r,
-        sig.s,
-        { gasLimit: 1000000, gasPrice: 30000000000 }
-      );
-      console.log("Approval Hash", res.hash);
-      send(data, amount);
+      return new Promise((resolve, reject) => {
+        contract
+          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+            gasLimit: 1000000,
+            gasPrice: 30000000000,
+          })
+          .then((res) => {
+            console.log("Approval Hash", res.hash);
+            send(data, amount)
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          })
+          .catch((err) => reject(err));
+      });
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
@@ -172,18 +190,34 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permitNew
       );
-      let sigNew = await ethers.utils.splitSignature(generatedNewSig);
-      const resPermit = await contract.permit(
-        account,
-        spender,
-        value,
-        deadline,
-        sigNew.v,
-        sigNew.r,
-        sigNew.s,
-        { gasLimit: 1000000, gasPrice: 30000000000 }
-      );
-      console.log("Approval Hash", resPermit.hash);
+
+      let sigNew = ethers.utils.splitSignature(generatedNewSig);
+      return new Promise((resolve, reject) => {
+        contract
+          .permit(
+            account,
+            spender,
+            value,
+            deadline,
+            sigNew.v,
+            sigNew.r,
+            sigNew.s,
+            { gasLimit: 1000000, gasPrice: 30000000000 }
+          )
+          .then((res) => {
+            console.log("Approval Hash", res.hash);
+            send(data, amount)
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
     }
   }
 };
@@ -194,66 +228,88 @@ const send = async (data, amount) => {
     dintDistributerABI,
     ownerSigner
   );
-  await dintDistContract
-    .sendDint(data.userAddress, data.recieverAddress, amount, {
-      gasLimit: 1000000,
-      gasPrice: 30000000000,
-    })
-    .then((res) => {
-      console.log("Transaction Hash", res.hash);
+  return new Promise((resolve, reject) => {
+    dintDistContract
+      .sendDint(data.userAddress, data.recieverAddress, amount, {
+        gasLimit: 1000000,
+        gasPrice: 30000000000,
+      })
 
-      // const filter = {
-      //   address: DintDistributerAddress,
-      //   topics: [
-      //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
-      //   ],
-      // };
-      // provider.on(filter, async (data) => {
-      //   console.log("data123", data);
-      // });
-    });
+      .then(
+        async (res) => {
+          console.log("Transaction Hash", res);
+
+          const filter = {
+            address: DintDistributerAddress,
+            topics: [
+              "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+            ],
+          };
+          provider.on(filter, async (data, err) => {
+            console.log("data123", data);
+            console.log("errrr", err);
+            const txnResponse = data;
+            resolve(txnResponse);
+            // const add = ethers.utils.defaultAbiCoder.decode(
+            //   ["address", "address"],
+            //   data.data
+            // );
+            // console.log("event=====", add);
+          });
+        },
+        (err) => {
+          console.log("err", err);
+        }
+      )
+      .catch((err) => {
+        console.log("err", err);
+        reject(err);
+      });
+  });
 };
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
-    client.query(
-      `select wallet_private_key, wallet_address, id from auth_user where id = ${sender_id} or id = ${reciever_id};`,
-      async (err, res) => {
-        if (err) console.log(err.stack);
-        else {
-          const data = res.rows;
-          let sender = data.find((el) => {
-            return el.id === sender_id;
-          });
-          let reciever = data.find((el) => {
-            return el.id === reciever_id;
-          });
-          const secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
-          const bufUserPvt = Buffer.from(sender.wallet_private_key);
-          const tokenUserPvt = new fernet.Token({
-            secret: secret,
-            token: bufUserPvt.toString(),
-            ttl: 0,
-          });
-          const userPrivateKey = tokenUserPvt.decode();
-          const bufUserAdd = Buffer.from(sender.wallet_address);
-          const tokenUserAdd = new fernet.Token({
-            secret: secret,
-            token: bufUserAdd.toString(),
-            ttl: 0,
-          });
-          const userAddress = tokenUserAdd.decode();
-          const bufRecieverAdd = Buffer.from(reciever.wallet_address);
-          const tokenRecieverAdd = new fernet.Token({
-            secret: secret,
-            token: bufRecieverAdd.toString(),
-            ttl: 0,
-          });
-          const recieverAddress = tokenRecieverAdd.decode();
-          resolve({ userPrivateKey, userAddress, recieverAddress });
-        }
-      }
-    );
+    client
+      .query(
+        `select wallet_private_key, wallet_address, id from auth_user where id = ${sender_id} or id = ${reciever_id};`
+      )
+      .then((res) => {
+        const data = res.rows;
+        let sender = data.find((el) => {
+          return el.id === sender_id;
+        });
+        let reciever = data.find((el) => {
+          return el.id === reciever_id;
+        });
+        const secret = new fernet.Secret(process.env.ENCRYPTION_KEY);
+        const bufUserPvt = Buffer.from(sender.wallet_private_key);
+        const tokenUserPvt = new fernet.Token({
+          secret: secret,
+          token: bufUserPvt.toString(),
+          ttl: 0,
+        });
+        const userPrivateKey = tokenUserPvt.decode();
+        const bufUserAdd = Buffer.from(sender.wallet_address);
+        const tokenUserAdd = new fernet.Token({
+          secret: secret,
+          token: bufUserAdd.toString(),
+          ttl: 0,
+        });
+        const userAddress = tokenUserAdd.decode();
+        const bufRecieverAdd = Buffer.from(reciever.wallet_address);
+        const tokenRecieverAdd = new fernet.Token({
+          secret: secret,
+          token: bufRecieverAdd.toString(),
+          ttl: 0,
+        });
+        const recieverAddress = tokenRecieverAdd.decode();
+        resolve({ userPrivateKey, userAddress, recieverAddress });
+      })
+      .catch((error) => {
+        console.log(error.stack);
+        reject(error.stack);
+      });
   });
 };
 
@@ -267,11 +323,36 @@ app.post("/api/send-dint/:apiKey", async (req, res) => {
   const { sender_id, reciever_id, amount } = req.body;
 
   try {
-    getData(sender_id, reciever_id, amount).then((data) => {
-      generate(data, amount);
-    });
-
-    res.send(req.body);
+    getData(sender_id, reciever_id, amount)
+      .then((data) => {
+        generate(data, amount)
+          .then((data) => {
+            console.log("txn data", data);
+            if (data.data) {
+              const users = ethers.utils.defaultAbiCoder.decode(
+                ["address", "address"],
+                data.data
+              );
+              const sender = users[0];
+              const reciever = users[1];
+              return res.send({
+                status: "Transaction Successful",
+                Hash: data.transactionHash,
+                sender: sender,
+                reciever: reciever,
+              });
+            } else {
+              return res.send("Something went wrong. Please try again");
+            }
+          })
+          .catch((err) => {
+            return res.send("Something went wrong", err);
+          });
+      })
+      .catch((error) => {
+        console.log("err", error);
+        return res.send("Something went wrong.");
+      });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong." });
   }
