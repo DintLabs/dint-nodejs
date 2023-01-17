@@ -33,7 +33,7 @@ client.connect(function (err) {
 
 // Custom Middleware
 app.use((req, res, next) => {
-  let validIps = ["::12", "::1", "::ffff:127.0.0.1"]; // Put your IP whitelist in this array
+  let validIps = ["::12", "::1", "::ffff:127.0.0.1", "52.3.163.167"]; // Put your IP whitelist in this array
   console.log("process", typeof process.env.whitelistIp);
   console.log("req.socket.remoteAddress", req.socket.remoteAddress);
   if (process.env.whitelistIp === "inactive") {
@@ -313,8 +313,11 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-app.post("/api/send-dint/:apiKey", async (req, res) => {
-  if (req.params.apiKey !== process.env.SECURITY_KEY) {
+app.post("/api/send-dint/", async (req, res) => {
+  // console.log("req.headers", req.headers.apikey=== process.env.SECURITY_KEY);
+  if (req.headers.apikey !== process.env.SECURITY_KEY) {
+    console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
+
     return res.send({ success: false, message: "invalid api key" });
   }
   if (!process.env.OWNER_PRIVATE_KEY) {
