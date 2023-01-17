@@ -340,10 +340,11 @@ app.post("/api/send-dint/", async (req, res) => {
               const sender = users[0];
               const reciever = users[1];
               return res.send({
-                status: "Transaction Successful",
+                success: true,
                 Hash: data.transactionHash,
                 sender: sender,
                 reciever: reciever,
+                amount: amount
               });
             } else {
               return res.send("Something went wrong. Please try again");
