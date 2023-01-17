@@ -33,7 +33,8 @@ client.connect(function (err) {
 
 // Custom Middleware
 app.use((req, res, next) => {
-  let validIps = ["::12", "::1", "::ffff:127.0.0.1", "52.3.163.167"]; // Put your IP whitelist in this array
+  let validIps = ["::12", "::1", "::ffff:127.0.0.1", process.env.WHITELIST_IP]; // Put your IP whitelist in this array
+  console.log("ip", validIps);
   console.log("process", typeof process.env.whitelistIp);
   console.log("req.socket.remoteAddress", req.socket.remoteAddress);
   if (process.env.whitelistIp === "inactive") {
