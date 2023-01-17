@@ -240,23 +240,24 @@ const send = async (data, amount) => {
         async (res) => {
           console.log("Transaction Hash", res);
 
-          const filter = {
-            address: DintDistributerAddress,
-            topics: [
-              "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
-            ],
-          };
-          provider.on(filter, async (data, err) => {
-            console.log("data123", data);
-            console.log("errrr", err);
-            const txnResponse = data;
-            resolve(txnResponse);
-            // const add = ethers.utils.defaultAbiCoder.decode(
-            //   ["address", "address"],
-            //   data.data
-            // );
-            // console.log("event=====", add);
-          });
+          // const filter = {
+          //   address: DintDistributerAddress,
+          //   topics: [
+          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+          //   ],
+          // };
+          // provider.on(filter, async (data, err) => {
+          //   console.log("data123", data);
+          //   console.log("errrr", err);
+          //   const txnResponse = data;
+          //   resolve(txnResponse);
+          //   // const add = ethers.utils.defaultAbiCoder.decode(
+          //   //   ["address", "address"],
+          //   //   data.data
+          //   // );
+          //   // console.log("event=====", add);
+          // });
+          resolve({res, data});
         },
         (err) => {
           console.log("err", err);
@@ -332,23 +333,23 @@ app.post("/api/send-dint/", async (req, res) => {
         generate(data, amount)
           .then((data) => {
             console.log("txn data", data);
-            if (data.data) {
-              const users = ethers.utils.defaultAbiCoder.decode(
-                ["address", "address"],
-                data.data
-              );
-              const sender = users[0];
-              const reciever = users[1];
+            // if (data.data) {
+            //   const users = ethers.utils.defaultAbiCoder.decode(
+            //     ["address", "address"],
+            //     data.data
+            //   );
+            //   const sender = users[0];
+            //   const reciever = users[1];
               return res.send({
                 success: true,
-                Hash: data.transactionHash,
-                sender: sender,
-                reciever: reciever,
-                amount: amount
+                Hash: data.res.hash,
+                sender: data.data.userAddress,
+                reciever: data.data.recieverAddress,
+                amount: amount,
               });
-            } else {
-              return res.send("Something went wrong. Please try again");
-            }
+            // } else {
+            //   return res.send("Something went wrong. Please try again");
+            // }
           })
           .catch((err) => {
             return res.send("Something went wrong", err);
