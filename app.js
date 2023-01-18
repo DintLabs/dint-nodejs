@@ -64,11 +64,7 @@ const web3 = new Web3(process.env.RPC_PROVIDER);
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-// const a = ethers.utils.defaultAbiCoder.decode(
-//   ["address", "address", "address"],
-//   "0x4a6728b900000000000000000000000078191244b4f21d1e034a7fb4b3bb3294c9aa5d39000000000000000000000000d0f5c2cd900ff5cf9ea3f3eae28fc094fd5fc3b8000000000000000000000000000000000000000000000000000000000000000a"
-// );
-// console.log("event=====", a);
+
 const a = provider.getTransaction(
   "0x01c9513a7559fa74f173cf1db0ed912e86f088594d53e02b2954445d2af4665f"
 );
@@ -117,8 +113,13 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-    if (currentApproval.toNumber() === 0) {
-      const value = amount;
+    console.log("currentApproval", currentApproval);
+
+    if (Number(currentApproval)== 0) {
+      const value = BigInt(
+        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+      ); 
+      
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -142,7 +143,7 @@ const generate = async (data, amount) => {
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
-            send(data, amount)
+            send(data, value)
               .then((data) => {
                 resolve(data);
               })
@@ -150,7 +151,9 @@ const generate = async (data, amount) => {
                 reject(err);
               });
           })
-          .catch((err) => reject(err));
+          .catch((err) => {
+            console.log("err permit", err)
+            reject(err)});
       });
     } else {
       const currentnonce = await contract.nonces(account);
@@ -178,11 +181,13 @@ const generate = async (data, amount) => {
         sig.s,
         { gasLimit: 1000000, gasPrice: 30000000000 }
       );
-      const value = amount;
+    const value = BigInt(
+      Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+    ); 
       const permitNew = {
         owner: account,
         spender,
-        value: amount,
+        value,
         nonce: newNonce + 1,
         deadline,
       };
@@ -207,7 +212,7 @@ const generate = async (data, amount) => {
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
-            send(data, amount)
+            send(data, value)
               .then((data) => {
                 resolve(data);
               })
@@ -216,6 +221,7 @@ const generate = async (data, amount) => {
               });
           })
           .catch((err) => {
+            console.log("err permit", err)
             reject(err);
           });
       });
@@ -223,7 +229,7 @@ const generate = async (data, amount) => {
   }
 };
 
-const send = async (data, amount) => {
+const send = async (data, value) => {
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
@@ -231,7 +237,7 @@ const send = async (data, amount) => {
   );
   return new Promise((resolve, reject) => {
     dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, amount, {
+      .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: 1000000,
         gasPrice: 30000000000,
       })
@@ -277,7 +283,6 @@ const getData = async (sender_id, reciever_id, amount) => {
         `select wallet_private_key, wallet_address, id from auth_user where id = ${sender_id} or id = ${reciever_id};`
       )
       .then((res) => {
-        console.log("res", res)
         const data = res.rows;
         let sender = data.find((el) => {
           return el.id === sender_id;
@@ -331,10 +336,8 @@ app.post("/api/send-dint/", async (req, res) => {
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
-        console.log("data", data);
         generate(data, amount)
           .then((data) => {
-            console.log("txn data", data);
             // if (data.data) {
             //   const users = ethers.utils.defaultAbiCoder.decode(
             //     ["address", "address"],
