@@ -277,6 +277,7 @@ const getData = async (sender_id, reciever_id, amount) => {
         `select wallet_private_key, wallet_address, id from auth_user where id = ${sender_id} or id = ${reciever_id};`
       )
       .then((res) => {
+        console.log("res", res)
         const data = res.rows;
         let sender = data.find((el) => {
           return el.id === sender_id;
@@ -330,6 +331,7 @@ app.post("/api/send-dint/", async (req, res) => {
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
+        console.log("data", data);
         generate(data, amount)
           .then((data) => {
             console.log("txn data", data);
@@ -352,15 +354,15 @@ app.post("/api/send-dint/", async (req, res) => {
             // }
           })
           .catch((err) => {
-            return res.send("Something went wrong", err);
+            return res.send({success: false, message: "Something went wrong while making transaction. Please try again!", error: err});
           });
       })
       .catch((error) => {
         console.log("err", error);
-        return res.send("Something went wrong.");
+        return res.send({sucess: false, message: "Something went wrong while getting user data."});
       });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong." });
+    res.status(500).json({ sucess: false, message: "Something went wrong. Please try again!" });
   }
 });
 
