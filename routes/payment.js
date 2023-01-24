@@ -4,7 +4,7 @@ const express = require("express");
 const stripe = require("stripe");
 const ethers = require("ethers");
 const { buffer } = require ("micro");
-// require("dotenv").config({ path: `../env.local`, override: true });
+require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { transferDint } = require("../controller/stripe");
@@ -65,7 +65,7 @@ stripeApp.post("/stripe/", async (req, res) => {
     level: "info",
     message: "End Point Hit",
   });
-
+res.setHeader("Access-Control-Allow-Origin", "*");
   const sig = req.headers["stripe-signature"];
   console.log("error", "error");
   winston.log("error", "127.0.0.1 - there's no place like home");
@@ -75,7 +75,7 @@ console.log("sig", sig)
   try {
     // const buf = await buffer(req.rawBody);
     // console.log("buf", buf);
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
