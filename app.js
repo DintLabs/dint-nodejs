@@ -446,15 +446,18 @@ app.post("/api/send-dint/", async (req, res) => {
    // make sure that Stripe is configured to emit events to your webhook!
    const event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
    if (event.type === "payment_intent.succeeded") {
-     const amount = ethers.utils.parseEther(
-       String(event.data.object.amount / 100)
-     );
-     const destAddr = event.data.object.metadata.walletAddr;
-     console.log({ amount, destAddr });
-     const tx = await transferDint({ amount, destAddr });
-     console.log("tx hash", tx.hash);
+    res.status(200).json({ received: true });
+    //  const amount = ethers.utils.parseEther(
+    //    String(event.data.object.amount / 100)
+    //  );
+    //  const destAddr = event.data.object.metadata.walletAddr;
+    //  console.log({ amount, destAddr });
+    //  const tx = await transferDint({ amount, destAddr });
+    //  console.log("tx hash", tx.hash);
+   }else{
+    res.status(200).json({ received: false });
    }
-   res.status(200).json({ received: true });
+   
  } catch (err) {
    res.status(400).send(`Webhook Error: ${err.message}`);
  }})
