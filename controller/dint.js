@@ -26,11 +26,7 @@ const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
 const web3 = new Web3(process.env.RPC_PROVIDER);
 // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-
-
-const provider = new ethers.providers.JsonRpcProvider(
-  process.env.RPC_PROVIDER 
-);
+const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
