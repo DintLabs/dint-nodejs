@@ -1,5 +1,6 @@
 const express = require("express");
-require("dotenv").config({ path: `.env.local`, override: true });
+// require("dotenv").config({ path: `.env.local`, override: true });
+require("dotenv").config();
 const cors = require("cors");
 const { Client } = require("pg");
 

@@ -1,5 +1,6 @@
 const ethers = require("ethers");
-require("dotenv").config({ path: `../env.local`, override: true });
+// require("dotenv").config({ path: `../env.local`, override: true });
+require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(

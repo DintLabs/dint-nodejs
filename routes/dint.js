@@ -1,6 +1,7 @@
 const express = require("express");
 const sendDint = express.Router();
-require("dotenv").config({ path: `../env.local`, override: true });
+// require("dotenv").config({ path: `../env.local`, override: true });
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const { getData, generate, checkout } = require("../controller/dint");
 
