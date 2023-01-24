@@ -1,6 +1,6 @@
 const express = require("express");
 const sendDint = express.Router();
-require("dotenv").config({ path: `.env.local`, override: true });
+require("dotenv").config({ path: `../env.local`, override: true });
 const bodyParser = require("body-parser");
 const { getData, generate, checkout } = require("../controller/dint");
 
@@ -70,7 +70,6 @@ sendDint.post("/send-dint", async (req, res) => {
   }
 });
 
-sendDint.post("/checkout", checkout)
-
+sendDint.post("/checkout", checkout);
 
 module.exports = sendDint;

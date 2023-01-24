@@ -4,6 +4,8 @@ const ethers = require("ethers");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "*/*" }));
+require("dotenv").config({ path: `../env.local`, override: true });
+
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 

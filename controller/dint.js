@@ -1,7 +1,7 @@
 const ethers = require("ethers");
 const Web3 = require("web3");
 const DintTokenAbBI = require("../DintTokenABI.json");
-require("dotenv").config({ path: `.env.local`, override: true });
+require("dotenv").config({ path: `../env.local`, override: true });
 const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
