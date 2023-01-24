@@ -110,7 +110,7 @@ console.log("sig", sig)
   } catch (err) {
     logger.log({
       level: "error",
-      message: "Event Failed",
+      message: err,
     });
     res.status(400).send(`Webhook Error: ${err.message}`);
 
