@@ -4,6 +4,7 @@ require("dotenv").config();
 const cors = require("cors");
 const { Client } = require("pg");
 
+
 const app = express();
 app.use(cors());
 const stripeApp = require("./routes/payment");

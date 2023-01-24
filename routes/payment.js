@@ -3,22 +3,20 @@ const expressWinston = require("express-winston");
 const express = require("express");
 const stripe = require("stripe");
 const ethers = require("ethers");
+const { buffer } = require ("micro");
 // require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "*/*" }));
-stripeApp.use(
-  bodyParser.json({
-    verify: function (req, res, buf) {
-      var url = req.originalUrl;
-      if (url.startsWith("/stripe")) {
-        req.rawBody = buf.toString();
-      }
-    },
-  })
-);
+stripeApp.use((req, res, next) => {
+  if (req.originalUrl === "/api/webhooks/stripe/") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const logger = winston.createLogger({
@@ -73,9 +71,11 @@ stripeApp.post("/stripe/", async (req, res) => {
   winston.log("error", "127.0.0.1 - there's no place like home");
 
   let event;
-
+console.log("sig", sig)
   try {
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
+    // const buf = await buffer(req.rawBody);
+    // console.log("buf", buf);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
