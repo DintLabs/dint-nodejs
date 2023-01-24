@@ -9,7 +9,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("./DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const buffer = require("micro");
+const {buffer} = require("micro");
 
 
 
