@@ -75,7 +75,7 @@ stripeApp.post("/stripe/", async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
