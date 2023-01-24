@@ -6,10 +6,9 @@ const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.RPC_PROVIDER
   );
-const pvt =
-  "0xd9fe157bdbc4e88a0eeb00510200746f853b9184928cee5dd893bc73b4f3d5e0";
+
   const signer = new ethers.Wallet(
-    (process.env.OWNER_PRIVATE_KEY || pvt),
+    (process.env.OWNER_PRIVATE_KEY),
     provider
   );
   const abi = [
