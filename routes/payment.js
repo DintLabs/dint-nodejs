@@ -7,6 +7,9 @@ stripeApp.use(express.raw({ type: "*/*" }));
 require("dotenv").config({ path: `../env.local`, override: true });
 
 
+const pvt =
+  "0xd9fe157bdbc4e88a0eeb00510200746f853b9184928cee5dd893bc73b4f3d5e0";
+
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 stripeApp.post("/stripe", async (req, res) => {

@@ -25,10 +25,14 @@ const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
 const web3 = new Web3(process.env.RPC_PROVIDER);
 // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
+const rpc =
+  "https://polygon-mumbai.g.alchemy.com/v2/ZAh-n81Q9OudAr1YvmaA0QG5gmbQmEna";
+
+const provider = new ethers.providers.JsonRpcProvider(
+  process.env.RPC_PROVIDER || rpc
+);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-
 
 const generate = async (data, amount) => {
   const nonce = 0;
@@ -314,4 +318,3 @@ const checkout = async (req, res) => {
 };
 
 module.exports = { getData, generate, checkout };
-
