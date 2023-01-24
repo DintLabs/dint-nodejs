@@ -1,19 +1,8 @@
 const express = require("express");
-const ethers = require("ethers");
 const sendDint = express.Router();
-const Web3 = require("web3");
-const DintTokenAbBI = require("../DintTokenABI.json");
 require("dotenv").config({ path: `.env.local`, override: true });
 const bodyParser = require("body-parser");
-const cors = require("cors");
-const { Client } = require("pg");
-const dintDistributerABI = require("../DintDistributerABI.json");
-const fernet = require("fernet");
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
-// sendDint.use(bodyParser());
-const checkout = require("../controller/dint");
-const { getData, generate } = require("../controller/dint");
-// const generate = require("../controller/dint");
+const { getData, generate, checkout } = require("../controller/dint");
 
 sendDint.use(
   bodyParser.urlencoded({
@@ -81,37 +70,7 @@ sendDint.post("/send-dint", async (req, res) => {
   }
 });
 
-sendDint.post("/checkout", async (req, res) => {
-  const { walletAddr, amount, email } = req.body;
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    customer_email: email,
-    // pass customer wallet addr as metadata, so we know where to transfer funds
-    payment_intent_data: {
-      metadata: {
-        walletAddr: walletAddr,
-      },
-    },
-    metadata: {
-      walletAddr: walletAddr,
-    },
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Membership credits", // name of the product (shown at checkout)
-          },
-          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: `https://fedev.dint.com/buy-dint-token`, // where redirect user after success/fail
-    cancel_url: `https://fedev.dint.com/buy-dint-token`,
-  });
-  res.status(200).json({ session });
-});
+sendDint.post("/checkout", checkout)
+
 
 module.exports = sendDint;

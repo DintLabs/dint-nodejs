@@ -1,9 +1,8 @@
-
 const ethers = require("ethers");
 const transferDint = async ({ amount, destAddr }) => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      process.env.RPC_PROVIDER
-    );
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.RPC_PROVIDER
+  );
 
   const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
   const abi = [
@@ -31,4 +30,4 @@ const transferDint = async ({ amount, destAddr }) => {
   return tx;
 };
 
-module.exports = {transferDint};
+module.exports = { transferDint };

@@ -11,14 +11,7 @@ const sendDint = require("./routes/dint");
 app.use("/api/webhooks", stripeApp);
 app.use("/api", sendDint);
 
-// const app = express();
 const PORT = 5000;
-// app.use(
-//   bodyParser.urlencoded({
-//     extended: true,
-//   })
-// );
-// app.use(bodyParser.json());
 
 const client = new Client({
   user: process.env.DB_USER,

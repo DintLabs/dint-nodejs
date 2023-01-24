@@ -1,14 +1,10 @@
-const express = require("express");
 const ethers = require("ethers");
 const Web3 = require("web3");
 const DintTokenAbBI = require("../DintTokenABI.json");
 require("dotenv").config({ path: `.env.local`, override: true });
-const bodyParser = require("body-parser");
-const cors = require("cors");
 const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
-// const client = require("../app");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 const client = new Client({
@@ -23,26 +19,16 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
-
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
 const web3 = new Web3(process.env.RPC_PROVIDER);
 // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-const webhookSecret =
-  "whsec_14891b2a6d650b8abaa45dfbd4efb3ee15944e0d2a162dd1cd956e949f225472";
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-const a = provider.getTransaction(
-  "0x01c9513a7559fa74f173cf1db0ed912e86f088594d53e02b2954445d2af4665f"
-);
-try {
-} catch (err) {
-  console.log(err);
-}
 
 const generate = async (data, amount) => {
   const nonce = 0;
@@ -294,39 +280,38 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-// const checkout = async (req, res) => {
-//   const { walletAddr, amount, email } = req.body;
-//   const session = await stripe.checkout.sessions.create({
-//     payment_method_types: ["card"],
-//     customer_email: email,
-//     // pass customer wallet addr as metadata, so we know where to transfer funds
-//     payment_intent_data: {
-//       metadata: {
-//         walletAddr: walletAddr,
-//       },
-//     },
-//     metadata: {
-//       walletAddr: walletAddr,
-//     },
-//     line_items: [
-//       {
-//         price_data: {
-//           currency: "usd",
-//           product_data: {
-//             name: "Membership credits", // name of the product (shown at checkout)
-//           },
-//           unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
-//         },
-//         quantity: 1,
-//       },
-//     ],
-//     mode: "payment",
-//     success_url: `https://fedev.dint.com/buy-dint-token`, // where redirect user after success/fail
-//     cancel_url: `https://fedev.dint.com/buy-dint-token`,
-//   });
-//   res.status(200).json({ session });
-// };
+const checkout = async (req, res) => {
+  const { walletAddr, amount, email } = req.body;
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    customer_email: email,
+    // pass customer wallet addr as metadata, so we know where to transfer funds
+    payment_intent_data: {
+      metadata: {
+        walletAddr: walletAddr,
+      },
+    },
+    metadata: {
+      walletAddr: walletAddr,
+    },
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Membership credits", // name of the product (shown at checkout)
+          },
+          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `https://fedev.dint.com/buy-dint-token`, // where redirect user after success/fail
+    cancel_url: `https://fedev.dint.com/buy-dint-token`,
+  });
+  res.status(200).json({ session });
+};
 
-module.exports = { getData, generate };
-// module.exports = generate;
-// module.exports = checkout;
+module.exports = { getData, generate, checkout };
+
