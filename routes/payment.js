@@ -1,22 +1,13 @@
 const winston = require("winston");
-const expressWinston = require("express-winston");
 const express = require("express");
 const stripe = require("stripe");
 const ethers = require("ethers");
-const { buffer } = require ("micro");
 // require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
-const bodyParser = require("body-parser");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "*/*" }));
-// stripeApp.use((req, res, next) => {
-//   if (req.originalUrl === "/api/webhooks/stripe/") {
-//     next();
-//   } else {
-//     express.json()(req, res, next);
-//   }
-// });
+
 require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const logger = winston.createLogger({
@@ -24,10 +15,6 @@ const logger = winston.createLogger({
   format: winston.format.json(),
   defaultMeta: { service: "user-service" },
   transports: [
-    //
-    // - Write all logs with importance level of `error` or less to `error.log`
-    // - Write all logs with importance level of `info` or less to `combined.log`
-    //
     new winston.transports.File({ filename: "error.log", level: "error" }),
     new winston.transports.File({ filename: "combined.log" }),
   ],
@@ -37,25 +24,7 @@ logger.log({
   message: "What time is the testing at?",
 });
 
-// stripeApp.use(
-//   expressWinston.logger({
-//     transports: [
-//       new winston.transports.Console(),
-//     //   new winston.transports.File({ filename: "combined.log" }),
-//     ],
-//     format: winston.format.combine(
-//       winston.format.colorize(),
-//       winston.format.json()
-//     ),
-//     meta: false,
-//     msg: "HTTP  ",
-//     expressFormat: true,
-//     colorize: false,
-//     ignoreRoute: function (req, res) {
-//       return false;
-//     },
-//   })
-// );
+
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -73,8 +42,7 @@ res.setHeader("Access-Control-Allow-Origin", "*");
   let event;
 console.log("sig", sig)
   try {
-    // const buf = await buffer(req.rawBody);
-    // console.log("buf", buf);
+   
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     logger.log({
       level: "info",
@@ -82,9 +50,7 @@ console.log("sig", sig)
       event,
     });
     logger.log("info", event);
-    // logger.info(event);
 
-    console.log("event", event);
     if (event.type === "payment_intent.succeeded") {
       logger.log({
         level: "error",
@@ -105,7 +71,6 @@ console.log("sig", sig)
         level: "error",
         message: event.type,
       });
-      // myLibLog.info("Payment not succeeded");
     }
   } catch (err) {
     logger.log({
