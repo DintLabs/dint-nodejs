@@ -307,8 +307,8 @@ const checkout = async (req, res) => {
       },
     ],
     mode: "payment",
-    success_url: `https://fedev.dint.com/buy-dint-token`, // where redirect user after success/fail
-    cancel_url: `https://fedev.dint.com/buy-dint-token`,
+    success_url: `https://fedev.dint.com/dint-wallet`, // where redirect user after success/fail
+    cancel_url: `https://fedev.dint.com/dint-wallet`,
   });
   res.status(200).json({ session });
 };
