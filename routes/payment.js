@@ -4,19 +4,19 @@ const express = require("express");
 const stripe = require("stripe");
 const ethers = require("ethers");
 const { buffer } = require ("micro");
-require("dotenv").config({ path: `../env.local`, override: true });
+// require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "*/*" }));
-stripeApp.use((req, res, next) => {
-  if (req.originalUrl === "/api/webhooks/stripe/") {
-    next();
-  } else {
-    express.json()(req, res, next);
-  }
-});
+// stripeApp.use((req, res, next) => {
+//   if (req.originalUrl === "/api/webhooks/stripe/") {
+//     next();
+//   } else {
+//     express.json()(req, res, next);
+//   }
+// });
 require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const logger = winston.createLogger({
@@ -75,7 +75,7 @@ console.log("sig", sig)
   try {
     // const buf = await buffer(req.rawBody);
     // console.log("buf", buf);
-    event = stripe.webhooks.constructEvent(req, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
