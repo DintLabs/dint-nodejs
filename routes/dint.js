@@ -75,6 +75,17 @@ sendDint.post("/send-dint", async (req, res) => {
 sendDint.post("/checkout", checkout);
 
 sendDint.post("/withdraw-dint", async (req, res) => {
+   if (req.headers.apikey !== process.env.SECURITY_KEY) {
+     console.log(
+       "req.headers",
+       req.headers.apikey === process.env.SECURITY_KEY
+     );
+
+     return res.send({ success: false, message: "invalid api key" });
+   }
+   if (!process.env.OWNER_PRIVATE_KEY) {
+     return res.send({ success: false, message: "private key not found" });
+   }
   const { user_id, amount } = req.body;
   console.log(" req.body", req.body);
 
