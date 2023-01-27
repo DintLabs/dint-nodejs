@@ -4,6 +4,7 @@ const sendDint = express.Router();
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { getData, generate, checkout } = require("../controller/dint");
+const { approval, getUserData } = require("../controller/payout");
 
 sendDint.use(
   bodyParser.urlencoded({
@@ -72,5 +73,59 @@ sendDint.post("/send-dint", async (req, res) => {
 });
 
 sendDint.post("/checkout", checkout);
+
+sendDint.post("/withdraw-dint", async (req, res) => {
+  const { user_id, amount } = req.body;
+  console.log(" req.body", req.body);
+
+  try {
+    getUserData(user_id, amount)
+      .then((data) => {
+        approval(data, amount)
+          .then((data) => {
+            // if (data.data) {
+            //   const users = ethers.utils.defaultAbiCoder.decode(
+            //     ["address", "address"],
+            //     data.data
+            //   );
+            //   const sender = users[0];
+            //   const reciever = users[1];
+            return res.send({
+              success: true,
+              hash: data.res.hash,
+              userAddress: data.data.userAddress,
+              amount: amount,
+            });
+            // } else {
+            //   return res.send("Something went wrong. Please try again");
+            // }
+          })
+          .catch((err) => {
+            return res.send({
+              success: false,
+              message:
+                "Something went wrong while making transaction. Please try again!",
+              error: err,
+            });
+          });
+      })
+      .catch((error) => {
+        console.log("err", error);
+        return res.send({
+          sucess: false,
+          message: "Something went wrong while getting user data.",
+          error: error,
+        });
+      });
+  } catch (error) {
+    res.status(500).json({
+      sucess: false,
+      message: "Something went wrong. Please try again!",
+      error: err,
+    });
+  }
+});
+
+
 
 module.exports = sendDint;
