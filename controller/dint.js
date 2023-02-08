@@ -7,7 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-​
+
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -19,17 +19,17 @@ client.connect(function (err) {
   if (err) throw err;
   console.log("Connected!");
 });
-​
+
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
 const web3 = new Web3(process.env.RPC_PROVIDER);
 // const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-​
+
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
-​
+
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-​
+
 const generate = async (data, amount) => {
   const nonce = 0;
   if (amount >= 0) {
@@ -39,7 +39,7 @@ const generate = async (data, amount) => {
       DintTokenAbBI,
       ownerSigner
     );
-    const domainName = "DintToken"; // token contract name
+    const domainName = "dint"; // token name
     const domainVersion = "MMT_0.1";
     const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
@@ -48,13 +48,14 @@ const generate = async (data, amount) => {
     var account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
-      // version: domainVersion,
+      version: domainVersion,
       verifyingContract: contractAddress.toLowerCase(),
       chainId,
     };
-​
+
     const domainType = [
       { name: "name", type: "string" },
+      { name: "version", type: "string" },
       { name: "chainId", type: "uint256" },
       { name: "verifyingContract", type: "address" },
     ];
@@ -69,14 +70,14 @@ const generate = async (data, amount) => {
       data.userAddress,
       DintDistributerAddress
     );
-​
+
     console.log("currentApproval", currentApproval);
-​
+
     if (Number(currentApproval) == 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
-​
+
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -154,7 +155,7 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permitNew
       );
-​
+
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
       return new Promise((resolve, reject) => {
         contract
@@ -186,7 +187,7 @@ const generate = async (data, amount) => {
     }
   }
 };
-​
+
 const send = async (data, value) => {
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
@@ -199,11 +200,11 @@ const send = async (data, value) => {
         gasLimit: 1000000,
         gasPrice: 30000000000,
       })
-​
+
       .then(
         async (res) => {
           console.log("Transaction Hash", res);
-​
+
           // const filter = {
           //   address: DintDistributerAddress,
           //   topics: [
@@ -233,7 +234,7 @@ const send = async (data, value) => {
       });
   });
 };
-​
+
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
     client
@@ -278,7 +279,7 @@ const getData = async (sender_id, reciever_id, amount) => {
       });
   });
 };
-​
+
 const checkout = async (req, res) => {
  res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount, email } = req.body;
@@ -312,16 +313,5 @@ const checkout = async (req, res) => {
   });
   res.status(200).json({ session });
 };
-​
+
 module.exports = { getData, generate, checkout };
-Collapse
-
-
-
-
-
-
-
-
-
-
