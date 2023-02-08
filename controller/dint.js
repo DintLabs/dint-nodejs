@@ -39,8 +39,7 @@ const generate = async (data, amount) => {
       DintTokenAbBI,
       ownerSigner
     );
-    const domainName = "dint"; // token name
-    const domainVersion = "MMT_0.1";
+    const domainName = "dintToken"; // token name
     const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
