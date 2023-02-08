@@ -55,7 +55,6 @@ const generate = async (data, amount) => {
 ​
     const domainType = [
       { name: "name", type: "string" },
-      { name: "version", type: "string" },
       { name: "chainId", type: "uint256" },
       { name: "verifyingContract", type: "address" },
     ];
@@ -315,3 +314,14 @@ const checkout = async (req, res) => {
 };
 ​
 module.exports = { getData, generate, checkout };
+Collapse
+
+
+
+
+
+
+
+
+
+
