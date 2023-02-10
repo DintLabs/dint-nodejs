@@ -314,7 +314,9 @@ const session = await stripe.checkout.sessions.create({
   cancel_url: `https://dint.com/dint-wallet`,
 });
  res.status(200).json({ session });
-  // ------------------- End of old code
+
+
+}
 
   //---------------------New code for stripe
   //res.setHeader("Access-Control-Allow-Origin", "*");
