@@ -286,6 +286,7 @@ const checkout = async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     customer_email: email,
+    customer: req.body.cardDetails.customer_id,
     // pass customer wallet addr as metadata, so we know where to transfer funds
     payment_intent_data: {
       metadata: {
