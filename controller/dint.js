@@ -282,6 +282,15 @@ const getData = async (sender_id, reciever_id, amount) => {
 
 const checkout = async (req, res) => {
  res.setHeader("Access-Control-Allow-Origin", "*");
+
+ const charge = await stripe.charges.create({
+  receipt_email: req.body.email,
+  amount: parseInt(req.body.amount) * 100, //USD*100
+  currency: "usd",
+  card: req.body.cardDetails.card_id,
+  customer: req.body.cardDetails.card_token,
+});
+
   const { walletAddr, amount, email } = req.body;
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
