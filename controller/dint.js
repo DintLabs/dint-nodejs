@@ -322,7 +322,7 @@ const checkout = async (req, res) => {
     amount: parseInt(req.body.amount) * 100, //USD*100
     currency: "usd",
     card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.card_token,
+    customer: req.body.cardDetails.customer_id,
   });
   res.send(charge);
 };
