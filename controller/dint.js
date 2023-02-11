@@ -297,14 +297,4 @@ const checkout = async (req, res) => {
   res.send(paymentIntent);
   };
   
-  //Webhook to send tokens after payment intent is successful
-  app.post("/webhook", async (req, res) => {
-  const event = req.body;
-  if (event.type === "payment_intent.succeeded") {
-  const walletAddr = event.data.object.metadata.walletAddr;
-  //Code to send tokens to the wallet address goes here
-  }
-  res.sendStatus(200);
-  });
   
-  module.exports = { getData, generate, checkout };
