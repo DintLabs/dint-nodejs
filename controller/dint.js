@@ -281,20 +281,19 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 const checkout = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "");
-  const paymentIntent = await stripe.paymentIntents.create({
-  receipt_email: req.body.email,
-  amount: parseInt(req.body.amount) * 100, //USD100
-  currency: "usd",
-  card: req.body.cardDetails.card_id,
-  customer: req.body.cardDetails.card_token,
-  payment_intent_data: {
-  metadata: {
-  walletAddr: req.body.walletAddr,
-  },
-  },
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  
+  const { walletAddr, email, amount, cardDetails } = req.body;
+
+  const charge = await stripe.charges.create({
+    receipt_email: email,
+    amount: parseInt(amount) * 100, // USD * 100
+    currency: "usd",
+    card: cardDetails.card_id,
+    customer: cardDetails.customer_id,
   });
-  res.send(paymentIntent);
-  };
   
-  
+  res.send({ charge, walletAddr, email });
+};
+
+module.exports = { getData, generate, checkout };
