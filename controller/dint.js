@@ -282,9 +282,14 @@ const getData = async (sender_id, reciever_id, amount) => {
 
 
 
-
 const checkout = async (req, res) => {
   const { charge, walletAddr, email } = req.body;
+
+  if (!charge) {
+    return res.status(400).send({
+      error: "No charge information provided"
+    });
+  }
 
   if (charge.status === "succeeded") {
     console.log("Payment was successful.");
