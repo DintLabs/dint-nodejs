@@ -290,19 +290,36 @@ const checkout = async (req, res) => {
     return res.status(400).send({ error: "A customer ID must be provided." });
   }
 
-  // Create the charge
-  const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, //USD*100
-    currency: "usd",
-    card: req.body.cardDetails.card_id,
+  // Create the PaymentIntent
+  const paymentIntent = await stripe.paymentIntents.create({
     customer: req.body.cardDetails.customer_id,
+    payment_method: req.body.cardDetails.card_id,
+    currency: "usd",
+    receipt_email: req.body.email,
+    // pass customer wallet addr as metadata, so we know where to transfer funds
+    payment_intent_data: {
+      metadata: {
+        walletAddr: walletAddr,
+      },
+    },
     metadata: {
       walletAddr: walletAddr,
     },
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Membership credits", // name of the product (shown at checkout)
+          },
+          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+        },
+        quantity: 1,
+      },
+    ],
   });
   
-  res.send({ charge, walletAddr, email });
+  res.send({ paymentIntent, walletAddr, email });
 };
 
 module.exports = { getData, generate, checkout };
