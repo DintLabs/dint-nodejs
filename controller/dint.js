@@ -281,55 +281,45 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
+const getData = async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const products = await stripe.products.list({ limit: 3 });
+  res.status(200).json({ products });
+};
+
+const generate = async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { email, walletAddr } = req.body;
+  const customer = await stripe.customers.create({
+    email: email,
+    metadata: {
+      walletAddr: walletAddr,
+    },
+  });
+  res.status(200).json({ customer });
+};
+
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   
   const { walletAddr, email, amount, cardDetails } = req.body;
 
   // Make sure a customer ID is provided
-  if (!cardDetails || !cardDetails.customer_id) {
+  if (!cardDetails || !cardDetails.card_customer_id) {
     return res.status(400).send({ error: "A customer ID must be provided." });
   }
 
   // Create the charge
-  let charge;
-  try {
-    charge = await stripe.charges.create({
-      receipt_email: req.body.email,
-      amount: parseInt(req.body.amount) * 100, //USD*100
-      currency: "usd",
-      card: req.body.cardDetails.card_id,
-      customer: req.body.cardDetails.customer_id,
-      payment_intent: {
-        metadata: {
-          walletAddr: walletAddr,
-        },
-      },
-    });
-
-    const paymentIntent = await stripe.paymentIntents.retrieve(charge.payment_intent);
-    if (paymentIntent.status === "succeeded") {
-      // Emit the "payment_intent.succeeded" event to Stripe
-      stripe.events.emit("payment_intent.succeeded", {
-        object: "event",
-        api_version: paymentIntent.api_version,
-        created: paymentIntent.created,
-        data: {
-          object: paymentIntent,
-        },
-        livemode: paymentIntent.livemode,
-        type: "payment_intent.succeeded",
-        pending_webhooks: 1,
-        request: {
-          id: paymentIntent.id,
-          idempotency_key: null,
-        },
-      });
-    }
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send({ error: "An error occurred while creating the charge." });
-  }
+  const charge = await stripe.charges.create({
+    receipt_email: email,
+    amount: parseInt(amount) * 100, //USD*100
+    currency: "usd",
+    card: cardDetails.card_id,
+    customer: cardDetails.customer_id,
+    metadata: {
+      walletAddr: walletAddr,
+    },
+  });
   
   res.send({ charge, walletAddr, email });
 };
