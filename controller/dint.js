@@ -293,27 +293,13 @@ const checkout = async (req, res) => {
   // Create the charge
   const charge = await stripe.charges.create({
     receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, //USD*100
+    amount: parseInt(req.body.amount) * 100, // USD * 100
     currency: "usd",
     card: req.body.cardDetails.card_id,
     customer: req.body.cardDetails.customer_id,
-    payment_intent: {
-      metadata: {
-        walletAddr: walletAddr,
-      },
+    metadata: {
+      walletAddr: walletAddr,
     },
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Membership credits", // name of the product (shown at checkout)
-          },
-          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
-        },
-        quantity: 1,
-      },
-    ],
   });
   
   res.send({ charge, walletAddr, email });
