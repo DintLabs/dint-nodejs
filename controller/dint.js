@@ -287,7 +287,7 @@ const checkout = async (req, res) => {
      payment_method_types: ["card"],
      customer_email: email,
      // pass customer wallet addr as metadata, so we know where to transfer funds
-     payment_intent_data: {
+     payment_intent: {
        metadata: {
          walletAddr: walletAddr,
        },
