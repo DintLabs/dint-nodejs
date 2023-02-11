@@ -285,6 +285,11 @@ const checkout = async (req, res) => {
   
   const { walletAddr, email, amount, cardDetails } = req.body;
 
+  // Make sure a customer ID is provided
+  if (!cardDetails || !cardDetails.customer_id) {
+    return res.status(400).send({ error: "A customer ID must be provided." });
+  }
+
   // Create the payment intent
   const paymentIntent = await stripe.paymentIntents.create({
     amount: parseInt(amount) * 100, // USD * 100
