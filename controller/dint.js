@@ -294,7 +294,7 @@ const checkout = async (req, res) => {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: parseInt(amount) * 100, // USD * 100
     currency: "usd",
-    customer: cardDetails.customer_id,
+    customer: req.body.cardDetails.customer_id,
     metadata: {
       walletAddr: walletAddr,
     },
