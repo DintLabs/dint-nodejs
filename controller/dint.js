@@ -286,7 +286,7 @@ const checkout = async (req, res) => {
   const { walletAddr, email, amount, cardDetails } = req.body;
 
   // Make sure a customer ID is provided
-  if (!cardDetails || !cardDetails.card_customer_id) {
+  if (!cardDetails || !cardDetails.customer_id) {
     return res.status(400).send({ error: "A customer ID must be provided." });
   }
 
