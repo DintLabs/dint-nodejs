@@ -292,25 +292,46 @@ const checkout = async (req, res) => {
   }
 
   // Create the charge
-  const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, // convert amount to cents
-    currency: "usd",
-    card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.customer_id,
-    metadata: {
-      walletAddr: walletAddr,
-    },
-  });
+  let charge;
+  try {
+    charge = await stripe.charges.create({
+      receipt_email: req.body.email,
+      amount: parseInt(req.body.amount) * 100, //USD*100
+      currency: "usd",
+      card: req.body.cardDetails.card_id,
+      customer: req.body.cardDetails.customer_id,
+      payment_intent: {
+        metadata: {
+          walletAddr: walletAddr,
+        },
+      },
+    });
 
-  // Handle payment_intent.succeeded event
-  if (charge.status === "succeeded") {
-    console.log("Payment was successful.");
-  } else {
-    console.error("Payment failed.");
+    const paymentIntent = await stripe.paymentIntents.retrieve(charge.payment_intent);
+    if (paymentIntent.status === "succeeded") {
+      // Emit the "payment_intent.succeeded" event to Stripe
+      stripe.events.emit("payment_intent.succeeded", {
+        object: "event",
+        api_version: paymentIntent.api_version,
+        created: paymentIntent.created,
+        data: {
+          object: paymentIntent,
+        },
+        livemode: paymentIntent.livemode,
+        type: "payment_intent.succeeded",
+        pending_webhooks: 1,
+        request: {
+          id: paymentIntent.id,
+          idempotency_key: null,
+        },
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ error: "An error occurred while creating the charge." });
   }
-
+  
   res.send({ charge, walletAddr, email });
 };
 
-module.exports = { checkout };
+module.exports = { getData, generate, checkout };
