@@ -281,23 +281,7 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-const getData = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  const products = await stripe.products.list({ limit: 3 });
-  res.status(200).json({ products });
-};
 
-const generate = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  const { email, walletAddr } = req.body;
-  const customer = await stripe.customers.create({
-    email: email,
-    metadata: {
-      walletAddr: walletAddr,
-    },
-  });
-  res.status(200).json({ customer });
-};
 
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
