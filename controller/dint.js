@@ -281,29 +281,11 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
+const stripe = require("stripe")("<your_stripe_secret_key>");
+
 const checkout = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  
-  const { walletAddr, email, amount, cardDetails } = req.body;
+  const { charge, walletAddr, email } = req.body;
 
-  // Make sure a customer ID is provided
-  if (!cardDetails || !cardDetails.customer_id) {
-    return res.status(400).send({ error: "A customer ID must be provided." });
-  }
-
-  // Create the charge
-  const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, // convert amount to cents
-    currency: "usd",
-    card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.customer_id,
-    metadata: {
-      walletAddr: walletAddr,
-    },
-  });
-
-  // Handle payment_intent.succeeded event
   if (charge.status === "succeeded") {
     console.log("Payment was successful.");
     const payment_intent_data = {
@@ -311,6 +293,19 @@ const checkout = async (req, res) => {
         walletAddr: walletAddr
       }
     };
+
+    // Send the "payment_intent.succeeded" event to Stripe
+    try {
+      await stripe.events.create({
+        type: "payment_intent.succeeded",
+        data: {
+          object: payment_intent_data
+        }
+      });
+      console.log("Successfully sent the event to Stripe");
+    } catch (error) {
+      console.error("Error sending the event to Stripe:", error);
+    }
   } else {
     console.error("Payment failed.");
   }
