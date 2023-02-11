@@ -292,6 +292,7 @@ const checkout = async (req, res) => {
          walletAddr: walletAddr,
        },
      },
+     customer: req.body.cardDetails.customer_id,
      metadata: {
        walletAddr: walletAddr,
      },
