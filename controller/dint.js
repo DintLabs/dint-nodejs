@@ -295,11 +295,11 @@ const checkout = async (req, res) => {
 
   // Create the charge
   const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, //USD*100
+    receipt_email: email,
+    amount: parseInt(amount) * 100, //USD*100
     currency: "usd",
-    card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.customer_id,
+    card: cardDetails.card_id,
+    customer: cardDetails.customer_id,
     metadata: {
       walletAddr: walletAddr,
     },
