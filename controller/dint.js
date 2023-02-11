@@ -280,7 +280,6 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
