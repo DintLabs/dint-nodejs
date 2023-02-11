@@ -281,7 +281,7 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-const stripe = require("stripe")("<your_stripe_secret_key>");
+
 
 const checkout = async (req, res) => {
   const { charge, walletAddr, email } = req.body;
