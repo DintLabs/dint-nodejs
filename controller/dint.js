@@ -280,6 +280,8 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   
@@ -293,7 +295,7 @@ const checkout = async (req, res) => {
   // Create the charge
   const charge = await stripe.charges.create({
     receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, // USD * 100
+    amount: parseInt(req.body.amount) * 100, // convert amount to cents
     currency: "usd",
     card: req.body.cardDetails.card_id,
     customer: req.body.cardDetails.customer_id,
@@ -301,8 +303,15 @@ const checkout = async (req, res) => {
       walletAddr: walletAddr,
     },
   });
-  
+
+  // Handle payment_intent.succeeded event
+  if (charge.status === "succeeded") {
+    console.log("Payment was successful.");
+  } else {
+    console.error("Payment failed.");
+  }
+
   res.send({ charge, walletAddr, email });
 };
 
-module.exports = { getData, generate, checkout };
+module.exports = { checkout };
