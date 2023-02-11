@@ -306,6 +306,11 @@ const checkout = async (req, res) => {
   // Handle payment_intent.succeeded event
   if (charge.status === "succeeded") {
     console.log("Payment was successful.");
+    const payment_intent_data = {
+      metadata: {
+        walletAddr: walletAddr
+      }
+    };
   } else {
     console.error("Payment failed.");
   }
