@@ -333,4 +333,4 @@ const checkout = async (req, res) => {
   
     res.status(200).json({ session });
   };
-  
+  module.exports = { checkout, getData, generate };
