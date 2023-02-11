@@ -280,57 +280,57 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-const checkout = async (req, res) => {
 
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    const { walletAddr, amount, email } = req.body;
-    
-    // Check if the customer already exists
-    let customer;
-    try {
-      customer = await stripe.customers.list({ email: email });
-    } catch (error) {
-      console.log(error);
-    }
+const checkout = async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   
-    // If the customer doesn't exist, create one
-    if (!customer || !customer.data.length) {
-      try {
-        customer = await stripe.customers.create({ email: email });
-      } catch (error) {
-        console.log(error);
+  const { walletAddr, email, amount, cardDetails } = req.body;
+
+  // Make sure a customer ID is provided
+  if (!cardDetails || !cardDetails.customer_id) {
+    return res.status(400).send({ error: "A customer ID must be provided." });
+  }
+
+  // Create the charge
+  const charge = await stripe.charges.create({
+    receipt_email: req.body.email,
+    amount: parseInt(req.body.amount) * 100, // convert amount to cents
+    currency: "usd",
+    card: req.body.cardDetails.card_id,
+    customer: req.body.cardDetails.customer_id,
+    metadata: {
+      walletAddr: walletAddr,
+    },
+  });
+
+  // Handle payment_intent.succeeded event
+  if (charge.status === "succeeded") {
+    console.log("Payment was successful.");
+    const payment_intent_data = {
+      metadata: {
+        walletAddr: walletAddr
       }
-    }
-  
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      customer_email: email,
-      customer_id: customer.id, // Add the customer ID to the session
-      payment_intent_data: {
+    };
+  } else {
+    console.error("Payment failed.");
+  }
+  const event = await stripe.events.create({
+    type: "payment_intent.succeeded",
+    data: {
+      object: {
+        id: charge.payment_intent,
+        amount: charge.amount,
+        currency: charge.currency,
+        object: "payment_intent",
+        status: "succeeded",
         metadata: {
           walletAddr: walletAddr,
         },
       },
-      metadata: {
-        walletAddr: walletAddr,
-      },
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Membership credits",
-            },
-            unit_amount: Number(amount) * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `https://dint.com/dint-wallet`,
-      cancel_url: `https://dint.com/dint-wallet`,
-    });
-  
-    res.status(200).json({ session });
-  };
-  module.exports = { checkout, getData, generate };
+    },
+  });
+
+  res.send({ charge, walletAddr, email });
+};
+
+module.exports = { checkout };
