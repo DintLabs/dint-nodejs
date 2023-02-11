@@ -281,12 +281,13 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 const checkout = async (req, res) => {
- res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount, email } = req.body;
+
   const session = await stripe.checkout.sessions.create({
+    customer: req.body.cardDetails.customer_id,
     payment_method_types: ["card"],
     customer_email: email,
-    // pass customer wallet addr as metadata, so we know where to transfer funds
     payment_intent_data: {
       metadata: {
         walletAddr: walletAddr,
@@ -300,17 +301,18 @@ const checkout = async (req, res) => {
         price_data: {
           currency: "usd",
           product_data: {
-            name: "Membership credits", // name of the product (shown at checkout)
+            name: "Membership credits",
           },
-          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+          unit_amount: Number(amount) * 100,
         },
         quantity: 1,
       },
     ],
     mode: "payment",
-    success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
+    success_url: `https://dint.com/dint-wallet`,
     cancel_url: `https://dint.com/dint-wallet`,
   });
+
   res.status(200).json({ session });
 };
 
