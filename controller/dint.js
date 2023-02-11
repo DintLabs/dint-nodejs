@@ -280,19 +280,11 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-const checkout = async (req, res) => {
- res.setHeader("Access-Control-Allow-Origin", "*");
 
- const charge = await stripe.charges.create({
-  receipt_email: req.body.email,
-  amount: parseInt(req.body.amount) * 100, //USD*100
-  currency: "usd",
-  card: req.body.cardDetails.card_id,
-  customer: req.body.cardDetails.customer_id,
-});
 
   const { walletAddr, amount, email } = req.body;
-  const session = await stripe.checkout.sessions.create({
+  const charge = await stripe.charges.create({
+  
     payment_method_types: ["card"],
     customer_email: email,
     // pass customer wallet addr as metadata, so we know where to transfer funds
@@ -321,6 +313,6 @@ const checkout = async (req, res) => {
     cancel_url: `https://dint.com/dint-wallet`,
   });
   res.status(200).json({ session });
-};
+
 
 module.exports = { getData, generate, checkout };
