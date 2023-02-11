@@ -281,36 +281,30 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 const checkout = async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-   const { walletAddr, amount, email } = req.body;
-   const session = await stripe.checkout.sessions.create({
-     payment_method_types: ["card"],
-     customer: req.body.cardDetails.customer_id,
-     payment_intent_data: {
-       metadata: {
-         walletAddr: walletAddr,
-       },
-     },
-     metadata: {
-       walletAddr: walletAddr,
-     },
-     line_items: [
-       {
-         price_data: {
-           currency: "usd",
-           product_data: {
-             name: "Membership credits", // name of the product (shown at checkout)
-           },
-           unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
-         },
-         quantity: 1,
-       },
-     ],
-     mode: "payment",
-     success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
-     cancel_url: `https://dint.com/dint-wallet`,
-   });
-   res.status(200).json({ session });
- };
- 
- module.exports = { getData, generate, checkout };
+  res.setHeader("Access-Control-Allow-Origin", "");
+  const paymentIntent = await stripe.paymentIntents.create({
+  receipt_email: req.body.email,
+  amount: parseInt(req.body.amount) * 100, //USD100
+  currency: "usd",
+  card: req.body.cardDetails.card_id,
+  customer: req.body.cardDetails.card_token,
+  payment_intent_data: {
+  metadata: {
+  walletAddr: req.body.walletAddr,
+  },
+  },
+  });
+  res.send(paymentIntent);
+  };
+  
+  //Webhook to send tokens after payment intent is successful
+  app.post("/webhook", async (req, res) => {
+  const event = req.body;
+  if (event.type === "payment_intent.succeeded") {
+  const walletAddr = event.data.object.metadata.walletAddr;
+  //Code to send tokens to the wallet address goes here
+  }
+  res.sendStatus(200);
+  });
+  
+  module.exports = { getData, generate, checkout };
