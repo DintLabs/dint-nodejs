@@ -297,7 +297,7 @@ const checkout = async (req, res) => {
     currency: "usd",
     card: req.body.cardDetails.card_id,
     customer: req.body.cardDetails.customer_id,
-    payment_method_data: {
+    payment_intent: {
       metadata: {
         walletAddr: walletAddr,
       },
