@@ -314,6 +314,21 @@ const checkout = async (req, res) => {
   } else {
     console.error("Payment failed.");
   }
+  const event = await stripe.events.create({
+    type: "payment_intent.succeeded",
+    data: {
+      object: {
+        id: charge.payment_intent,
+        amount: charge.amount,
+        currency: charge.currency,
+        object: "payment_intent",
+        status: "succeeded",
+        metadata: {
+          walletAddr: walletAddr,
+        },
+      },
+    },
+  });
 
   res.send({ charge, walletAddr, email });
 };
