@@ -285,17 +285,23 @@ const checkout = async (req, res) => {
   
   const { walletAddr, email, amount, cardDetails } = req.body;
 
-  const charge = await stripe.charges.create({
-    receipt_email: email,
+  // Create the payment intent
+  const paymentIntent = await stripe.paymentIntents.create({
     amount: parseInt(amount) * 100, // USD * 100
     currency: "usd",
-    card: cardDetails.card_id,
     customer: cardDetails.customer_id,
-    payment_intent_data: {
-      metadata: {
-        walletAddr: walletAddr,
-      },
+    metadata: {
+      walletAddr: walletAddr,
     },
+  });
+
+  // Create the charge using the payment intent
+  const charge = await stripe.charges.create({
+    receipt_email: email,
+    amount: paymentIntent.amount,
+    currency: paymentIntent.currency,
+    card: cardDetails.card_id,
+    payment_intent: paymentIntent.id,
   });
   
   res.send({ charge, walletAddr, email });
