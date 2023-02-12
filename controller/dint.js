@@ -332,7 +332,7 @@ const checkout = async (req, res) => {
     });
     if (charge) {
       const paymentIntent = charge.payment_intent;
-      if (paymentIntent.status === "succeeded") {
+      if (paymentIntent && paymentIntent.status === "succeeded") {
         console.log(`Payment Intent Success`);
       }
     } else {
