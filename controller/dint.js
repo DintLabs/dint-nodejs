@@ -333,7 +333,7 @@ const getData = async (sender_id, reciever_id, amount) => {
     const endpoint = stripe.webhookEndpoints.create({
       url: "https://node.dint.com/api/webhooks/stripe",
       enabled_events: ["payment_intent.succeeded"],
-      secret: webhookSecret,
+    
     });
   
     res.send(charge);
