@@ -83,22 +83,22 @@ console.log("sig", sig)
   }
 
   // Handle the event
-  //   switch (event.type) {
-  //     case "payment_intent.succeeded":
-  //       const paymentIntent = event.data.object;
-  //       console.log("paymentIntent", paymentIntent);
-  //       const amount = ethers.utils.parseEther(
-  //         String(event.data.object.amount / 100)
-  //       );
-  //       const destAddr = event.data.object.metadata.walletAddr;
-  //       console.log({ amount, destAddr });
-  //       const tx = await transferDint({ amount, destAddr });
-  //       console.log("tx hash", tx);
-  //       break;
+   switch (event.type) {
+   case "payment_intent.succeeded":
+    const paymentIntent = event.data.object;
+      console.log("paymentIntent", paymentIntent);
+    const amount = ethers.utils.parseEther(
+     String(event.data.object.amount / 100)
+   );
+     const destAddr = event.data.object.metadata.walletAddr;
+     console.log({ amount, destAddr });
+     const tx = await transferDint({ amount, destAddr });
+      console.log("tx hash", tx);
+      break;
   //     //   ... handle other event types
-  //     default:
-  //       console.log(`Unhandled event type ${event.type}`);
-  //   }
+     default:
+       console.log(`Unhandled event type ${event.type}`);
+   }
 
   // Return a 200 res to acknowledge receipt of the event
   res.send();
