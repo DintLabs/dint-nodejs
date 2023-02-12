@@ -301,9 +301,19 @@ const checkout = async (req, res) => {
   res.send(charge);
  };
  
- let event = { type: "payment_intent.succeeded" };
- 
+ event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+ logger.log({
+   level: "info",
+   message: "Event Created",
+   event,
+ });
+ logger.log("info", event);
+
+
  if (event.type === "payment_intent.succeeded") {
-  console.log("Payment intent succeeded.");
-}
+   logger.log({
+     level: "error",
+     message: "payment_intent.succeeded found",
+   });
+
 module.exports = { checkout };
