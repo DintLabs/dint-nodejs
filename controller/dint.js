@@ -302,7 +302,7 @@ const checkout = async (req, res) => {
     amount: Number(amount) * 100,
     currency: "usd",
       // pass customer wallet addr as metadata, so we know where to transfer funds
-      payment_intent: {
+      payment_intent_data: {
         metadata: {
           walletAddr: walletAddr,
         },
