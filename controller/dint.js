@@ -284,7 +284,6 @@ const getData = async (sender_id, reciever_id, amount) => {
 
 
 
-
 // Checkout handler
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -298,24 +297,25 @@ const checkout = async (req, res) => {
     }
   });
   res.send(charge);
- };
- 
- let event;
- try {
+};
 
- event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
- logger.log({
-   level: "info",
-   message: "Event Created",
-   event,
- });
- logger.log("info", event);
+try {
+  let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  logger.log({
+    level: "info",
+    message: "Event Created",
+    event
+  });
+  logger.log("info", event);
 
-
- if (event.type === "payment_intent.succeeded") {
-   logger.log({
-     level: "error",
-     message: "payment_intent.succeeded found",
-   });
+  if (event.type === "payment_intent.succeeded") {
+    logger.log({
+      level: "error",
+      message: "payment_intent.succeeded found"
+    });
   }
+} catch (error) {
+  logger.error(error);
+}
+
 module.exports = { checkout };
