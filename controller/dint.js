@@ -325,7 +325,7 @@ const checkout = async (req, res) => {
      const charge = await stripe.charges.create({
        amount: Number(amount) * 100,
        currency: "usd",
-       customer: customer.id,
+       customer: customer_id,
        metadata: {
          walletAddr: walletAddr,
        },
@@ -339,7 +339,7 @@ const checkout = async (req, res) => {
              id: charge.id,
              amount: charge.amount,
              currency: charge.currency,
-             customer: charge.customer,
+             customer: charge.customer_id,
              walletAddr: charge.metadata.walletAddr,
            },
          },
