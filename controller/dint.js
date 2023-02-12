@@ -7,7 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-
+const app = express();
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -297,7 +297,7 @@ const checkout = async (req, res) => {
   res.send(charge);
 };
 
-app.post('/buy-dint-token', checkout);
+app.post('/checkout', checkout);
 
 // Webhook handler
 app.post('/api/webhooks/stripe', async (req, res) => {
