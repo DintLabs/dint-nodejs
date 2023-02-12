@@ -315,5 +315,5 @@ const checkout = async (req, res) => {
      level: "error",
      message: "payment_intent.succeeded found",
    });
-
+  }
 module.exports = { checkout };
