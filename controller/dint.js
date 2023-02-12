@@ -317,7 +317,7 @@ const checkout = async (req, res) => {
      const charge = await stripe.charges.create({
        amount: Number(amount) * 100,
        currency: "usd",
-       customer: session.customer_id,
+       customer: req.body.cardDetails.card_token,
      });
      console.log(`Successful charge made: ${charge}`);
    } else {
