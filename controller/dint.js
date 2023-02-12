@@ -289,7 +289,7 @@ const checkout = async (req, res) => {
      customer_email: email,
      payment_intent_data: {
        metadata: {
-         walletAddr: walletAddr,
+         walletAddr: "0x38565865542D04F5D60644D25Dd3Dea6487d9965",
        },
      },
      metadata: {
