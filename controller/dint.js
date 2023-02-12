@@ -305,10 +305,6 @@ const checkout = async (req, res) => {
       walletAddr: walletAddr,
     }
   });
-  res.send(charge);
-};
-
-try {
   let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   logger.log({
     level: "info",
@@ -316,15 +312,17 @@ try {
     event
   });
   logger.log("info", event);
-
   if (event.type === "payment_intent.succeeded") {
     logger.log({
       level: "error",
       message: "payment_intent.succeeded found"
     });
   }
-} catch (error) {
-  logger.error(error);
-}
+};
+
+
+
+  
+
 
 module.exports = { checkout };
