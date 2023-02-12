@@ -307,7 +307,7 @@ const checkout = async (req, res) => {
     }
   });
 
-  let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  let event = stripe.webhooks.constructEvent(req.body, endpointSecret);
   logger.log({
     level: "info",
     message: "Event Created",
