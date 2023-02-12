@@ -281,39 +281,38 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-const winston = require("winston");
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.File({ filename: "error.log", level: "error" }),
-    new winston.transports.File({ filename: "combined.log" }),
-  ],
-});
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const { walletAddr, amount } = req.body;
+   const { walletAddr, amount, email } = req.body;
+   const session = await stripe.checkout.sessions.create({
+     payment_method_types: ["card"],
+     customer_email: email,
+     // pass customer wallet addr as metadata, so we know where to transfer funds
+     payment_intent_data: {
+       metadata: {
+         walletAddr: walletAddr,
+       },
+     },
+     metadata: {
+       walletAddr: walletAddr,
+     },
+     line_items: [
+       {
+         price_data: {
+           currency: "usd",
+           product_data: {
+             name: "Membership credits", // name of the product (shown at checkout)
+           },
+           unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+         },
+         quantity: 1,
+       },
+     ],
+     mode: "payment",
+     success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
+     cancel_url: `https://dint.com/dint-wallet`,
+   });
+   res.status(200).json({ session });
+ };
 
-  const charge = await stripe.charges.create({
-    customer: req.body.cardDetails.customer_id,
-    amount: Number(amount) * 100,
-    currency: "usd",
-      // pass customer wallet addr as metadata, so we know where to transfer funds
-      payment_intent_data: {
-        metadata: {
-          walletAddr: walletAddr,
-        },
-      },
-      metadata: {
-        walletAddr: walletAddr,
-      },
-  });
-
-  res.status(200).send({ status: "success" });
-};
-
-
-module.exports = { getData, generate, checkout };
+ module.exports = { getData, generate, checkout };
