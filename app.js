@@ -13,7 +13,7 @@ const sendDint = require("./routes/dint");
 app.use("/api/webhooks", stripeApp);
 app.use("/api", sendDint);
 
-const PORT = 6000;
+const PORT = 5000;
 
 const client = new Client({
   user: process.env.DB_USER,
