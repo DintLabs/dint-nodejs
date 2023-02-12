@@ -309,7 +309,7 @@ app.post("/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
-app.post("/checkout", checkout);
+app.post("/api/webhooks", stripeApp);
 
 const port = 3000;
 app.listen(port, () => {
