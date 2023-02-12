@@ -305,7 +305,7 @@ const checkout = async (req, res) => {
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 
-app.post("/webhook", async (req, res) => {
+app.post("/api/webhooks/stripe", async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
   try {
