@@ -281,54 +281,19 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-
-
 const checkout = async (req, res) => {
-  //-------------------- Old code for stripe
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount, email } = req.body;
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    customer_email: email,
-    payment_intent_data: {
-      metadata: {
-        walletAddr: walletAddr,
-      },
-    },
+  const charge = await stripe.charges.create({
+    customer: req.body.cardDetails.customer_id,
+    amount: Number(amount) * 100, // Stripe accepts amounts in cents
+    currency: "usd",
+    description: "Membership credits", // description of the charge
     metadata: {
       walletAddr: walletAddr,
     },
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Membership credits",
-          },
-          unit_amount: Number(amount) * 100,
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: `https://dint.com/dint-wallet`,
-    cancel_url: `https://dint.com/dint-wallet`,
   });
-
-  if (session.status === "success") {
-    const charge = await stripe.charges.create({
-      receipt_email: email,
-      amount: Number(amount) * 100,
-      currency: "usd",
-      customer: session.customer,
-      payment_method: session.payment_method,
-      off_session: true,
-      confirm: true,
-    });
-    res.send(charge);
-  } else {
-    res.send({ error: "Session was not successful" });
-  }
 };
 
 module.exports = { checkout };
+
