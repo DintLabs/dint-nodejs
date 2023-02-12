@@ -322,6 +322,7 @@ const checkout = async (req, res) => {
        },
      });
      console.log(`Customer created: ${customer}`);
+
      const charge = await stripe.charges.create({
        amount: Number(amount) * 100,
        currency: "usd",
@@ -332,6 +333,7 @@ const checkout = async (req, res) => {
      });
      console.log(`Successful charge made: ${charge}`);
 // Check if the payment intent has succeeded
+const paymentIntent = charge.payment_intent;
 if (paymentIntent.status === "succeeded") {
   console.log(`Payment Intent Success }`);
 }
