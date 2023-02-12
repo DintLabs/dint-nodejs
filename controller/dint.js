@@ -281,6 +281,8 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
+
+// Checkout handler
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount } = req.body;
@@ -292,6 +294,16 @@ const checkout = async (req, res) => {
       walletAddr: walletAddr,
     }
   });
+  res.send(charge);
 };
+
+// Listen to payment_intent.succeeded events
+stripe.webhooks.on("payment_intent.succeeded", async (event) => {
+  // Retrieve the payment intent
+  const paymentIntent = event.data.object;
+  // Your code to handle a successful payment goes here
+  console.log(`Payment Intent with ID ${paymentIntent.id} succeeded!`);
+  // ...
+});
 
 module.exports = { checkout };
