@@ -281,60 +281,37 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-  //-------------------- Old code for stripe
 const checkout = async (req, res) => {
-res.setHeader("Access-Control-Allow-Origin", "*");
-const { walletAddr, amount, email } = req.body;
-const charge = await stripe.charges.create({
-payment_method_types: ["card"],
-customer_email: email,
-  //   // pass customer wallet addr as metadata, so we know where to transfer funds
-payment_intent_data: {
-metadata: {
-  walletAddr: walletAddr,
- },
- },
-metadata: {
- walletAddr: walletAddr,
-   },
-ine_items: [
-    {
-     price_data: {
-        currency: "usd",
-         product_data: {
-        name: "Membership credits", // name of the product (shown at checkout)
-         },
-          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  const { walletAddr, amount, email } = req.body;
+  const charge = await stripe.charges.create({
+    payment_method_types: ["card"],
+    customer_email: email,
+    //   // pass customer wallet addr as metadata, so we know where to transfer funds
+    payment_intent_data: {
+      metadata: {
+        walletAddr: walletAddr,
       },
-       quantity: 1,
-     },
-  ],
-   mode: "payment",
- success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
-   cancel_url: `https://dint.com/dint-wallet`,
- });
- module.exports = { checkout };
-}
+    },
+    metadata: {
+      walletAddr: walletAddr,
+    },
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Membership credits", // name of the product (shown at checkout)
+          },
+          unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
+    cancel_url: `https://dint.com/dint-wallet`,
+  });
+};
 
-// ------------------- End of old code
-
-  //---------------------New code for stripe
-
-  //const checkout = async (req, res) => {
-    //res.setHeader("Access-Control-Allow-Origin", "*");
-    //const charge = await stripe.charges.create({
-    //  receipt_email: req.body.email,
-   //   amount: parseInt(req.body.amount) * 100, //USD*100
-    //  currency: "usd",
-     // card: req.body.cardDetails.card_id,
-    //  customer: req.body.cardDetails.customer_id,
-     
-   // });
-  
- 
-  
-    //res.send(charge);
-   // mode: "payment",
-  //};
-  
-  //module.exports = { checkout }
+module.exports = { checkout };
