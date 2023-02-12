@@ -301,9 +301,15 @@ const checkout = async (req, res) => {
     customer: req.body.cardDetails.customer_id,
     amount: Number(amount) * 100,
     currency: "usd",
-    metadata: {
-      walletAddr:"29yhabids"
-    }
+      // pass customer wallet addr as metadata, so we know where to transfer funds
+      payment_intent_data: {
+        metadata: {
+          walletAddr: walletAddr,
+        },
+      },
+      metadata: {
+        walletAddr: walletAddr,
+      },
   });
 
   res.status(200).send({ status: "success" });
