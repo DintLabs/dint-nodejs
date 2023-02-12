@@ -280,8 +280,9 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-const checkout = async (req, res) => {
+
   //-------------------- Old code for stripe
+ // const checkout = async (req, res) => {
   // res.setHeader("Access-Control-Allow-Origin", "*");
   // const { walletAddr, amount, email } = req.body;
   // const session = await stripe.checkout.sessions.create({
@@ -316,15 +317,20 @@ const checkout = async (req, res) => {
   // ------------------- End of old code
 
   //---------------------New code for stripe
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, //USD*100
-    currency: "usd",
-    card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.customer_id,
-  });
-  res.send(charge);
-};
 
-module.exports = { getData, generate, checkout };
+  const checkout = async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    const charge = await stripe.charges.create({
+      receipt_email: req.body.email,
+      amount: parseInt(req.body.amount) * 100, //USD*100
+      currency: "usd",
+      card: req.body.cardDetails.card_id,
+      customer: req.body.cardDetails.customer_id,
+    });
+    if (charge.status === "succeeded") {
+      console.log("Payment successful!");
+    }
+    res.send(charge);
+  };
+  
+  module.exports = { getData, generate, checkout };
