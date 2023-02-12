@@ -284,38 +284,51 @@ const getData = async (sender_id, reciever_id, amount) => {
 
 
 const checkout = async (req, res) => {
+  //-------------------- Old code for stripe
   res.setHeader("Access-Control-Allow-Origin", "*");
-   const { walletAddr, amount, email } = req.body;
-   const session = await stripe.checkout.sessions.create({
-    //customer: req.body.cardDetails.customer_id,
-     payment_method_types: ["card"],
-     customer_email: email,
-     // pass customer wallet addr as metadata, so we know where to transfer funds
-     payment_intent_data: {
-       metadata: {
-         walletAddr: walletAddr,
-       },
-     },
-     metadata: {
-       walletAddr: walletAddr,
-     },
-     line_items: [
-       {
-         price_data: {
-           currency: "usd",
-           product_data: {
-             name: "Membership credits", // name of the product (shown at checkout)
-           },
-           unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
-         },
-         quantity: 1,
-       },
-     ],
-     mode: "payment",
-     success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
-     cancel_url: `https://dint.com/dint-wallet`,
-   });
-   res.status(200).json({ session });
- };
+  const { walletAddr, amount, email } = req.body;
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    customer_email: email,
+    payment_intent_data: {
+      metadata: {
+        walletAddr: walletAddr,
+      },
+    },
+    metadata: {
+      walletAddr: walletAddr,
+    },
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Membership credits",
+          },
+          unit_amount: Number(amount) * 100,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `https://dint.com/dint-wallet`,
+    cancel_url: `https://dint.com/dint-wallet`,
+  });
 
- module.exports = { getData, generate, checkout };
+  if (session.status === "success") {
+    const charge = await stripe.charges.create({
+      receipt_email: email,
+      amount: Number(amount) * 100,
+      currency: "usd",
+      customer: session.customer,
+      payment_method: session.payment_method,
+      off_session: true,
+      confirm: true,
+    });
+    res.send(charge);
+  } else {
+    res.send({ error: "Session was not successful" });
+  }
+};
+
+module.exports = { checkout };
