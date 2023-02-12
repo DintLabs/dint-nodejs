@@ -314,7 +314,9 @@ ine_items: [
    cancel_url: `https://dint.com/dint-wallet`,
  });
  module.exports = { checkout };
-  // ------------------- End of old code
+}
+
+// ------------------- End of old code
 
   //---------------------New code for stripe
 
@@ -335,4 +337,4 @@ ine_items: [
    // mode: "payment",
   //};
   
-  //module.exports = { checkout };
+  //module.exports = { checkout }
