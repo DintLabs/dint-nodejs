@@ -8,6 +8,8 @@ const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const stripeApp = require("../routes/payment");
+const app = express();
+app.use(cors());
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -302,6 +304,9 @@ const checkout = async (req, res) => {
 
 app.post("/api/webhooks", stripeApp);
 
-
+const port = 5000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
 
 module.exports = { checkout };
