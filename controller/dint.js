@@ -290,10 +290,7 @@ const checkout = async (req, res) => {
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    },
-    line_items: [{ price: req.body.cardDetails.price_id, quantity: 1 }],
-    success_url: `https://dint.com/dint-wallet`, // where to redirect user after success/fail
-    cancel_url: `https://dint.com/dint-wallet`,
+    }
   });
 };
 
