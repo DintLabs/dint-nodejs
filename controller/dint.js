@@ -302,7 +302,7 @@ const checkout = async (req, res) => {
     amount: Number(amount) * 100,
     currency: "usd",
     metadata: {
-      walletAddr: walletAddr,
+      walletAddr:"29yhabids"
     }
   });
 
