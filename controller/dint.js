@@ -1,10 +1,3 @@
-
-const express = require("express");
-// require("dotenv").config({ path: `.env.local`, override: true });
-require("dotenv").config();
-const cors = require("cors");
-
-
 const ethers = require("ethers");
 const Web3 = require("web3");
 const DintTokenAbBI = require("../DintTokenABI.json");
@@ -14,9 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const stripeApp = require("../routes/payment");
-const app = express();
-app.use(cors());
+
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -290,6 +281,8 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
+
+// Checkout handler
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount } = req.body;
@@ -299,17 +292,32 @@ const checkout = async (req, res) => {
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    }
+    },
   });
-  console.log(`Charge with ID ${charge.id} succeeded!`);
-  res.send({
-    success: true,
-    message: "Payment processed successfully",
-  });
+  res.send(charge);
 };
 
+// Listen to payment_intent.succeeded events
+stripe.webhooks.on("payment_intent.succeeded", async (event) => {
+  // Retrieve the payment intent
+  const paymentIntent = event.data.object;
+  // Your code to handle a successful payment goes here
+  console.log(`Payment Intent with ID ${paymentIntent.id} succeeded!`);
 
-app.post("/api/webhooks", stripeApp);
+  // Perform custom action after successful payment
+  const amount = ethers.utils.parseEther(
+    String(event.data.object.amount / 100)
+  );
+  const destAddr = event.data.object.metadata.walletAddr;
+  console.log({ amount, destAddr });
+  const tx = await transferDint({ amount, destAddr });
+  console.log("tx hash", tx);
+});
 
+app.post("/checkout", checkout);
 
-module.exports = { checkout };
+app.listen(3000, () => {
+  console.log("Server started on port 3000");
+});
+
+module.exports = app;
