@@ -298,31 +298,31 @@ const checkout = async (req, res) => {
   res.send(charge);
 };
 
-app.post('/checkout', checkout);
+stripe.webhooks.on('payment_intent.succeeded', async (event) => {
+  console.log('Payment Intent with ID', event.data.object.id, 'succeeded!');
+});
 
 // Webhook handler
-app.post('/api/webhooks/stripe', async (req, res) => {
+app.post('/webhook', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
+
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error(err);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
   }
 
-  // Handle the event
   switch (event.type) {
     case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      console.log('Payment Intent with ID', paymentIntent.id, 'succeeded!');
+      console.log('Payment Intent with ID', event.data.object.id, 'succeeded!');
       break;
     default:
-      return res.status(400).end();
+      break;
   }
 
-  // Return a 200 response to acknowledge receipt of the event
-  res.status(200).end();
+  res.send();
 });
 
-module.exports = { checkout };
+module.exports = { checkout, app };
