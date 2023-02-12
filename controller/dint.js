@@ -302,5 +302,7 @@ const checkout = async (req, res) => {
  };
  
  
- 
+ if (event.type === "payment_intent.succeeded") {
+  console.log("Payment intent succeeded.");
+}
 module.exports = { checkout };
