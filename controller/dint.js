@@ -281,7 +281,6 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   const { walletAddr, amount } = req.body;
@@ -300,7 +299,6 @@ const checkout = async (req, res) => {
   });
 };
 
-app.post("/api/checkout", checkout);
 
 app.post("/api/webhooks", stripeApp);
 
@@ -308,3 +306,5 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+module.exports = { checkout };
