@@ -7,6 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const express = require('express');
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
