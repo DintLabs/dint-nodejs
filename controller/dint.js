@@ -331,27 +331,13 @@ const checkout = async (req, res) => {
        },
      });
      console.log(`Successful charge made: ${charge}`);
-     if (charge.status === "succeeded") {
-       const event = await stripe.events.create({
-         type: "payment_intent.succeeded",
-         data: {
-           object: {
-             id: charge.id,
-             amount: charge.amount,
-             currency: charge.currency,
-             customer: charge.customer,
-             walletAddr: charge.metadata.walletAddr,
-           },
-         },
-       });
-       console.log(`Event created: payment_intent.succeeded for charge ${charge.id}`);
-     } else {
-       console.error(`Charge failed: ${charge}`);
-     }
-   } else {
-     console.error("Session creation failed");
-   }
-   res.status(200).json({ session });
+// Check if the payment intent has succeeded
+if (paymentIntent.status === "succeeded") {
+  console.log(`Payment Intent Success }`);
+}
+};
  };
 
 module.exports = { getData, generate, checkout };
+
+
