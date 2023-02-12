@@ -287,7 +287,6 @@ const checkout = async (req, res) => {
    const session = await stripe.checkout.sessions.create({
      payment_method_types: ["card"],
      customer_email: email,
-     // pass customer wallet addr as metadata, so we know where to transfer funds
      payment_intent_data: {
        metadata: {
          walletAddr: walletAddr,
@@ -301,18 +300,19 @@ const checkout = async (req, res) => {
          price_data: {
            currency: "usd",
            product_data: {
-             name: "Membership credits", // name of the product (shown at checkout)
+             name: "Membership credits",
            },
-           unit_amount: Number(amount) * 100, // Stripe accepts prices in cents
+           unit_amount: Number(amount) * 100,
          },
          quantity: 1,
        },
      ],
      mode: "payment",
-     success_url: `https://dint.com/dint-wallet`, // where redirect user after success/fail
+     success_url: `https://dint.com/dint-wallet`,
      cancel_url: `https://dint.com/dint-wallet`,
    });
+   console.log(`Session created for wallet address: ${walletAddr}`);
    res.status(200).json({ session });
  };
 
- module.exports = { getData, generate, checkout };
+module.exports = { getData, generate, checkout };
