@@ -313,6 +313,16 @@ const checkout = async (req, res) => {
      cancel_url: `https://dint.com/dint-wallet`,
    });
    console.log(`Session created for wallet address: ${walletAddr}`);
+   if (session) {
+     const charge = await stripe.charges.create({
+       amount: Number(amount) * 100,
+       currency: "usd",
+       customer: session.customer_id,
+     });
+     console.log(`Successful charge made: ${charge}`);
+   } else {
+     console.error("Session creation failed");
+   }
    res.status(200).json({ session });
  };
 
