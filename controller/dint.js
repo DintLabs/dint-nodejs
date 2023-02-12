@@ -1,3 +1,10 @@
+
+const express = require("express");
+// require("dotenv").config({ path: `.env.local`, override: true });
+require("dotenv").config();
+const cors = require("cors");
+const { Client } = require("pg");
+
 const ethers = require("ethers");
 const Web3 = require("web3");
 const DintTokenAbBI = require("../DintTokenABI.json");
