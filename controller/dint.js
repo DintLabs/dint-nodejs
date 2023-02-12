@@ -292,7 +292,7 @@ const logger = winston.createLogger({
   ],
 });
 
-
+const sig = req.headers["stripe-signature"];
 // Checkout handler
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -305,6 +305,7 @@ const checkout = async (req, res) => {
       walletAddr: walletAddr,
     }
   });
+
   let event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   logger.log({
     level: "info",
