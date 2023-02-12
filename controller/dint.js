@@ -292,32 +292,36 @@ const checkout = async (req, res) => {
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    },
+    }
   });
   res.send(charge);
 };
 
-// Listen to payment_intent.succeeded events
-stripe.webhooks.on("payment_intent.succeeded", async (event) => {
-  // Retrieve the payment intent
-  const paymentIntent = event.data.object;
-  // Your code to handle a successful payment goes here
-  console.log(`Payment Intent with ID ${paymentIntent.id} succeeded!`);
+app.post('/checkout', checkout);
 
-  // Perform custom action after successful payment
-  const amount = ethers.utils.parseEther(
-    String(event.data.object.amount / 100)
-  );
-  const destAddr = event.data.object.metadata.walletAddr;
-  console.log({ amount, destAddr });
-  const tx = await transferDint({ amount, destAddr });
-  console.log("tx hash", tx);
+// Webhook handler
+app.post('/api/webhooks/stripe', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      console.log('Payment Intent with ID', paymentIntent.id, 'succeeded!');
+      break;
+    default:
+      return res.status(400).end();
+  }
+
+  // Return a 200 response to acknowledge receipt of the event
+  res.status(200).end();
 });
 
-app.post("/checkout", checkout);
-
-app.listen(3000, () => {
-  console.log("Server started on port 3000");
-});
-
-module.exports = app;
+module.exports = { checkout };
