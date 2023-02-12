@@ -297,7 +297,7 @@ const checkout = async (req, res) => {
   res.send(charge);
 };
 
-app.post('/checkout', checkout);
+app.post('/buy-dint-token', checkout);
 
 // Webhook handler
 app.post('/api/webhooks/stripe', async (req, res) => {
