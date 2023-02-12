@@ -292,10 +292,11 @@ const logger = winston.createLogger({
   ],
 });
 
-const sig = req.headers["stripe-signature"];
+
 // Checkout handler
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
+  const sig = req.headers["stripe-signature"];
   const { walletAddr, amount } = req.body;
   const charge = await stripe.charges.create({
     customer: req.body.cardDetails.customer_id,
