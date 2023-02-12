@@ -326,14 +326,10 @@ const getData = async (sender_id, reciever_id, amount) => {
       currency: "usd",
       card: req.body.cardDetails.card_id,
       customer: req.body.cardDetails.customer_id,
+      mode: "payment",
     });
   
-    // Set up a webhook to listen for the payment_intent.succeeded event
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    const endpoint = stripe.webhookEndpoints.update({
-      enabled_events: ["payment_intent.succeeded"],
-    
-    });
+ 
   
     res.send(charge);
   };
