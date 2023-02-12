@@ -284,7 +284,7 @@ const getData = async (sender_id, reciever_id, amount) => {
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
    const walletAddr = "0x38565865542D04F5D60644D25Dd3Dea6487d9965";
-   const { amount, email } = req.body;
+   const { amount, email, source } = req.body;
    const session = await stripe.checkout.sessions.create({
      payment_method_types: ["card"],
      customer_email: email,
@@ -314,10 +314,21 @@ const checkout = async (req, res) => {
    });
    console.log(`Session created for wallet address: ${walletAddr}`);
    if (session) {
+     const customer = await stripe.customers.create({
+       email: email,
+       source: source,
+       metadata: {
+         walletAddr: walletAddr,
+       },
+     });
+     console.log(`Customer created: ${customer}`);
      const charge = await stripe.charges.create({
        amount: Number(amount) * 100,
        currency: "usd",
-       customer: req.body.cardDetails.customer_id,
+       customer: customer.id,
+       metadata: {
+         walletAddr: walletAddr,
+       },
      });
      console.log(`Successful charge made: ${charge}`);
    } else {
