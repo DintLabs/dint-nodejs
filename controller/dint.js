@@ -282,6 +282,9 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
+const express = require("express");
+const stripe = require("stripe")("YOUR_STRIPE_SECRET_KEY");
+const app = express();
 
 // Checkout handler
 const checkout = async (req, res) => {
@@ -293,20 +296,17 @@ const checkout = async (req, res) => {
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    }
+    },
   });
   res.send(charge);
 };
 
-stripe.webhooks.on('payment_intent.succeeded', async (event) => {
-  console.log('Payment Intent with ID', event.data.object.id, 'succeeded!');
-});
-
 // Webhook handler
-app.post('/webhook', async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
+const endpointSecret = "YOUR_ENDPOINT_SECRET";
 
+app.post("/webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
@@ -314,15 +314,16 @@ app.post('/webhook', async (req, res) => {
     return;
   }
 
+  // Handle the event
   switch (event.type) {
-    case 'payment_intent.succeeded':
-      console.log('Payment Intent with ID', event.data.object.id, 'succeeded!');
+    case "payment_intent.succeeded":
+      console.log("Payment Intent with ID", event.data.object.id, "succeeded!");
       break;
     default:
-      break;
   }
 
+  // Return a 200 response to acknowledge receipt of the event
   res.send();
 });
 
-module.exports = { checkout, app };
+module.exports = { checkout };
