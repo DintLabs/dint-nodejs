@@ -282,9 +282,9 @@ const getData = async (sender_id, reciever_id, amount) => {
 };
 
 
-const express = require("express");
-const stripe = require("stripe")("YOUR_STRIPE_SECRET_KEY");
-const app = express();
+
+
+
 
 // Checkout handler
 const checkout = async (req, res) => {
@@ -302,7 +302,8 @@ const checkout = async (req, res) => {
 };
 
 // Webhook handler
-const endpointSecret = "YOUR_ENDPOINT_SECRET";
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
 
 app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
