@@ -325,12 +325,29 @@ const checkout = async (req, res) => {
      const charge = await stripe.charges.create({
        amount: Number(amount) * 100,
        currency: "usd",
-       customer: req.body.cardDetails.customer_id,
+       customer: customer.id,
        metadata: {
          walletAddr: walletAddr,
        },
      });
      console.log(`Successful charge made: ${charge}`);
+     if (charge.status === "succeeded") {
+       const event = await stripe.events.create({
+         type: "payment_intent.succeeded",
+         data: {
+           object: {
+             id: charge.id,
+             amount: charge.amount,
+             currency: charge.currency,
+             customer: charge.customer,
+             walletAddr: charge.metadata.walletAddr,
+           },
+         },
+       });
+       console.log(`Event created: payment_intent.succeeded for charge ${charge.id}`);
+     } else {
+       console.error(`Charge failed: ${charge}`);
+     }
    } else {
      console.error("Session creation failed");
    }
