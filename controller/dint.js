@@ -328,10 +328,9 @@ const getData = async (sender_id, reciever_id, amount) => {
       customer: req.body.cardDetails.customer_id,
     });
     const event = req.body;
-    if (event.type === "payment_intent.succeeded") {
-      console.log("Payment intent succeeded!");
+   console.log("Payment intent succeeded!");
       // Perform any necessary actions here
-    }
+      event.type === "payment_intent.succeeded"
     res.send(charge);
   };
   
