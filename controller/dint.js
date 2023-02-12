@@ -295,35 +295,34 @@ const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Checkout handler
 const checkout = async (req, res) => {
+  // Set the "Access-Control-Allow-Origin" header
   res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // Get the wallet address and amount from the request body
   const { walletAddr, amount } = req.body;
+
+  // Create the Stripe charge
   const charge = await stripe.charges.create({
     customer: req.body.cardDetails.customer_id,
     amount: Number(amount) * 100,
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    }
+    },
   });
 
-  let event = stripe.webhooks.constructEvent(req.body, endpointSecret);
+  // Log the event
   logger.log({
     level: "info",
-    message: "Event Created",
-    event
+    message: "Event created",
+    event: charge,
   });
-  logger.log("info", event);
-  if (event.type === "payment_intent.succeeded") {
-    logger.log({
-      level: "error",
-      message: "payment_intent.succeeded found"
-    });
-  }
+
+  // Return the success status
+  return res.status(200).send({
+    success: true,
+    message: "Payment successful",
+  });
 };
-
-
-
-  
-
 
 module.exports = { checkout };
