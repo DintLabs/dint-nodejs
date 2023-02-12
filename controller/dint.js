@@ -287,7 +287,7 @@ const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
    const { walletAddr, amount, email } = req.body;
    const session = await stripe.checkout.sessions.create({
-    customer: req.body.cardDetails.customer_id,
+    //customer: req.body.cardDetails.customer_id,
      payment_method_types: ["card"],
      customer_email: email,
      // pass customer wallet addr as metadata, so we know where to transfer funds
