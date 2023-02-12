@@ -291,7 +291,7 @@ const checkout = async (req, res) => {
     payment_method_types: ["card"],
     line_items: [
       {
-        price: "price_1",
+        price: "22",
         quantity: 1,
       },
     ],
