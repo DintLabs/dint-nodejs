@@ -291,7 +291,7 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: "combined.log" }),
   ],
 });
-
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Checkout handler
 const checkout = async (req, res) => {
