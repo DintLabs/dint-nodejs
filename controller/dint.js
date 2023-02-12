@@ -327,16 +327,9 @@ const getData = async (sender_id, reciever_id, amount) => {
       card: req.body.cardDetails.card_id,
       customer: req.body.cardDetails.customer_id,
     });
-    if (charge.status === "succeeded") {
-      console.log("Payment successful!");
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: charge.amount,
-        currency: charge.currency,
-        customer: charge.customer,
-        payment_method: charge.payment_method,
-        receipt_email: charge.receipt_email,
-        description: "Payment intent for successful charge",
-      });
+    if (event.type === "payment_intent.succeeded") {
+      console.log("Payment intent succeeded!");
+      // Perform any necessary actions here, such as sending an email or updating a database record
     }
     res.send(charge);
   };
