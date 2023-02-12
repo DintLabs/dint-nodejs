@@ -283,17 +283,15 @@ const getData = async (sender_id, reciever_id, amount) => {
 
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const { walletAddr, amount } = req.body;
+  const { walletAddr, amount, email } = req.body;
   const charge = await stripe.charges.create({
     customer: req.body.cardDetails.customer_id,
-    amount: Number(amount) * 100,
+    amount: Number(amount) * 100, // Stripe accepts amounts in cents
     currency: "usd",
+    description: "Membership credits", // description of the charge
     metadata: {
       walletAddr: walletAddr,
     },
-    line_items: [{ price: req.body.cardDetails.price_id, quantity: 1 }],
-    success_url: `https://dint.com/dint-wallet`, // where to redirect user after success/fail
-    cancel_url: `https://dint.com/dint-wallet`,
   });
 };
 
