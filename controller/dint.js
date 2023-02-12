@@ -301,6 +301,7 @@ const checkout = async (req, res) => {
   res.send(charge);
  };
  
+ let event = { type: "payment_intent.succeeded" };
  
  if (event.type === "payment_intent.succeeded") {
   console.log("Payment intent succeeded.");
