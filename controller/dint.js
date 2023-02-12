@@ -327,11 +327,16 @@ const getData = async (sender_id, reciever_id, amount) => {
       card: req.body.cardDetails.card_id,
       customer: req.body.cardDetails.customer_id,
     });
-    const event = req.body;
-   console.log("Payment intent succeeded!");
-      // Perform any necessary actions here
-      event.type === "payment_intent.succeeded"
+  
+    // Set up a webhook to listen for the payment_intent.succeeded event
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const endpoint = stripe.webhookEndpoints.create({
+      url: "https://node.dint.com/api/webhooks/stripe",
+      enabled_events: ["payment_intent.succeeded"],
+      secret: webhookSecret,
+    });
+  
     res.send(charge);
   };
   
-  module.exports = { getData, generate, checkout };
+  module.exports = { checkout };
