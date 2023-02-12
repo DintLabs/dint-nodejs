@@ -296,35 +296,11 @@ const checkout = async (req, res) => {
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    },
+    }
   });
   res.send(charge);
-};
-
-// Webhook handler
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-
-app.post("/api/webhooks", async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-  } catch (err) {
-    console.error(err);
-    return;
-  }
-
-  // Handle the event
-  switch (event.type) {
-    case "payment_intent.succeeded":
-      console.log("Payment Intent with ID", event.data.object.id, "succeeded!");
-      break;
-    default:
-  }
-
-  // Return a 200 response to acknowledge receipt of the event
-  res.send();
-});
-
+ };
+ 
+ 
+ 
 module.exports = { checkout };
