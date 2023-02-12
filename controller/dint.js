@@ -285,7 +285,7 @@ const getData = async (sender_id, reciever_id, amount) => {
 const checkout = async (req, res) => {
 res.setHeader("Access-Control-Allow-Origin", "*");
 const { walletAddr, amount, email } = req.body;
-const session = await stripe.checkout.sessions.create({
+const charge = await stripe.charges.create({
 payment_method_types: ["card"],
 customer_email: email,
   //   // pass customer wallet addr as metadata, so we know where to transfer funds
