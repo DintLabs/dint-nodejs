@@ -300,14 +300,7 @@ const checkout = async (req, res) => {
   });
 };
 
-app.post("/api/webhooks", (req, res) => {
-    const event = req.body;
-    if (event.type === "charge.succeeded") {
-      // Perform actions when a charge succeeds
-      console.log(`Charge with ID ${event.data.object.id} succeeded!`);
-    }
-    res.sendStatus(200);
-  });
+app.post("/api/checkout", checkout);
 
 app.post("/api/webhooks", stripeApp);
 
