@@ -301,6 +301,10 @@ const checkout = async (req, res) => {
   res.send(charge);
  };
  
+ let event;
+console.log("sig", sig)
+ try {
+
  event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
  logger.log({
    level: "info",
