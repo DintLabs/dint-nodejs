@@ -293,19 +293,25 @@ const checkout = async (req, res) => {
       walletAddr: walletAddr,
     }
   });
-
-  // Trigger the charge.succeeded event
-  stripe.events.create({
-    type: "charge.succeeded",
-    data: {
-      object: {
-        id: charge.id,
-        amount: charge.amount,
-        currency: charge.currency,
-        metadata: charge.metadata,
-      },
-    },
+  console.log(`Charge with ID ${charge.id} succeeded!`);
+  res.send({
+    success: true,
+    message: "Payment processed successfully",
   });
 };
 
-module.exports = { checkout };
+app.post("/webhook", (req, res) => {
+  const event = req.body;
+  if (event.type === "charge.succeeded") {
+    // Perform actions when a charge succeeds
+    console.log(`Charge with ID ${event.data.object.id} succeeded!`);
+  }
+  res.sendStatus(200);
+});
+
+app.post("/checkout", checkout);
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
