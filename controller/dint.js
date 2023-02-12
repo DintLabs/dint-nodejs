@@ -293,36 +293,20 @@ const logger = winston.createLogger({
 });
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// Checkout handler
 const checkout = async (req, res) => {
-  // Set the "Access-Control-Allow-Origin" header
   res.setHeader("Access-Control-Allow-Origin", "*");
-
-  // Get the wallet address and amount from the request body
   const { walletAddr, amount } = req.body;
 
-  // Create the Stripe charge
   const charge = await stripe.charges.create({
     customer: req.body.cardDetails.customer_id,
     amount: Number(amount) * 100,
     currency: "usd",
     metadata: {
       walletAddr: walletAddr,
-    },
+    }
   });
 
-  // Log the event
-  logger.log({
-    level: "info",
-    message: "Event created",
-    event: charge,
-  });
-
-  // Return the success status
-  return res.status(200).send({
-    success: true,
-    message: "Payment successful",
-  });
+  res.status(200).send({ status: "success" });
 };
 
 module.exports = { checkout };
