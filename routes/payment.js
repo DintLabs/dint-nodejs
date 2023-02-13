@@ -43,7 +43,7 @@ res.setHeader("Access-Control-Allow-Origin", "*");
 console.log("sig", sig)
   try {
    
-    event = stripe.webhooks.verifySignature(req.body, sig, endpointSecret);
+    event = event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
