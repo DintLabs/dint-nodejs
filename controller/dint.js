@@ -7,6 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
 const express = require('express');
 const app = express();
 const client = new Client({
@@ -281,57 +282,17 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
+
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const walletAddr = "0x38565865542D04F5D60644D25Dd3Dea6487d9965";
-  const { amount, email, source } = req.body;
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    customer_email: email,
-    payment_intent_data: {
-      metadata: {
-        walletAddr: walletAddr,
-      },
-    },
-    metadata: {
-      walletAddr: walletAddr,
-    },
-    line_items: [
-      {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: "Membership credits",
-          },
-          unit_amount: Number(amount) * 100,
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url: `https://dint.com/dint-wallet`,
-    cancel_url: `https://dint.com/dint-wallet`,
-  });
-  console.log(`Session created for wallet address: ${walletAddr}`);
-  if (session) {
-    const customer = await stripe.customers.create({
-      email: email,
-      source: source,
-      metadata: {
-        walletAddr: walletAddr,
-      },
-    });
-    console.log(`Customer created: ${customer}`);
-    const charge = await stripe.charges.create({
-      amount: Number(amount) * 100,
-      currency: "usd",
-      customer: req.body.cardDetails.customer_id,
-      metadata: {
-        walletAddr: walletAddr,
-      },
-    });
-    
-  }
-};
+   const charge = await stripe.charges.create({
+     receipt_email: req.body.email,
+     amount: parseInt(req.body.amount) * 100, //USD*100
+     currency: "usd",
+     card: req.body.cardDetails.card_id,
+     customer: req.body.cardDetails.customer_id,
+   });
+   res.send(charge);
+ };
 
-module.exports = { checkout };
+ module.exports = { getData, generate, checkout };
