@@ -37,13 +37,13 @@ stripeApp.post("/stripe/", async (req, res) => {
 res.setHeader("Access-Control-Allow-Origin", "*");
   const sig = req.headers["stripe-signature"];
   console.log("error", "error");
-  winston.log("error", "127.0.0.1 - there's no place like home");
+  winston.log("error", "127.0.0.1 - there's no place like Miami");
 
   let event;
 console.log("sig", sig)
   try {
    
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.verifySignature(req.body, sig, endpointSecret);
     logger.log({
       level: "info",
       message: "Event Created",
@@ -83,21 +83,21 @@ console.log("sig", sig)
   }
 
   // Handle the event
-   switch (event.type) {
-   case "payment_intent.succeeded":
+ switch (event.type) {
+  case "payment_intent.succeeded":
     const paymentIntent = event.data.object;
-      console.log("paymentIntent", paymentIntent);
+    console.log("paymentIntent", paymentIntent);
     const amount = ethers.utils.parseEther(
-     String(event.data.object.amount / 100)
-   );
-     const destAddr = event.data.object.metadata.walletAddr;
-     console.log({ amount, destAddr });
-     const tx = await transferDint({ amount, destAddr });
-      console.log("tx hash", tx);
-      break;
+       String(event.data.object.amount / 100)
+      );
+         const destAddr = event.data.object.metadata.walletAddr;
+         console.log({ amount, destAddr });
+        const tx = await transferDint({ amount, destAddr });
+       console.log("tx hash", tx);
+       break;
   //     //   ... handle other event types
-     default:
-       console.log(`Unhandled event type ${event.type}`);
+      default:
+        console.log(`Unhandled event type ${event.type}`);
    }
 
   // Return a 200 res to acknowledge receipt of the event

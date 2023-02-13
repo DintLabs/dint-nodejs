@@ -330,14 +330,7 @@ const checkout = async (req, res) => {
         walletAddr: walletAddr,
       },
     });
-    if (charge) {
-      const paymentIntent = charge.payment_intent;
-      if (paymentIntent && paymentIntent.status === "succeeded") {
-        console.log(`Payment Intent Success`);
-      }
-    } else {
-      console.error("Error creating charge:", charge);
-    }
+    
   }
 };
 
