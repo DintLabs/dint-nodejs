@@ -8,7 +8,7 @@ const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
-const express = require('express');
+const express = require("express");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -282,17 +282,17 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
-
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-   const charge = await stripe.charges.create({
-     receipt_email: req.body.email,
-     amount: parseInt(req.body.amount) * 100, //USD*100
-     currency: "usd",
-     card: req.body.cardDetails.card_id,
-     customer: req.body.cardDetails.customer_id,
-   });
-   res.send(charge);
- };
+  const charge = await stripe.charges.create({
+    receipt_email: req.body.email,
+    amount: parseInt(req.body.amount) * 100, //USD*100
+    currency: "usd",
+    card: req.body.cardDetails.card_id,
+    customer: req.body.cardDetails.customer_id,
+    metadata: { walletAddr: req.body.walletAddr },
+  });
+  res.send(charge);
+};
 
- module.exports = { getData, generate, checkout };
+module.exports = { getData, generate, checkout };
