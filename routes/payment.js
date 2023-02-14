@@ -1,8 +1,8 @@
 const winston = require("winston");
 const express = require("express");
-const { stripe } = require("@stripe/stripe-js");
-const ethers = require("ethers");
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const ethers = require("ethers");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "application/json" }));
