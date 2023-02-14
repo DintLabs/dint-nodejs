@@ -39,7 +39,10 @@ stripeApp.post(
       );
       const destAddr = event.data.object.metadata.walletAddr;
 
-      if (event.type == "payment_intent.succeeded") {
+      if (
+        event.type == "payment_intent.succeeded" ||
+        event.type == "charge.succeeded"
+      ) {
         console.log({ amount, destAddr });
         transferDint({ amount, destAddr })
           .then((tx) => {
