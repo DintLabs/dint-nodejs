@@ -1,7 +1,6 @@
 const winston = require("winston");
 const express = require("express");
-// const { stripe } = require("@stripe/stripe-js");
-const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const { stripe } = require("@stripe/stripe-js");
 const ethers = require("ethers");
 require("dotenv").config();
 const { transferDint } = require("../controller/stripe");
