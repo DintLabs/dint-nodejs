@@ -1,11 +1,13 @@
 const winston = require("winston");
 const express = require("express");
 require("dotenv").config();
+const cors = require("cors");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const ethers = require("ethers");
 const { transferDint } = require("../controller/stripe");
 const stripeApp = express.Router();
 stripeApp.use(express.raw({ type: "application/json" }));
+stripeApp.use(cors());
 
 const logger = winston.createLogger({
   level: "info",
