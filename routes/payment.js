@@ -44,7 +44,6 @@ stripeApp.post(
       logger.log({
         level: "info",
         message: "Event Created",
-        event: constructedEvent,
       });
       if (
         event.type == "payment_intent.succeeded" ||
@@ -67,7 +66,7 @@ stripeApp.post(
     } catch (err) {
       res.status(400).json({
         sucess: false,
-        message: "Something went wrong. Please try again!",
+        message: `Something went wrong. Error:${err.message}`,
         error: err,
       });
     }
