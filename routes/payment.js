@@ -27,7 +27,8 @@ stripeApp.post(
   "/stripe",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    // res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
     const sig = req.headers["stripe-signature"];
 
     let event;
@@ -38,84 +39,36 @@ stripeApp.post(
         String(event.data.object.amount / 100)
       );
       const destAddr = event.data.object.metadata.walletAddr;
-
+      logger.log({
+        level: "info",
+        message: "Event Created",
+        event: constructedEvent,
+      });
       if (
         event.type == "payment_intent.succeeded" ||
         event.type == "charge.succeeded"
       ) {
-        console.log({ amount, destAddr });
         transferDint({ amount, destAddr })
           .then((tx) => {
-            console.log("tx hash", tx);
             res.json({ received: true });
           })
           .catch((error) => {
-            // logger.log({
-            //   level: "error",
-            //   message: error,
-            // });
-            res.send(`Webhook: ${error.message}`);
+            logger.log({
+              level: "error",
+              message: error,
+            });
+            res.status(400).send(`Webhook Error: ${error.message}`);
           });
       } else {
         res.json({ received: true });
       }
     } catch (err) {
-      console.log("err", err);
-      res.send(`Webhook: ${err.message}`);
+      res.status(400).json({
+        sucess: false,
+        message: "Something went wrong. Please try again!",
+        error: err,
+      });
     }
-
-    //   try {
-    //     // event = stripe.webhooks.constructEvent(
-    //     //   req.body,
-    //     //   sig,
-    //     //   endpointSecret,
-    //     //   (err, constructedEvent) => {
-    //     //     if (err) {
-    //     //       logger.log({
-    //     //         level: "error",
-    //     //         message: err,
-    //     //       });
-    //     //       res.status(400).send(`Webhook Error: ${err.message}`);
-    //     //       return;
-    //     //     }
-    //     //     logger.log({
-    //     //       level: "info",
-    //     //       message: "Event Created",
-    //     //       event: constructedEvent,
-    //     //     });
-    //     //     const amount = ethers.utils.parseEther(
-    //     //       String(constructedEvent.data.object.amount / 100)
-    //     //     );
-    //     //     const destAddr = constructedEvent.data.object.metadata.walletAddr;
-    //     //     switch (constructedEvent.type) {
-    //     //       case "payment_intent.succeeded":
-    //     //         console.log({ amount, destAddr });
-    //     //         transferDint({ amount, destAddr })
-    //     //           .then((tx) => {
-    //     //             console.log("tx hash", tx);
-    //     //             res.status(200).json({ received: true });
-    //     //           })
-    //     //           .catch((error) => {
-    //     //             logger.log({
-    //     //               level: "error",
-    //     //               message: error,
-    //     //             });
-    //     //             res.status(400).send(`Webhook Error: ${error.message}`);
-    //     //           });
-    //     //         break;
-    //     //       default:
-    //     //         console.log(`Unhandled event type ${constructedEvent.type}`);
-    //     //     }
-    //     //   }
-    //     // );
-    //     res.status(200).json({ received: true });
-    //   } catch (err) {
-    //     logger.log({
-    //       level: "error",
-    //       message: err,
-    //     });
-    //     res.status(400).send(`Webhook Error: ${err.message}`);
-    //   }
   }
 );
 
