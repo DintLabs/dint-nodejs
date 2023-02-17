@@ -180,6 +180,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "maxDuration",
+		"outputs": [
+			{
+				"internalType": "uint64",
+				"name": "",
+				"type": "uint64"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "owner",
 		"outputs": [
 			{
@@ -271,6 +284,19 @@
 			}
 		],
 		"name": "setFeeCollector",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint64",
+				"name": "_durationInSeconds",
+				"type": "uint64"
+			}
+		],
+		"name": "setMaxDuration",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
