@@ -69,7 +69,7 @@ const approval = async (data, amount) => {
     ];
     const currentApproval = await contract.allowance(
       data.userAddress,
-      DintDistributerAddress
+      ownerAddress
     );
 
     console.log("currentApproval", currentApproval);
