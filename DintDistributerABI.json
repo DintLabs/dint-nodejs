@@ -116,24 +116,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_referrer",
-				"type": "address"
-			},
-			{
-				"internalType": "bool",
-				"name": "_isReferrer",
-				"type": "bool"
-			}
-		],
-		"name": "changeReferrerState",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "dintToken",
 		"outputs": [
