@@ -215,8 +215,8 @@ const send = async (data, value) => {
       data.recieverAddress,
       value,
       {
-        gasLimit: ethers.BigNumber.from(1000000),
-        gasPrice: ethers.BigNumber.from(1000000),
+        gasLimit: gasLimit,
+        gasPrice: gasPrice,
       }
     )
       .then(
