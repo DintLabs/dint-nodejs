@@ -23,7 +23,7 @@ sendDint.post("/send-dint", async (req, res) => {
     return res.send({ success: false, message: "private key not found" });
   }
 
-  const { sender_id, reciever_id, amount, priceInUSD} = req.body;
+  const { sender_id, reciever_id, amount } = req.body;
 
   try {
     getData(sender_id, reciever_id, amount)
