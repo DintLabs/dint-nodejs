@@ -33,7 +33,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
-              priceInUSD: 50, // replace 50 with the actual price in USD
+              priceInUSD: 1000000, // replace 50 with the actual price in USD
             });
           })
           .catch((err) => {
