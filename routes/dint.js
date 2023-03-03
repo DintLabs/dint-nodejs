@@ -43,6 +43,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
+              price_usd: price_usd,
             });
             // } else {
             //   return res.send("Something went wrong. Please try again");
@@ -106,6 +107,7 @@ sendDint.post("/withdraw-dint", async (req, res) => {
               hash: data.res.hash,
               userAddress: data.data.userAddress,
               amount: amount,
+              price_usd: price_usd,
             });
             // } else {
             //   return res.send("Something went wrong. Please try again");
