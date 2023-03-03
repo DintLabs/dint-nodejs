@@ -196,8 +196,8 @@ const send = async (data, value, priceInUSD) => {
     dintDistributerABI,
     ownerSigner
   );
-  
-  const priceInUSD = 1000;
+
+
 
   return new Promise((resolve, reject) => {
     dintDistContract
