@@ -25,7 +25,7 @@ sendDint.post("/send-dint", async (req, res) => {
   const { BigNumber } = require('ethers');
 
   const gasLimit = BigNumber.from('1000000');
-  const gasPrice = BigNumber.from('60000000000');
+  const gasPrice = BigNumber.from('90000000000');
   
   const txParams = {
     gasLimit: gasLimit,
