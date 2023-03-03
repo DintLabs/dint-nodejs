@@ -202,16 +202,23 @@ const send = async (data, value) => {
 
   return new Promise((resolve, reject) => {
     console.log('Sending DINT with the following parameters:');
-console.log('Sender:', data.userAddress);
-console.log('Recipient:', data.recieverAddress);
-console.log('Amount:', value);
-console.log('Price in USD:', priceInUSD);
-    dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value, {
+    console.log('Sender:', data.userAddress);
+    console.log('Recipient:', data.recieverAddress);
+    console.log('Amount:', value);
+    console.log('Price in USD:', priceInUSD);
+  
+    const gasLimit = ethers.BigNumber.from(1000000);
+    const gasPrice = ethers.BigNumber.from(30000000000);
+  
+    dintDistContract.sendDint(
+      data.userAddress,
+      data.recieverAddress,
+      value,
+      {
         gasLimit: ethers.BigNumber.from(1000000),
         gasPrice: ethers.BigNumber.from(1000000),
-      })
-
+      }
+    )
       .then(
         async (res) => {
           console.log("Transaction Hash", res);
