@@ -44,6 +44,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
+              priceInUSD: priceInUSD,
             });
             // } else {
             //   return res.send("Something went wrong. Please try again");
