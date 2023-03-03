@@ -207,9 +207,9 @@ const send = async (data, value) => {
     console.log('Amount:', value);
     console.log('Price in USD:', priceInUSD);
   
-    const gasLimit = ethers.BigNumber.from(1000000);
-    const gasPrice = ethers.BigNumber.from(30000000000);
-  
+    const gasLimit = ethers.BigNumber.from(1000000).toString();
+    const gasPrice = ethers.BigNumber.from(30000000000).toString();
+    
     dintDistContract.sendDint(
       data.userAddress,
       data.recieverAddress,
