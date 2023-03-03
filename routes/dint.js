@@ -108,6 +108,7 @@ sendDint.post("/withdraw-dint", async (req, res) => {
               hash: data.res.hash,
               userAddress: data.data.userAddress,
               amount: amount,
+              priceInUSD: priceInUSD,
             });
             // } else {
             //   return res.send("Something went wrong. Please try again");
