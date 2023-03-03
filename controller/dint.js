@@ -98,8 +98,8 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasLimit: web3.utils.toHex('1000000'), 
+            gasPrice: web3.utils.toHex('30000000000') 
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -199,8 +199,8 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasLimit: web3.utils.toHex('1000000'), 
+        gasPrice: web3.utils.toHex('30000000000') 
       })
 
       .then(
