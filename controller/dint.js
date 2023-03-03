@@ -189,23 +189,14 @@ const generate = async (data, amount, priceInUSD) => {
     }
   }
 };
-
-const send = async (data, value) => {
-  const priceInUSD = 1;
+priceInUSD
+const send = async (data, value, priceInUSD) => {
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
-
-
-
   return new Promise((resolve, reject) => {
-    console.log('Sending DINT with the following parameters:');
-console.log('Sender:', data.userAddress);
-console.log('Recipient:', data.recieverAddress);
-console.log('Amount:', value);
-console.log('Price in USD:', priceInUSD);
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: 1000000,
