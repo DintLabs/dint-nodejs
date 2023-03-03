@@ -1,6 +1,5 @@
 const express = require("express");
 const sendDint = express.Router();
-// require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const { getData, generate, checkout } = require("../controller/dint");
@@ -15,29 +14,19 @@ sendDint.use(bodyParser.json());
 
 sendDint.post("/send-dint", async (req, res) => {
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
-    console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
-
     return res.send({ success: false, message: "invalid api key" });
   }
   if (!process.env.OWNER_PRIVATE_KEY) {
     return res.send({ success: false, message: "private key not found" });
   }
 
-  const { sender_id, reciever_id, amount } = req.body;
-  const priceInUSD = 1000000;
+  const { sender_id, reciever_id, amount, priceInUSD } = req.body;
 
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
         generate(data, amount, priceInUSD)
           .then((data) => {
-            // if (data.data) {
-            //   const users = ethers.utils.defaultAbiCoder.decode(
-            //     ["address", "address"],
-            //     data.data
-            //   );
-            //   const sender = users[0];
-            //   const reciever = users[1];
             return res.send({
               success: true,
               Hash: data.res.hash,
@@ -46,9 +35,6 @@ sendDint.post("/send-dint", async (req, res) => {
               amount: amount,
               priceInUSD: priceInUSD,
             });
-            // } else {
-            //   return res.send("Something went wrong. Please try again");
-            // }
           })
           .catch((err) => {
             return res.send({
@@ -77,32 +63,19 @@ sendDint.post("/send-dint", async (req, res) => {
 sendDint.post("/checkout", checkout);
 
 sendDint.post("/withdraw-dint", async (req, res) => {
-   if (req.headers.apikey !== process.env.SECURITY_KEY) {
-     console.log(
-       "req.headers",
-       req.headers.apikey === process.env.SECURITY_KEY
-     );
-
-     return res.send({ success: false, message: "invalid api key" });
-   }
-   if (!process.env.OWNER_PRIVATE_KEY) {
-     return res.send({ success: false, message: "private key not found" });
-   }
-  const { user_id, amount } = req.body;
-  console.log(" req.body", req.body);
+  if (req.headers.apikey !== process.env.SECURITY_KEY) {
+    return res.send({ success: false, message: "invalid api key" });
+  }
+  if (!process.env.OWNER_PRIVATE_KEY) {
+    return res.send({ success: false, message: "private key not found" });
+  }
+  const { user_id, amount, priceInUSD } = req.body;
 
   try {
     getUserData(user_id, amount)
       .then((data) => {
         approval(data, amount)
           .then((data) => {
-            // if (data.data) {
-            //   const users = ethers.utils.defaultAbiCoder.decode(
-            //     ["address", "address"],
-            //     data.data
-            //   );
-            //   const sender = users[0];
-            //   const reciever = users[1];
             return res.send({
               success: true,
               hash: data.res.hash,
@@ -110,9 +83,6 @@ sendDint.post("/withdraw-dint", async (req, res) => {
               amount: amount,
               priceInUSD: priceInUSD,
             });
-            // } else {
-            //   return res.send("Something went wrong. Please try again");
-            // }
           })
           .catch((err) => {
             return res.send({
@@ -139,7 +109,5 @@ sendDint.post("/withdraw-dint", async (req, res) => {
     });
   }
 });
-
-
 
 module.exports = sendDint;
