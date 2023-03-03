@@ -98,8 +98,8 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasLimit: BigNumber.from("1000000"),
+      gasPrice: BigNumber.from("30000000000"),
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
