@@ -237,7 +237,7 @@ const send = async (data, value) => {
   });
 };
 
-const getData = async (sender_id, reciever_id, amount) => {
+const getData = async (sender_id, reciever_id, amount, _priceInUSD) => {
   return new Promise((resolve, reject) => {
     client
       .query(
