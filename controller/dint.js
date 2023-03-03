@@ -32,7 +32,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-const generate = async (data, amount, ) => {
+const generate = async (data, amount) => {
   const nonce = 0;
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
@@ -198,7 +198,7 @@ const send = async (data, value) => {
   );
   return new Promise((resolve, reject) => {
     dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value, priceInUSD, {
+      .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: web3.utils.toHex('1000000'), 
         gasPrice: web3.utils.toHex('30000000000') 
       })
