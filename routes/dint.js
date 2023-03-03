@@ -22,11 +22,11 @@ sendDint.post("/send-dint", async (req, res) => {
   if (!process.env.OWNER_PRIVATE_KEY) {
     return res.send({ success: false, message: "private key not found" });
   }
-
-  const { sender_id, reciever_id, amount } = req.body;
+  price_usd="1000000";
+  const { sender_id, reciever_id, amount, price_usd } = req.body;
 
   try {
-    getData(sender_id, reciever_id, amount)
+    getData(sender_id, reciever_id, amount, price_usd)
       .then((data) => {
         generate(data, amount)
           .then((data) => {
