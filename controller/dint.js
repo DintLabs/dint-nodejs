@@ -189,8 +189,9 @@ const generate = async (data, amount, priceInUSD) => {
     }
   }
 };
-const priceInUSD = 1;
+
 const send = async (data, value, priceInUSD) => {
+  const priceInUSD = 1;
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
