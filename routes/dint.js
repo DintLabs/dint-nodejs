@@ -20,12 +20,12 @@ sendDint.post("/send-dint", async (req, res) => {
     return res.send({ success: false, message: "private key not found" });
   }
 
-  const { sender_id, reciever_id, amount, priceInUSD } = req.body;
+  const { sender_id, reciever_id, amount } = req.body;
 
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
-        generate(data, amount, priceInUSD)
+        generate(data, amount)
           .then((data) => {
             return res.send({
               success: true,
@@ -33,7 +33,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
-              priceInUSD: priceInUSD,
+              priceInUSD: 50, // replace 50 with the actual price in USD
             });
           })
           .catch((err) => {
@@ -46,7 +46,6 @@ sendDint.post("/send-dint", async (req, res) => {
           });
       })
       .catch((error) => {
-        console.log("err", error);
         return res.send({
           sucess: false,
           message: "Something went wrong while getting user data.",
@@ -69,7 +68,7 @@ sendDint.post("/withdraw-dint", async (req, res) => {
   if (!process.env.OWNER_PRIVATE_KEY) {
     return res.send({ success: false, message: "private key not found" });
   }
-  const { user_id, amount, priceInUSD } = req.body;
+  const { user_id, amount } = req.body;
 
   try {
     getUserData(user_id, amount)
@@ -81,7 +80,6 @@ sendDint.post("/withdraw-dint", async (req, res) => {
               hash: data.res.hash,
               userAddress: data.data.userAddress,
               amount: amount,
-              priceInUSD: priceInUSD,
             });
           })
           .catch((err) => {
@@ -94,7 +92,6 @@ sendDint.post("/withdraw-dint", async (req, res) => {
           });
       })
       .catch((error) => {
-        console.log("err", error);
         return res.send({
           sucess: false,
           message: "Something went wrong while getting user data.",
