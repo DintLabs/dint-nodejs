@@ -20,12 +20,12 @@ sendDint.post("/send-dint", async (req, res) => {
     return res.send({ success: false, message: "private key not found" });
   }
 
-  const { sender_id, reciever_id, amount } = req.body;
+  const { sender_id, reciever_id, amount, priceInUSD } = req.body;
 
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
-        generate(data, amount)
+        generate(data, amount, priceInUSD)
           .then((data) => {
             return res.send({
               success: true,
@@ -33,7 +33,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
-              priceInUSD: 1000000, // replace 50 with the actual price in USD
+              priceInUSD: priceInUSD,
             });
           })
           .catch((err) => {
