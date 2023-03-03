@@ -24,12 +24,11 @@ sendDint.post("/send-dint", async (req, res) => {
   }
 
   const { sender_id, reciever_id, amount } = req.body;
-  const dintPrice = 1000000;
 
   try {
     getData(sender_id, reciever_id, amount)
       .then((data) => {
-        generate(data, amount, dintPrice)
+        generate(data, amount)
           .then((data) => {
             // if (data.data) {
             //   const users = ethers.utils.defaultAbiCoder.decode(
