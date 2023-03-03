@@ -198,7 +198,7 @@ const send = async (data, value) => {
   );
   return new Promise((resolve, reject) => {
     dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value, {
+      .sendDint(data.userAddress, data.recieverAddress, value, _priceInUSD,{
         gasLimit: 1000000,
         gasPrice: 30000000000,
       })
@@ -237,7 +237,7 @@ const send = async (data, value) => {
   });
 };
 
-const getData = async (sender_id, reciever_id, amount, _priceInUSD) => {
+const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
     client
       .query(
