@@ -22,7 +22,16 @@ sendDint.post("/send-dint", async (req, res) => {
   if (!process.env.OWNER_PRIVATE_KEY) {
     return res.send({ success: false, message: "private key not found" });
   }
+  const { BigNumber } = require('ethers');
 
+  const gasLimit = BigNumber.from('1000000');
+  const gasPrice = BigNumber.from('60000000000');
+  
+  const txParams = {
+    gasLimit: gasLimit,
+    gasPrice: gasPrice,
+    // other transaction parameters
+  };
   const { sender_id, reciever_id, amount } = req.body;
   const price_usd = "1000000";
   try {
