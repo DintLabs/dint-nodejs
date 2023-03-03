@@ -200,6 +200,11 @@ const send = async (data, value, priceInUSD) => {
 
 
   return new Promise((resolve, reject) => {
+    console.log('Sending DINT with the following parameters:');
+console.log('Sender:', data.userAddress);
+console.log('Recipient:', data.recieverAddress);
+console.log('Amount:', value);
+console.log('Price in USD:', priceInUSD);
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: 1000000,
