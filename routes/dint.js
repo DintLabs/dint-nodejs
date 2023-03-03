@@ -1,5 +1,7 @@
 const express = require("express");
 const sendDint = express.Router();
+// require("dotenv").config({ path: `../env.local`, override: true });
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const { getData, generate, checkout } = require("../controller/dint");
 const { approval, getUserData } = require("../controller/payout");
@@ -13,6 +15,8 @@ sendDint.use(bodyParser.json());
 
 sendDint.post("/send-dint", async (req, res) => {
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
+    console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
+
     return res.send({ success: false, message: "invalid api key" });
   }
   if (!process.env.OWNER_PRIVATE_KEY) {
@@ -26,6 +30,13 @@ sendDint.post("/send-dint", async (req, res) => {
       .then((data) => {
         generate(data, amount, priceInUSD)
           .then((data) => {
+            // if (data.data) {
+            //   const users = ethers.utils.defaultAbiCoder.decode(
+            //     ["address", "address"],
+            //     data.data
+            //   );
+            //   const sender = users[0];
+            //   const reciever = users[1];
             return res.send({
               success: true,
               Hash: data.res.hash,
@@ -33,6 +44,9 @@ sendDint.post("/send-dint", async (req, res) => {
               reciever: data.data.recieverAddress,
               amount: amount,
             });
+            // } else {
+            //   return res.send("Something went wrong. Please try again");
+            // }
           })
           .catch((err) => {
             return res.send({
