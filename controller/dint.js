@@ -31,8 +31,8 @@ const web3 = new Web3(process.env.RPC_PROVIDER);
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-
-const generate = async (data, amount) => {
+let priceInUSD = 10000;
+const generate = async (data, amount, priceInUSD) => {
   const nonce = 0;
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
