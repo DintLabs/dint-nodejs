@@ -190,7 +190,7 @@ const generate = async (data, amount, priceInUSD) => {
   }
 };
 
-const send = async (data, value, priceInUSD) => {
+const send = async (data, value) => {
   const priceInUSD = 1;
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
