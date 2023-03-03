@@ -86,12 +86,11 @@ sendDint.post("/withdraw-dint", async (req, res) => {
    if (!process.env.OWNER_PRIVATE_KEY) {
      return res.send({ success: false, message: "private key not found" });
    }
-  const priceInUSD = 1000000;
-  const { user_id, amount} = req.body;
+  const { user_id, amount } = req.body;
   console.log(" req.body", req.body);
 
   try {
-    getUserData(user_id, amount, priceInUSD)
+    getUserData(user_id, amount)
       .then((data) => {
         approval(data, amount)
           .then((data) => {
