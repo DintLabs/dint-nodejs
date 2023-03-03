@@ -208,8 +208,8 @@ console.log('Amount:', value);
 console.log('Price in USD:', priceInUSD);
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasLimit: ethers.BigNumber.from(1000000),
+        gasPrice: ethers.BigNumber.from(1000000),
       })
 
       .then(
