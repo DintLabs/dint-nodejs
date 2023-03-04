@@ -192,7 +192,7 @@ const generate = async (data, amount) => {
 
 const send = async (data, value) => {
   console.log(data);
-console.log('value'=value);
+  console.log('value', value);
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
@@ -204,6 +204,7 @@ console.log('value'=value);
         gasLimit: 1000000,
         gasPrice: 30000000000,
       })
+
 
       .then(
         async (res) => {
