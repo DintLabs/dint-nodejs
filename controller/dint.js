@@ -194,7 +194,7 @@ const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
 
-const priceInUSD =1;
+const priceInUSD =1000000;
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
