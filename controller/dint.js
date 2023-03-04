@@ -193,7 +193,7 @@ const generate = async (data, amount) => {
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
-  console.log('dintPrice =', priceInUSD);
+
 const priceInUSD =1;
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
@@ -211,7 +211,7 @@ const priceInUSD =1;
       .then(
         async (res) => {
           console.log("Transaction Hash", res);
-
+          console.log('dintPrice =', priceInUSD);
           // const filter = {
           //   address: DintDistributerAddress,
           //   topics: [
