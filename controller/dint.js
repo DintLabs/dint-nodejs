@@ -101,11 +101,11 @@ const priorityFeeGwei = 35;
 const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
 
       let sig = await ethers.utils.splitSignature(generatedSig);
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: 1000000,
-            gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+            gasPrice: 200000000000,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -148,7 +148,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         sig.s,
         { 
           gasLimit: 1000000,
-          gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+          gasPrice: 200000000000,
         }
       );
       const value = BigInt(
@@ -168,7 +168,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         contract
           .permit(
             account,
@@ -180,7 +180,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
             sigNew.s,
             { 
               gasLimit: 1000000,
-              gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+              gasPrice: 200000000000,
             }
           )
           .then((res) => {
