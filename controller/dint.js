@@ -227,8 +227,6 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
           // Sign and send the transaction
-const signer = provider.getSigner();
-const txResponse = await signer.sendTransaction(tx);
           // const filter = {
           //   address: DintDistributerAddress,
           //   topics: [
