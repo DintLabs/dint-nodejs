@@ -57,10 +57,9 @@ const transferDint = async ({ amount, destAddr }) => {
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
-  });
-  console.log("Transaction Hash", tx.hash);
-  return tx;
-
+  }); // TRANSFER DINT to the customer
+  
+return tx;
 };
 
 module.exports = { transferDint };
