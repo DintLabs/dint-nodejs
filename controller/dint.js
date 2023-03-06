@@ -201,16 +201,24 @@ const send = async (data, value) => {
   console.log('value =', value);
 
 const priceInUSD =1000000;
+
+// Specify the desired priority fee (in Gwei)
+const priorityFeeGwei = 35;
+
+// Convert the priority fee to Wei
+const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+
+
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
         gasLimit: 1000000,
-        gasPrice: 200000000000,
+        gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
       })
 
 
@@ -218,6 +226,9 @@ const priceInUSD =1000000;
         async (res) => {
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
+          // Sign and send the transaction
+const signer = provider.getSigner();
+const txResponse = await signer.sendTransaction(tx);
           // const filter = {
           //   address: DintDistributerAddress,
           //   topics: [
