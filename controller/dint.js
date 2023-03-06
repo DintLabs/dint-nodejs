@@ -208,6 +208,12 @@ const send = async (data, value) => {
 
 const priceInUSD =1000000;
 
+// Specify the desired priority fee (in Gwei)
+const priorityFeeGwei = 35;
+
+// Convert the priority fee to Wei
+const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
