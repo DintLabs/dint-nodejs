@@ -149,7 +149,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         sig.s,
         { 
           gasLimit: 1000000,
-          gasPrice: 200000000000,
+          gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
         }
       );
       const value = BigInt(
