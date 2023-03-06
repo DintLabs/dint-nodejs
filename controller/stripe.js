@@ -32,7 +32,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Get the current gas prices
   let gasPrice;
-  let gasLimit = ethers.utils.parseUnits("100000", "wei");
+  let gasLimit = ethers.utils.parseUnits("1000000", "wei");
   let maxFeePerGas;
   let maxPriorityFeePerGas;
   try {
@@ -48,7 +48,7 @@ const transferDint = async ({ amount, destAddr }) => {
     );
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    maxFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default gas price
+    maxFeePerGas = ethers.utils.parseUnits("1000", "gwei"); // Set default gas price
     maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
   }
 
@@ -58,8 +58,9 @@ const transferDint = async ({ amount, destAddr }) => {
     maxFeePerGas,
     maxPriorityFeePerGas,
   });
-
+  console.log("Transaction Hash", res);
   return tx;
+
 };
 
 module.exports = { transferDint };
