@@ -32,7 +32,8 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Get the current gas prices
   let gasPrice;
-  let gasLimit = ethers.utils.parseUnits("2000000", "wei");
+  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
+
   let maxFeePerGas;
   let maxPriorityFeePerGas;
   try {
