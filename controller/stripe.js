@@ -1,8 +1,6 @@
-import { ethers } from 'ethers';
-import { buffer } from "micro";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET; // validate requests
+const ethers = require("ethers");
+// require("dotenv").config({ path: `../env.local`, override: true });
+require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
