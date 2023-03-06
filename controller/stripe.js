@@ -1,4 +1,5 @@
 const ethers = require("ethers");
+const Web3 = require("web3");
 // require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 
@@ -32,16 +33,30 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-    // Specify the desired priority fee (in Gwei)
-    const priorityFeeGwei = 45;
-
-    // Convert the priority fee to Wei
-    const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
-  const targetBlocks = 3; // Target number of blocks for the transaction to be included in
-
+    // get max fees from gas station
+let maxFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
+let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
+try {
+    const { data } = await axios({
+        method: 'get',
+        url: isProd
+        ? 'https://gasstation-mainnet.matic.network/v2'
+        : 'https://gasstation-mumbai.matic.today/v2',
+    })
+    maxFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxFee) + '',
+        'gwei'
+    )
+    maxPriorityFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxPriorityFee) + '',
+        'gwei'
+    )
+} catch {
+    // ignore
+}
   const tx = await erc20dint.transfer(destAddr, amount, {
-    gasLimit: 20000000,
-    gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+    maxFeePerGas,
+    maxPriorityFeePerGas,
   }); // TRANSFER DINT to the customer
 
 
