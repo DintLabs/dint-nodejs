@@ -58,7 +58,7 @@ const transferDint = async ({ amount, destAddr }) => {
     maxFeePerGas,
     maxPriorityFeePerGas,
   });
-  console.log("Transaction Hash", res);
+  console.log("Transaction Hash", tx.hash);
   return tx;
 
 };
