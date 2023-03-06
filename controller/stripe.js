@@ -43,11 +43,11 @@ try {
         ? 'https://gasstation-mainnet.matic.network/v2'
         : 'https://gasstation-mumbai.matic.today/v2',
     })
-    maxFeePerGas = ethers.utils.parseUnits(
+    gasPrice = ethers.utils.parseUnits(
         Math.ceil(data.fast.maxFee) + '',
         'gwei'
     )
-    maxPriorityFeePerGas = ethers.utils.parseUnits(
+    gasLimit= ethers.utils.parseUnits(
         Math.ceil(data.fast.maxPriorityFee) + '',
         'gwei'
     )
@@ -55,8 +55,8 @@ try {
     // ignore
 }
   const tx = await erc20dint.transfer(destAddr, amount, {
-    maxFeePerGas,
-    maxPriorityFeePerGas,
+    gasLimit,
+    gasPrice,
   }); // TRANSFER DINT to the customer
 
 
