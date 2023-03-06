@@ -42,7 +42,7 @@ const approval = async (data, amount) => {
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
-    const chainId = 80001; // this is for the chain's ID.
+    const chainId = 137; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = ownerAddress.toLowerCase();
     const deadline = 2673329804;
@@ -204,7 +204,7 @@ const send = async (data, value) => {
 
       .then(
         async (res) => {
-          console.log("Transaction Hash", res);
+          console.log("Transaction Hashes payouts", res);
 
           // const filter = {
           //   address: DintDistributerAddress,
