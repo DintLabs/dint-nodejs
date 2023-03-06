@@ -1,17 +1,20 @@
 const ethers = require("ethers");
-const Web3 = require("web3");
-// require("dotenv").config({ path: `../env.local`, override: true });
+const axios = require("axios");
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.RPC_PROVIDER
-  );
+  // Load environment variables
+  const rpcProvider = process.env.RPC_PROVIDER;
+  const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
+  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
 
-  const signer = new ethers.Wallet(
-    (process.env.OWNER_PRIVATE_KEY),
-    provider
-  );
+  if (!rpcProvider || !ownerPrivateKey || !contractAddr) {
+    throw new Error("Missing environment variables");
+  }
+
+  const provider = new ethers.providers.JsonRpcProvider(rpcProvider);
+  const signer = new ethers.Wallet(ownerPrivateKey, provider);
+
   const abi = [
     {
       constant: false,
@@ -27,43 +30,37 @@ const transferDint = async ({ amount, destAddr }) => {
     },
   ];
 
-
-
-
-  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-    // get max fees from gas station
-let maxFeePerGas = ethers.BigNumber.from(200000000000) // fallback to 40 gwei
-let maxPriorityFeePerGas = ethers.BigNumber.from(60000000000) // fallback to 40 gwei
-try {
+  // Get gas prices from gas station
+  let gasPrice = ethers.BigNumber.from(200000000000); // fallback to 40 gwei
+  let gasLimit = ethers.BigNumber.from(6000000); // fallback to 6 million gas
+  try {
     const { data } = await axios({
-        method: 'get',
-        url: isProd
-        ? 'https://gasstation-mainnet.matic.network/v2'
-        : 'https://gasstation-mumbai.matic.today/v2',
-    })
+      method: "get",
+      url: isProd
+        ? "https://gasstation-mainnet.matic.network/v2"
+        : "https://gasstation-mumbai.matic.today/v2",
+    });
+
     gasPrice = ethers.utils.parseUnits(
-        Math.ceil(data.fast.maxFee) + '',
-        'gwei'
-    )
-    gasLimit= ethers.utils.parseUnits(
-        Math.ceil(data.fast.maxPriorityFee) + '',
-        'gwei'
-    )
-} catch {
+      Math.ceil(data.fast.maxFee) + "",
+      "gwei"
+    );
+    gasLimit = ethers.utils.parseUnits(
+      Math.ceil(data.fast.gasLimit) + "",
+      "wei"
+    );
+  } catch {
     // ignore
-}
+  }
+
   const tx = await erc20dint.transfer(destAddr, amount, {
     gasLimit,
     gasPrice,
   }); // TRANSFER DINT to the customer
 
-
-
   return tx;
 };
 
 module.exports = { transferDint };
-
-
