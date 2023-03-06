@@ -27,17 +27,21 @@ const transferDint = async ({ amount, destAddr }) => {
   ];
 
 
-n
+
 
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-  const gasLimit = 21000; // Standard gas limit for a simple transfer
+    // Specify the desired priority fee (in Gwei)
+    const priorityFeeGwei = 45;
+
+    // Convert the priority fee to Wei
+    const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
   const targetBlocks = 3; // Target number of blocks for the transaction to be included in
-  const gasPrice = await provider.estimateGasPrice({ targetBlockTime: targetBlocks * 15 }); // Target block time is 15 seconds on Polygo
+
   const tx = await erc20dint.transfer(destAddr, amount, {
-    gasPrice,
-    gasLimit,
+    gasLimit: 20000000,
+    gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
   }); // TRANSFER DINT to the customer
 
 
@@ -46,3 +50,5 @@ n
 };
 
 module.exports = { transferDint };
+
+
