@@ -27,13 +27,9 @@ const transferDint = async ({ amount, destAddr }) => {
     },
   ];
 
-  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
-  const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // Get the current gas prices
   let gasPrice;
-  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-
   let maxFeePerGas;
   let maxPriorityFeePerGas;
   try {
@@ -54,6 +50,9 @@ const transferDint = async ({ amount, destAddr }) => {
   }
 
   // Send the transaction
+  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
+  const erc20dint = new ethers.Contract(contractAddr, abi, signer);
+  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
   const tx = await erc20dint.transfer(destAddr, amount, {
     gasLimit,
     maxFeePerGas,
