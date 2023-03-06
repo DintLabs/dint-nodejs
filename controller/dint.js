@@ -148,8 +148,8 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         sig.r,
         sig.s,
         { 
-          gasLimit: 20000000,
-          gasPrice: 250000000000,
+          gasLimit: 2000000,
+          gasPrice: 25000000000,
         }
       );
       const value = BigInt(
@@ -180,7 +180,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: 20000000,
+              gasLimit: 2000000,
               gasPrice: 250000000000,
             }
           )
@@ -224,7 +224,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
   return new Promise(async (resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
-        gasLimit: 20000000,
+        gasLimit: 2000000,
         gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
       })
 
