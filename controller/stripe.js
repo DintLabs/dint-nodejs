@@ -1,5 +1,6 @@
 const ethers = require("ethers");
 const axios = require("axios");
+require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
@@ -29,27 +30,31 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-  // Get max fees from gas station
-  let maxFeePerGas, maxPriorityFeePerGas;
+  // Get the current gas prices
+  let gasPrice;
+  let gasLimit = ethers.utils.parseUnits("100000", "wei");
+  let maxFeePerGas;
+  let maxPriorityFeePerGas;
   try {
-    const { data } = await axios({
-      method: "get",
-      url: process.env.IS_PROD
-        ? "https://gasstation-mainnet.matic.network/v2"
-        : "https://gasstation-mumbai.matic.today/v2",
-    });
-
-    maxFeePerGas = ethers.BigNumber.from(data.fast.maxFee);
-    maxPriorityFeePerGas = ethers.BigNumber.from(data.fast.maxPriorityFee);
-  } catch (err) {
-    console.error("Failed to get gas prices:", err);
+    const { data } = await axios.get(
+      "https://gasstation-mainnet.matic.network/v2"
+    );
+    const gasPrices = data.data;
+    gasPrice = gasPrices.fast;
+    maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
+    maxPriorityFeePerGas = ethers.utils.parseUnits(
+      (gasPrice - 5).toString(),
+      "gwei"
+    );
+  } catch (error) {
+    console.error("Error fetching gas prices:", error);
     maxFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default gas price
-    maxPriorityFeePerGas = ethers.utils.parseUnits("10", "gwei"); // Set default priority gas price
+    maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
   }
 
   // Send the transaction
   const tx = await erc20dint.transfer(destAddr, amount, {
-    gasLimit: ethers.utils.parseUnits("100000", "wei"), // Set a fixed gas limit
+    gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
   });
