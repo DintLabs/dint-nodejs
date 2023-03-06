@@ -27,7 +27,6 @@ const transferDint = async ({ amount, destAddr }) => {
     },
   ];
 
-
   // Get the current gas prices
   let gasPrice;
   let maxFeePerGas;
@@ -58,8 +57,8 @@ const transferDint = async ({ amount, destAddr }) => {
     maxFeePerGas,
     maxPriorityFeePerGas,
   }); // TRANSFER DINT to the customer
-  
-return tx;
+
+  return tx;
 };
 
 module.exports = { transferDint };
