@@ -94,12 +94,18 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permit
       );
+      // Specify the desired priority fee (in Gwei)
+const priorityFeeGwei = 35;
+
+// Convert the priority fee to Wei
+const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+
       let sig = await ethers.utils.splitSignature(generatedSig);
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: 1000000,
-            gasPrice: 200000000000,
+            gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -142,7 +148,7 @@ const generate = async (data, amount) => {
         sig.s,
         { 
           gasLimit: 1000000,
-          gasPrice: 200000000000,
+          gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
         }
       );
       const value = BigInt(
@@ -162,7 +168,7 @@ const generate = async (data, amount) => {
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         contract
           .permit(
             account,
@@ -174,7 +180,7 @@ const generate = async (data, amount) => {
             sigNew.s,
             { 
               gasLimit: 1000000,
-              gasPrice: 200000000000,
+              gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
             }
           )
           .then((res) => {
@@ -201,12 +207,6 @@ const send = async (data, value) => {
   console.log('value =', value);
 
 const priceInUSD =1000000;
-
-// Specify the desired priority fee (in Gwei)
-const priorityFeeGwei = 35;
-
-// Convert the priority fee to Wei
-const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
 
 
   const dintDistContract = new ethers.Contract(
