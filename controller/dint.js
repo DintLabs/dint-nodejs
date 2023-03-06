@@ -99,7 +99,7 @@ const generate = async (data, amount) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasPrice: 200000000000,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -204,7 +204,7 @@ const priceInUSD =1000000;
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
         gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasPrice: 200000000000,
       })
 
 
