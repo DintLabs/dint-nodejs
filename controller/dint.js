@@ -95,7 +95,7 @@ const generate = async (data, amount) => {
         permit
       );
       // Specify the desired priority fee (in Gwei)
-const priorityFeeGwei = 35;
+const priorityFeeGwei = 45;
 
 // Convert the priority fee to Wei
 const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
@@ -149,7 +149,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         sig.s,
         { 
           gasLimit: 1000000,
-          gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+          gasPrice: 200000000000,
         }
       );
       const value = BigInt(
@@ -210,7 +210,7 @@ const send = async (data, value) => {
 const priceInUSD =1000000;
 
 // Specify the desired priority fee (in Gwei)
-const priorityFeeGwei = 35;
+const priorityFeeGwei = 45;
 
 // Convert the priority fee to Wei
 const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
