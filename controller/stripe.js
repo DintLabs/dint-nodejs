@@ -28,10 +28,11 @@ const transferDint = async ({ amount, destAddr }) => {
 
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
-  const gasPrice = await provider.getGasPrice();
+
   
   const tx = await erc20dint.transfer(destAddr, amount, {
-    gasPrice,
+    gasPrice: ethers.utils.parseUnits("100", "gwei"), // set the gas price to 100 gwei
+    gasLimit: ethers.utils.parseUnits("500000", "wei"),
   }); // TRANSFER DINT to the customer
 
 };
