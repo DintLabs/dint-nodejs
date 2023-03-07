@@ -1,5 +1,10 @@
+const ethers = require("ethers");
+const axios = require("axios");
+require("dotenv").config();
+
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
+
   const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
 
   const abi = [
@@ -20,31 +25,30 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-  // Get gas prices
+  // get max fees from gas station
   let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
   let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
   try {
-    const { data } = await axios.get(
-      process.env.IS_PROD
+    const { data } = await axios({
+      method: "get",
+      url: process.env.IS_PROD
         ? "https://gasstation-mainnet.matic.network/v2"
-        : "https://gasstation-mumbai.matic.today/v2"
-    );
-    const fastGas = data.fast;
-    if (fastGas && fastGas.maxFee && fastGas.maxPriorityFee) {
+        : "https://gasstation-mumbai.matic.today/v2",
+    });
+    if (data.fast && data.fast.maxFee && data.fast.maxPriorityFee) {
       maxFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(fastGas.maxFee).toString(),
+        Math.ceil(data.fast.maxFee) + "",
         "gwei"
       );
       maxPriorityFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(fastGas.maxPriorityFee).toString(),
+        Math.ceil(data.fast.maxPriorityFee) + "",
         "gwei"
       );
     } else {
       throw new Error("Invalid gas price data");
     }
-  } catch (error) {
-    console.error("Error fetching gas prices:", error.message);
-    throw error;
+  } catch (err) {
+    console.error("Error fetching gas prices:", err);
   }
 
   // Send the transaction
