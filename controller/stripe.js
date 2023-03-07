@@ -51,9 +51,9 @@ const transferDint = async ({ amount, destAddr }) => {
   try {
     // Send the transaction
     const tx = await erc20dint.transfer(destAddr, amount, {
-      maxFeePerGas: ethers.utils.parseUnits("150", "gwei"),
-      maxPriorityFeePerGas: ethers.utils.parseUnits("35", "gwei"),
-      gasLimit: ethers.utils.parseUnits("500000", "wei"),
+      maxFeePerGas: ethers.utils.parseUnits("250", "gwei"),
+      maxPriorityFeePerGas: ethers.utils.parseUnits("55", "gwei"),
+      gasLimit: ethers.utils.parseUnits("2000000", "wei"),
     });
     
     const receipt = await tx.wait();
