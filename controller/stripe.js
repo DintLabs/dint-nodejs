@@ -31,7 +31,7 @@ const transferDint = async ({ amount, destAddr }) => {
   try {
     const { data } = await axios({
       method: "get",
-      url: "https://gasstation-mainnet.matic.network/v1/gasprice",
+      url: "https://gasstation-mainnet.matic.network/v2",
     });
 
     console.log("Gas prices:", data);
