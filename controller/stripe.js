@@ -31,13 +31,12 @@ const transferDint = async ({ amount, destAddr }) => {
   let maxPriorityFeePerGas;
   try {
     const { data } = await axios({
-      method: "get",
-      url:
-        process.env.IS_PROD === "true"
-          ? "https://gasstation-mainnet.matic.network/v2"
-          : "https://gasstation-mumbai.matic.today/v2",
+      method: 'get',
+      url: isProd
+      ? 'https://gasstation-mainnet.matic.network/v2'
+      : 'https://gasstation-mumbai.matic.today/v2',
     });
-
+  
     console.log("Gas prices:", data);
     if (
       data &&
