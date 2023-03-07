@@ -34,8 +34,8 @@ const transferDint = async ({ amount, destAddr }) => {
       method: "get",
       url:
         process.env.IS_PROD === "true"
-          ? "https://gasstation-mainnet.matic.network/v1/gasprice"
-          : "https://gasstation-mumbai.matic.today/v1/gasprice",
+          ? "https://gasstation-mainnet.matic.network/v2"
+          : "https://gasstation-mumbai.matic.today/v2",
     });
 
     console.log("Gas prices:", data);
