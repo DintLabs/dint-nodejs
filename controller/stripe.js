@@ -27,15 +27,21 @@ const transferDint = async ({ amount, destAddr }) => {
     },
   ];
 
+  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
+  const erc20dint = new ethers.Contract(contractAddr, abi, signer);
+
   // Get the current gas prices
   let gasPrice;
+  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
+
   let maxFeePerGas;
   let maxPriorityFeePerGas;
   try {
     const { data } = await axios.get(
-      "https://ethgasstation.info/json/ethgasAPI.json"
+      "https://gasstation-mainnet.matic.network/v2"
     );
-    gasPrice = data.fast;
+    const gasPrices = data.data;
+    gasPrice = gasPrices.fast;
     maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
     maxPriorityFeePerGas = ethers.utils.parseUnits(
       (gasPrice - 5).toString(),
@@ -48,16 +54,14 @@ const transferDint = async ({ amount, destAddr }) => {
   }
 
   // Send the transaction
-  const contractAddr = process.env.DINT_TOKEN_ADDRESS;
-  const erc20dint = new ethers.Contract(contractAddr, abi, signer);
-  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
   const tx = await erc20dint.transfer(destAddr, amount, {
     gasLimit,
     maxFeePerGas,
     maxPriorityFeePerGas,
-  }); // TRANSFER DINT to the customer
-  
+  });
+  console.log("Transaction Hash", tx.hash);
   return tx;
+
 };
 
 module.exports = { transferDint };
