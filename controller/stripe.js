@@ -55,9 +55,10 @@ const transferDint = async ({ amount, destAddr }) => {
       maxPriorityFeePerGas: ethers.utils.parseUnits("35", "gwei"),
       gasLimit: ethers.utils.parseUnits("500000", "wei"),
     });
-
-    console.log("Transaction Hash", tx.hash);
-    return tx;
+    
+    const receipt = await tx.wait();
+    console.log("Transaction Hash", receipt.transactionHash);
+    return receipt;
   } catch (error) {
     console.error("Error sending transaction:", error);
     return;
