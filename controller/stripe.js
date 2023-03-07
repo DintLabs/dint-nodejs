@@ -31,33 +31,37 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // Get the current gas prices
-let gasPrice;
-const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-
-let maxFeePerGas;
-let maxPriorityFeePerGas;
-try {
-  const { data } = await axios.get(
-    "https://gasstation-mainnet.matic.network/v2"
-  );
-  console.log('Gas prices:', data); // log the entire response object
-  const gasPrices = data;
-  if (gasPrices && gasPrices.fast) {
-    gasPrice = gasPrices.fast.toString(); // convert to string
-  } else {
-    // handle the error or fallback to a default gas price
-    gasPrice = "200"; // set default gas price as string
+  let gasPrice;
+  let maxFeePerGas;
+  let maxPriorityFeePerGas;
+  try {
+    const { data } = await axios.get(
+      "https://gasstation-mainnet.matic.network/v2"
+    );
+    console.log('Gas prices:', data); // log the entire response object
+    const gasPrices = data;
+    if (gasPrices && gasPrices.fast && gasPrices.fast.hasOwnProperty('maxFeePerGas')) {
+      maxFeePerGas = ethers.utils.parseUnits(gasPrices.fast.maxFeePerGas.toString(), "gwei");
+      maxPriorityFeePerGas = ethers.utils.parseUnits(
+        (gasPrices.fast.maxFeePerGas - 5).toString(),
+        "gwei"
+      );
+      gasPrice = gasPrices.fast.maxFeePerGas;
+    } else {
+      // handle the error or fallback to a default gas price
+      gasPrice = 200;
+      maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
+      maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
+    }
+  } catch (error) {
+    console.error("Error fetching gas prices:", error);
+    gasPrice = 200;
+    maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
+    maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
   }
-  maxFeePerGas = ethers.utils.parseUnits(gasPrice, "gwei");
-  maxPriorityFeePerGas = ethers.utils.parseUnits(
-    (gasPrice - 5).toString(),
-    "gwei"
-  );
-} catch (error) {
-  console.error("Error fetching gas prices:", error);
-  maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
-  maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
-}
+
+  // Estimate gas limit
+  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
 
   // Send the transaction
   const tx = await erc20dint.transfer(destAddr, amount, {
