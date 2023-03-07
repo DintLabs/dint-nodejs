@@ -1,3 +1,7 @@
+const ethers = require("ethers");
+const axios = require("axios");
+require("dotenv").config();
+
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.RPC_PROVIDER
