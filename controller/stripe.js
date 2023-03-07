@@ -1,7 +1,3 @@
-const ethers = require("ethers");
-const axios = require("axios");
-require("dotenv").config();
-
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.RPC_PROVIDER
@@ -30,6 +26,11 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
+  // Check if amount is a valid decimal value
+  if (isNaN(parseFloat(amount))) {
+    throw new Error('Invalid decimal value for amount parameter');
+  }
+
   // Get the current gas prices
   let gasPrice;
   const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
@@ -40,8 +41,7 @@ const transferDint = async ({ amount, destAddr }) => {
     const { data } = await axios.get(
       "https://gasstation-mainnet.matic.network/v2"
     );
-    console.log("Gas Prices Response:", data); // Debug logging
-    const gasPrices = data;
+    const gasPrices = data.data;
     gasPrice = gasPrices.fast;
     maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
     maxPriorityFeePerGas = ethers.utils.parseUnits(
