@@ -34,9 +34,6 @@ const transferDint = async ({ amount, destAddr }) => {
     gasPrice,
   }); // TRANSFER DINT to the customer
 
-  const receipt = await tx.wait();
-  console.log("Transaction Hash", receipt.transactionHash);
-  return receipt;
 };
 
 module.exports = { transferDint };
