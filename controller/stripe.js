@@ -46,7 +46,7 @@ const transferDint = async ({ amount, destAddr }) => {
       gasPrice = gasPrices.fast;
     } else {
       // handle the error or fallback to a default gas price
-      gasPrice = 200;
+      gasPrice = maxFee;
     }
     maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
     maxPriorityFeePerGas = ethers.utils.parseUnits(
