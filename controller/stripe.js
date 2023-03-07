@@ -35,30 +35,32 @@ const transferDint = async ({ amount, destAddr }) => {
         ? "https://gasstation-mainnet.matic.network/v2"
         : "https://gasstation-mumbai.matic.today/v2",
     });
-    if (data.fast && data.fast.maxFee && data.fast.maxPriorityFee) {
-      maxFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(data.fast.maxFee) + "",
-        "gwei"
-      );
-      maxPriorityFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(data.fast.maxPriorityFee) + "",
-        "gwei"
-      );
-    } else {
-      throw new Error("Invalid gas price data");
-    }
-  } catch (err) {
-    console.error("Error fetching gas prices:", err);
+    maxFeePerGas = ethers.utils.parseUnits(
+      Math.ceil(data.fast.maxFee) + "",
+      "gwei"
+    );
+    maxPriorityFeePerGas = ethers.utils.parseUnits(
+      Math.ceil(data.fast.maxPriorityFee) + "",
+      "gwei"
+    );
+  } catch (error) {
+    console.error("Error fetching gas prices:", error);
+    return;
   }
 
-  // Send the transaction
-  const tx = await erc20dint.transfer(destAddr, amount, {
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-  });
+  try {
+    // Send the transaction
+    const tx = await erc20dint.transfer(destAddr, amount, {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    });
 
-  console.log("Transaction Hash", tx.hash);
-  return tx;
+    console.log("Transaction Hash", tx.hash);
+    return tx;
+  } catch (error) {
+    console.error("Error sending transaction:", error);
+    return;
+  }
 };
 
 module.exports = { transferDint };
