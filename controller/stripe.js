@@ -32,8 +32,8 @@ const transferDint = async ({ amount, destAddr }) => {
   
   try {
     const tx = await erc20dint.transfer(destAddr, amount, {
-      gasPrice: ethers.utils.parseUnits("180", "gwei"),
-      gasLimit: ethers.utils.parseUnits("5000000", "wei"),
+      gasPrice: ethers.utils.parseUnits("200", "gwei"),
+      gasLimit: ethers.utils.parseUnits("50000000", "wei"),
     });
     console.log("Transaction hash:", tx.hash);
   } catch (error) {
