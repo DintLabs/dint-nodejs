@@ -45,30 +45,26 @@ const transferDint = async ({ amount, destAddr }) => {
     console.log('Gas prices:', data); // log the entire response object
     const gasPrices = data;
     if (gasPrices && gasPrices.fast && typeof gasPrices.fast.maxFeePerGas === 'number') {
-      maxFeePerGas = ethers.utils.parseUnits(gasPrices.fast.maxFeePerGas.toString(), "gwei");
-      maxPriorityFeePerGas = ethers.utils.parseUnits(
-        (gasPrices.fast.maxFeePerGas - 5).toString(),
-        "gwei"
-      );
-      gasPrice = gasPrices.fast.maxFeePerGas;
+      maxFeePerGas = ethers.BigNumber.from(gasPrices.fast.maxFeePerGas.toString()).mul(ethers.BigNumber.from("1000000000"));
+      maxPriorityFeePerGas = ethers.BigNumber.from(gasPrices.fast.maxPriorityFeePerGas.toString()).mul(ethers.BigNumber.from("1000000000"));
+      gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
     } else {
       // handle the error or fallback to a default gas price
-      gasPrice = 200;
-      maxFeePerGas = ethers.utils.parseUnits("40", "gwei"); // fallback to 40 gwei
-      maxPriorityFeePerGas = ethers.utils.parseUnits("40", "gwei"); // fallback to 40 gwei
+      gasPrice = ethers.BigNumber.from(20000000000);
+      maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    gasPrice = 200;
-    maxFeePerGas = ethers.utils.parseUnits("40", "gwei"); // Set default gas price
-    maxPriorityFeePerGas = ethers.utils.parseUnits("40", "gwei"); // Set default priority gas price
+    gasPrice = ethers.BigNumber.from(20000000000);
+    maxFeePerGas = ethers.BigNumber.from(40000000000); // Set default gas price
+    maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // Set default priority gas price
   }
 
   // Estimate gas limit
   let gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
   const GAS_MULTIPLIER = 2;
   gasLimit = parseInt(gasLimit * GAS_MULTIPLIER);
-
 
   // Send the transaction
   const tx = await erc20dint.transfer(destAddr, amount, {
