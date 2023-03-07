@@ -3,14 +3,9 @@ const axios = require("axios");
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.RPC_PROVIDER
-  );
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
-  const signer = new ethers.Wallet(
-    process.env.OWNER_PRIVATE_KEY,
-    provider
-  );
+  const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
 
   const abi = [
     {
@@ -32,34 +27,44 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Get the current gas prices
   let gasPrice;
-  let maxFeePerGas = ethers.BigNumber.from(100000000000) // fallback to 100 gwei
-  let maxPriorityFeePerGas = ethers.BigNumber.from(100000000000) // fallback to 100 gwei
+  let maxFeePerGas;
+  let maxPriorityFeePerGas;
   try {
     const { data } = await axios({
-      method: 'get',
-      url: process.env.IS_PROD === 'true'
-      ? 'https://gasstation-mainnet.matic.network/v2'
-      : 'https://gasstation-mumbai.matic.today/v2',
+      method: "get",
+      url:
+        process.env.IS_PROD === "true"
+          ? "https://gasstation-mainnet.matic.network/v1/gasprice"
+          : "https://gasstation-mumbai.matic.today/v1/gasprice",
     });
 
-    console.log('Gas prices:', data); // log the entire response object
-    const gasPrices = data;
-    if (gasPrices && gasPrices.fast && typeof gasPrices.fast.maxFeePerGas === 'number') {
-      maxFeePerGas = ethers.BigNumber.from(gasPrices.fast.maxFeePerGas.toString()).mul(ethers.BigNumber.from("1000000000"));
-      maxPriorityFeePerGas = ethers.BigNumber.from(gasPrices.fast.maxPriorityFeePerGas.toString()).mul(ethers.BigNumber.from("1000000000"));
+    console.log("Gas prices:", data);
+    if (
+      data &&
+      data.standard &&
+      typeof data.standard === "number" &&
+      data.standard > 0
+    ) {
+      const gasPriceGwei = Math.ceil(data.standard / 10) * 10;
+      maxFeePerGas = ethers.utils.parseUnits(gasPriceGwei.toString(), "gwei");
+      maxPriorityFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(gasPriceGwei * 1.1).toString(),
+        "gwei"
+      );
       gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
     } else {
-      // handle the error or fallback to a default gas price
-      gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
+      throw new Error("Invalid gas price data");
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
+    gasPrice = ethers.utils.parseUnits("100", "gwei");
+    maxFeePerGas = gasPrice;
+    maxPriorityFeePerGas = gasPrice;
   }
 
   // Estimate gas limit
   let gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-  const GAS_MULTIPLIER = 4;
+  const GAS_MULTIPLIER = 2;
   gasLimit = parseInt(gasLimit * GAS_MULTIPLIER);
 
   // Send the transaction
