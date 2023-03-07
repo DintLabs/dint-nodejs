@@ -26,8 +26,8 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // get max fees from gas station
-  let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
-  let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+  let maxFeePerGas = ethers.BigNumber.from(90000000000); // fallback to 40 gwei
+  let maxPriorityFeePerGas = ethers.BigNumber.from(100000000000); // fallback to 40 gwei
   try {
     const { data } = await axios({
       method: "get",
