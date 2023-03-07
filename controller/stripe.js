@@ -31,9 +31,9 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // Get the current gas prices
-  let gasPrice;
-  let maxFeePerGas;
-  let maxPriorityFeePerGas;
+let gasPrice;
+let maxFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
+let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
   try {
     const { data } = await axios.get(
       "https://gasstation-mainnet.matic.network/v2"
@@ -50,14 +50,14 @@ const transferDint = async ({ amount, destAddr }) => {
     } else {
       // handle the error or fallback to a default gas price
       gasPrice = 200;
-      maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
-      maxPriorityFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default priority gas price
+      maxFeePerGas = ethers.BigNumber.from(90000000000) // fallback to 40 gwei
+      maxPriorityFeePerGas = ethers.BigNumber.from(70000000000) // fallback to 40 gwei
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
     gasPrice = 200;
     maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
-    maxPriorityFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default priority gas price
+    maxPriorityFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default priority gas price
   }
 
   // Estimate gas limit
