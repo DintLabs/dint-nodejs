@@ -41,7 +41,14 @@ const transferDint = async ({ amount, destAddr }) => {
       "https://gasstation-mainnet.matic.network/v2"
     );
     console.log('Gas prices:', data); // log the entire response object
-    const gasPrices = data.data;
+    const gasPrices = await getGasPrices();
+    if (gasPrices && gasPrices.fast) {
+      const gasPrice = 200;
+      // continue with the transaction using the gasPrice
+    } else {
+      // handle the error or fallback to a default gas price
+      const gasPrice = gasPrices.fast;
+    }
     gasPrice = gasPrices.fast;
     maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
     maxPriorityFeePerGas = ethers.utils.parseUnits(
