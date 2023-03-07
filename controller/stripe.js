@@ -51,13 +51,13 @@ const transferDint = async ({ amount, destAddr }) => {
       // handle the error or fallback to a default gas price
       gasPrice = 200;
       maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
-      maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
+      maxPriorityFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default priority gas price
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
     gasPrice = 200;
     maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
-    maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
+    maxPriorityFeePerGas = ethers.utils.parseUnits("100", "gwei"); // Set default priority gas price
   }
 
   // Estimate gas limit
