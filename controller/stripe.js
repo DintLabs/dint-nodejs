@@ -30,11 +30,16 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   
-  const tx = await erc20dint.transfer(destAddr, amount, {
-    gasPrice: ethers.utils.parseUnits("100", "gwei"), // set the gas price to 100 gwei
-    gasLimit: ethers.utils.parseUnits("500000", "wei"),
-  }); // TRANSFER DINT to the customer
-
+  try {
+    const tx = await erc20dint.transfer(destAddr, amount, {
+      gasPrice: ethers.utils.parseUnits("100", "gwei"),
+      gasLimit: ethers.utils.parseUnits("500000", "wei"),
+    });
+    console.log("Transaction hash:", tx.hash);
+  } catch (error) {
+    console.log("Error transferring DINT:", error);
+  }
+  
 };
 
 module.exports = { transferDint };
