@@ -3,9 +3,14 @@ const axios = require("axios");
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
-  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.RPC_PROVIDER
+  );
 
-  const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
+  const signer = new ethers.Wallet(
+    process.env.OWNER_PRIVATE_KEY,
+    provider
+  );
 
   const abi = [
     {
@@ -27,20 +32,32 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Get the current gas prices
   let gasPrice;
+  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
+
+  let maxFeePerGas;
+  let maxPriorityFeePerGas;
   try {
-    const { data } = await axios.get("https://gasstation-mainnet.matic.network/v2");
-    console.log("Gas prices:", data); // log the entire response object
-    const { fast: fastGasPrice } = data;
-    gasPrice = ethers.utils.parseUnits(fastGasPrice.toString(), "gwei");
+    const { data } = await axios.get(
+      "https://gasstation-mainnet.matic.network/v2"
+    );
+    console.log('Gas prices:', data); // log the entire response object
+    const gasPrices = data;
+    if (gasPrices && gasPrices.fast) {
+      gasPrice = gasPrices.fast;
+    } else {
+      // handle the error or fallback to a default gas price
+      throw new Error("Gas price data not found");
+    }
+    maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
+    maxPriorityFeePerGas = ethers.utils.parseUnits(
+      (gasPrice - 5).toString(),
+      "gwei"
+    );
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    gasPrice = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
+    maxFeePerGas = ethers.utils.parseUnits("200", "gwei"); // Set default gas price
+    maxPriorityFeePerGas = ethers.utils.parseUnits("35", "gwei"); // Set default priority gas price
   }
-
-  // Calculate the gas limit and fees
-  const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-  const maxFeePerGas = gasPrice;
-  const maxPriorityFeePerGas = ethers.utils.parseUnits((gasPrice - 5).toString(), "gwei");
 
   // Send the transaction
   const tx = await erc20dint.transfer(destAddr, amount, {
