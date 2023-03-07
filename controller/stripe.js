@@ -1,12 +1,10 @@
-const transferDint = async ({ amount, destAddr }) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.RPC_PROVIDER
-  );
+const ethers = require("ethers");
+const fetch = require("node-fetch");
+require("dotenv").config();
 
-  const signer = new ethers.Wallet(
-    (process.env.OWNER_PRIVATE_KEY),
-    provider
-  );
+const transferDint = async ({ amount, destAddr }) => {
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
+  const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
   const abi = [
     {
       constant: false,
@@ -37,10 +35,11 @@ const transferDint = async ({ amount, destAddr }) => {
       gasPrice: gasPrice,
       gasLimit: ethers.utils.parseUnits("25000000", "wei"),
     });
+
     console.log("Transaction hash:", tx.hash);
   } catch (error) {
     console.log("Error transferring DINT:", error);
   }
-  
 };
 
+module.exports = { transferDint };
