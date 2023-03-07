@@ -35,17 +35,25 @@ let gasPrice;
 let maxFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
 let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
   try {
-    const { data } = await axios.get(
-      "https://gasstation-mainnet.matic.network/v2"
-    );
+    const { data } = await axios({
+      method: 'get',
+      url: isProd
+      ? 'https://gasstation-mainnet.matic.network/v2'
+      : 'https://gasstation-mumbai.matic.today/v2',
+    })
+
+
     console.log('Gas prices:', data); // log the entire response object
     const gasPrices = data;
     if (gasPrices && gasPrices.fast && gasPrices.fast.hasOwnProperty('maxFeePerGas')) {
-      maxFeePerGas = ethers.utils.parseUnits(gasPrices.fast.maxFeePerGas.toString(), "gwei");
-      maxPriorityFeePerGas = ethers.utils.parseUnits(
-        (gasPrices.fast.maxFeePerGas - 5).toString(),
-        "gwei"
-      );
+      maxFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxFee) + '',
+        'gwei'
+    )
+    maxPriorityFeePerGas = ethers.utils.parseUnits(
+        Math.ceil(data.fast.maxPriorityFee) + '',
+        'gwei'
+    );
       gasPrice = gasPrices.fast.maxFeePerGas;
     } else {
       // handle the error or fallback to a default gas price
