@@ -40,7 +40,8 @@ const transferDint = async ({ amount, destAddr }) => {
     const { data } = await axios.get(
       "https://gasstation-mainnet.matic.network/v2"
     );
-    const gasPrices = data.data;
+    console.log("Gas Prices Response:", data); // Debug logging
+    const gasPrices = data;
     gasPrice = gasPrices.fast;
     maxFeePerGas = ethers.utils.parseUnits(gasPrice.toString(), "gwei");
     maxPriorityFeePerGas = ethers.utils.parseUnits(
@@ -61,7 +62,6 @@ const transferDint = async ({ amount, destAddr }) => {
   });
   console.log("Transaction Hash", tx.hash);
   return tx;
-
 };
 
 module.exports = { transferDint };
