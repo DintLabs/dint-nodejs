@@ -41,7 +41,7 @@ const transferDint = async ({ amount, destAddr }) => {
       "https://gasstation-mainnet.matic.network/v2"
     );
     console.log('Gas prices:', data); // log the entire response object
-    const gasPrices = await getGasPrices();
+    const gasPrices = data;
     if (gasPrices && gasPrices.fast) {
       const gasPrice = 200;
       // continue with the transaction using the gasPrice
