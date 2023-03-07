@@ -32,8 +32,8 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Get the current gas prices
   let gasPrice;
-  let maxFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
-  let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
+  let maxFeePerGas = ethers.BigNumber.from(100000000000) // fallback to 100 gwei
+  let maxPriorityFeePerGas = ethers.BigNumber.from(100000000000) // fallback to 100 gwei
   try {
     const { data } = await axios({
       method: 'get',
@@ -50,20 +50,16 @@ const transferDint = async ({ amount, destAddr }) => {
       gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
     } else {
       // handle the error or fallback to a default gas price
-      gasPrice = ethers.BigNumber.from(20000000000);
-      maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
-      maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+      gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    gasPrice = ethers.BigNumber.from(20000000000);
-    maxFeePerGas = ethers.BigNumber.from(40000000000); // Set default gas price
-    maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // Set default priority gas price
+    gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
   }
 
   // Estimate gas limit
   let gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-  const GAS_MULTIPLIER = 2;
+  const GAS_MULTIPLIER = 4;
   gasLimit = parseInt(gasLimit * GAS_MULTIPLIER);
 
   // Send the transaction
