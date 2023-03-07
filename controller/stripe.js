@@ -26,9 +26,8 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // Get the current gas prices
-  let gasPrice;
-  let maxFeePerGas;
-  let maxPriorityFeePerGas;
+  let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+  let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
   try {
     const { data } = await axios({
       method: "get",
@@ -37,34 +36,28 @@ const transferDint = async ({ amount, destAddr }) => {
           ? "https://gasstation-mainnet.matic.network/v2"
           : "https://gasstation-mumbai.matic.today/v2",
     });
-
     console.log("Gas prices:", data);
     if (
       data &&
-      data.standard &&
-      typeof data.standard === "number" &&
-      data.standard > 0
+      data.fast &&
+      typeof data.fast === "object" &&
+      typeof data.fast.maxFee === "string" &&
+      typeof data.fast.maxPriorityFee === "string"
     ) {
-      const gasPriceGwei = Math.ceil(data.standard / 10) * 10;
-      maxFeePerGas = ethers.utils.parseUnits(gasPriceGwei.toString(), "gwei");
+      maxFeePerGas = ethers.utils.parseUnits(data.fast.maxFee, "wei");
       maxPriorityFeePerGas = ethers.utils.parseUnits(
-        Math.ceil(gasPriceGwei * 1.1).toString(),
-        "gwei"
+        data.fast.maxPriorityFee,
+        "wei"
       );
-      gasPrice = maxFeePerGas.add(maxPriorityFeePerGas);
     } else {
       throw new Error("Invalid gas price data");
     }
   } catch (error) {
     console.error("Error fetching gas prices:", error);
-    gasPrice = ethers.utils.parseUnits("100", "gwei");
-    maxFeePerGas = gasPrice;
-    maxPriorityFeePerGas = gasPrice;
   }
 
   // Send the transaction
   const tx = await erc20dint.transfer(destAddr, amount, {
-    gasPrice,
     maxFeePerGas,
     maxPriorityFeePerGas,
   });
