@@ -30,11 +30,6 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-  // Check if amount is a valid decimal value
-  if (isNaN(parseFloat(amount))) {
-    throw new Error('Invalid decimal value for amount parameter');
-  }
-
   // Get the current gas prices
   let gasPrice;
   const gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
