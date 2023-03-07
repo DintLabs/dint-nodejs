@@ -1,5 +1,4 @@
 const ethers = require("ethers");
-// require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
@@ -29,10 +28,14 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
-  
+  // Fetch the current gas price from GasNow
+  const gasPrice = await fetch('https://gasstation-mainnet.matic.network/')
+    .then(response => response.json())
+    .then(data => data.data.standard);
+
   try {
     const tx = await erc20dint.transfer(destAddr, amount, {
-      maxFeePerGas: ethers.utils.parseUnits("950", "gwei"),
+      gasPrice: gasPrice,
       gasLimit: ethers.utils.parseUnits("25000000", "wei"),
     });
     console.log("Transaction hash:", tx.hash);
