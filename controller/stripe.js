@@ -62,7 +62,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
   // Estimate gas limit
   let gasLimit = await erc20dint.estimateGas.transfer(destAddr, amount);
-  const GAS_MULTIPLIER = 1.5;
+  const GAS_MULTIPLIER = 2;
   gasLimit = parseInt(gasLimit * GAS_MULTIPLIER);
 
   // Send the transaction
