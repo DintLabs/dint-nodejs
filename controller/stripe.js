@@ -26,41 +26,35 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // get max fees from gas station
-  let maxFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
-  let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000); // fallback to 40 gwei
+  let maxFeePerGas = ethers.BigNumber.from(10000000000) // 10 gwei
+  let maxPriorityFeePerGas = ethers.BigNumber.from(40000000000) // fallback to 40 gwei
   try {
     const { data } = await axios({
-      method: "get",
-      url: process.env.IS_PROD
-        ? "https://gasstation-mainnet.matic.network/v2"
-        : "https://gasstation-mumbai.matic.today/v2",
-    });
+      method: 'get',
+      url: isProd
+        ? 'https://gasstation-mainnet.matic.network/v2'
+        : 'https://gasstation-mumbai.matic.today/v2',
+    })
     maxFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxFee) + "",
-      "gwei"
-    );
+      Math.ceil(data.fast.maxFee) + '',
+      'gwei'
+    )
     maxPriorityFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxPriorityFee) + "",
-      "gwei"
-    );
-  } catch (error) {
-    console.error("Error fetching gas prices:", error);
-    return;
+      Math.ceil(data.fast.maxPriorityFee) + '',
+      'gwei'
+    )
+  } catch {
+    // ignore
   }
 
-  try {
-    // Send the transaction
-    const tx = await erc20dint.transfer(destAddr, amount, {
-      maxFeePerGas,
-      maxPriorityFeePerGas,
-    });
+  // Send the transaction
+  const tx = await erc20dint.transfer(destAddr, amount, {
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+  });
 
-    console.log("Transaction Hash", tx.hash);
-    return tx;
-  } catch (error) {
-    console.error("Error sending transaction:", error);
-    return;
-  }
+  console.log("Transaction Hash", tx.hash);
+  return tx;
 };
 
 module.exports = { transferDint };
