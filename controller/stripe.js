@@ -35,7 +35,8 @@ const transferDint = async ({ amount, destAddr }) => {
     });
   
     // Parse gas prices, set default values in case of errors
-    const fastGasPrice = parseFloat(data?.fast?.gasPrice) || 40;
+    const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 40;
+
     maxFeePerGas = ethers.utils.parseUnits(
       Math.ceil(fastGasPrice) + "",
       "wei"
