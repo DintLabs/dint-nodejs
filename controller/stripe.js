@@ -1,4 +1,5 @@
-import { ethers } from "ethers";
+const { ethers } = require("ethers");
+
 import fetch from 'node-fetch';
 
 import dotenv from "dotenv";
