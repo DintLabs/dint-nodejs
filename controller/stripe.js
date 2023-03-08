@@ -26,8 +26,8 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // get max fees from gas station
-  let maxFeePerGas = ethers.BigNumber.from(150000000000); // fallback to 40 gwei
-  let maxPriorityFeePerGas = ethers.BigNumber.from(1500000000000); // fallback to 40 gwei
+  let maxFeePerGas = ethers.BigNumber.from(250000000000); // fallback to 40 gwei
+  let maxPriorityFeePerGas = ethers.BigNumber.from(2500000000000); // fallback to 40 gwei
   try {
     const { data } = await axios({
       method: "get",
@@ -35,7 +35,7 @@ const transferDint = async ({ amount, destAddr }) => {
     });
 
     // Parse gas prices, set default values in case of errors
-    const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 150;
+    const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
     const maxGasPrice = Math.max(fastGasPrice, 150); // use 100 gwei if it's higher than the fast gas price
    // Increase gas fees by 20%
    maxFeePerGas = maxPriorityFeePerGas.add(maxPriorityFeePerGas.mul(20).div(100));
@@ -44,7 +44,7 @@ const transferDint = async ({ amount, destAddr }) => {
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
       maxPriorityFeePerGas,
-      gasLimit: ethers.utils.parseUnits("20000000", "wei"),
+      gasLimit: ethers.utils.parseUnits("200000000", "wei"),
     });
 
     const receipt = await tx.wait();
@@ -62,7 +62,7 @@ const transferDint = async ({ amount, destAddr }) => {
       const tx = await erc20dint.transfer(destAddr, amount, {
         maxFeePerGas,
         maxPriorityFeePerGas,
-        gasLimit: ethers.utils.parseUnits("25000000", "wei"),
+        gasLimit: ethers.utils.parseUnits("250000000", "wei"),
       });
 
       const receipt = await tx.wait();
