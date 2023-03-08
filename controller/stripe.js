@@ -1,6 +1,6 @@
 const { ethers } = require("ethers");
+const fetch = require('node-fetch');
 
-import fetch from 'node-fetch';
 
 import dotenv from "dotenv";
 dotenv.config();
