@@ -1,9 +1,5 @@
-const ethers = require("ethers");
-const axios = require("axios");
-require("dotenv").config();
-
-const transferDint = async ({ amount, destAddr }) => {
-  console.log('transferDint function called with amount:', amount, 'and destAddr:', destAddr);
+const transferDint = async ({ destAddr }) => {
+  console.log('transferDint function called with destAddr:', destAddr);
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
   const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
@@ -45,7 +41,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
    
 
-    const tx = await erc20dint.transfer(destAddr, amount, {
+    const tx = await erc20dint.transfer(destAddr, 1, {
       gasPrice,
       maxFeePerGas,
       maxPriorityFeePerGas,
@@ -62,7 +58,7 @@ const transferDint = async ({ amount, destAddr }) => {
       maxFeePerGas = maxFeePerGas.mul(120).div(100);
       maxPriorityFeePerGas = maxPriorityFeePerGas.mul(120).div(100);
 
-      const tx = await erc20dint.transfer(destAddr, amount, {
+      const tx = await erc20dint.transfer(destAddr, 1, {
         maxFeePerGas,
         maxPriorityFeePerGas,
         gasLimit: ethers.utils.parseUnits("25000000", "wei"),
