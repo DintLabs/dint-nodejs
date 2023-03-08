@@ -1,7 +1,8 @@
-const ethers = require("ethers");
-const fetch = require('node-fetch').default;
+import { ethers } from "ethers";
+import fetch from 'node-fetch';
 
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
@@ -43,4 +44,4 @@ const transferDint = async ({ amount, destAddr }) => {
   }
 };
 
-module.exports = { transferDint };
+export { transferDint };
