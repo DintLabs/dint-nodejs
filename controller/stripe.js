@@ -2,7 +2,7 @@ const ethers = require("ethers");
 const axios = require("axios");
 require("dotenv").config();
 
-const abi = require("./DintTokenABI.json");
+const abi = require("../DintTokenABI.json");
 
 const transferDint = async ({ destAddr, amount }) => {
   console.log('transferDint function called with destAddr:', destAddr, 'and amount:', amount);
