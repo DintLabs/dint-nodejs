@@ -1,5 +1,4 @@
 const ethers = require("ethers");
-// require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
@@ -8,9 +7,10 @@ const transferDint = async ({ amount, destAddr }) => {
   );
 
   const signer = new ethers.Wallet(
-    (process.env.OWNER_PRIVATE_KEY),
+    process.env.OWNER_PRIVATE_KEY,
     provider
   );
+
   const abi = [
     {
       constant: false,
@@ -31,9 +31,10 @@ const transferDint = async ({ amount, destAddr }) => {
   const gasPrice = await provider.getGasPrice();
   const tx = await erc20dint.transfer(destAddr, amount, {
     gasPrice,
-  }); // TRANSFER DINT to the customer
+  });
 
-  return tx;
+  const receipt = await tx.wait();
+  return receipt;
 };
 
 module.exports = { transferDint };
