@@ -1,8 +1,7 @@
 const { ethers } = require("ethers");
 const fetch = require('node-fetch');
+const dotenv = require("dotenv").config();
 
-
-import dotenv from "dotenv";
 dotenv.config();
 
 const transferDint = async ({ amount, destAddr }) => {
