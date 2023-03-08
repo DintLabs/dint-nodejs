@@ -71,6 +71,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
       const receipt = await tx.wait();
       console.log("Transaction Hash", receipt.transactionHash);
+      console.log("Receipt:", receipt);
       return receipt;
     }
 
