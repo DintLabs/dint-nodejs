@@ -27,11 +27,6 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // get max fees from gas station
-  const maxGasPrice = Math.max(fastGasPrice, 200); // use 100 gwei if it's higher than the fast gas price
-  const maxFeePerGas = ethers.BigNumber.from(Math.ceil(maxGasPrice * 1.1));
-  const maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
-  
-  
   try {
     const { data } = await axios({
       method: "get",
@@ -44,8 +39,8 @@ const transferDint = async ({ amount, destAddr }) => {
     const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
     const maxGasPrice = Math.max(fastGasPrice, 200); // use 100 gwei if it's higher than the fast gas price
 
-    maxFeePerGas = maxPriorityFeePerGas.add(maxPriorityFeePerGas.mul(20).div(100));
-    maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
+    let maxFeePerGas = ethers.BigNumber.from(Math.ceil(maxGasPrice * 1.1));
+    let maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
 
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
