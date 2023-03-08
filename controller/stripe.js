@@ -11,7 +11,7 @@ const getProviderAndSigner = () => {
 const getGasPrices = async () => {
   try {
     const { data } = await axios.get("https://gasstation-mainnet.matic.network/v2");
-    const fastGasPrice = parseFloat(data?.fast?.gasPrice) || 40;
+    const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 40;
     const maxGasPrice = Math.max(fastGasPrice, 100);
     return {
       maxFeePerGas: ethers.utils.parseUnits(Math.ceil(maxGasPrice) + "", "wei"),
