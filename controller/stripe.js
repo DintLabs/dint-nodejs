@@ -36,11 +36,12 @@ const transferDint = async ({ amount, destAddr }) => {
     console.log('Gas station data:', data);
 
     // Parse gas prices, set default values in case of errors
-    const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
-    const maxGasPrice = Math.max(fastGasPrice, 200); // use 100 gwei if it's higher than the fast gas price
+   
+    const maxGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
+const maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
+const maxFeePerGas = maxPriorityFeePerGas.mul(2); // set maxFeePerGas to 2 times maxPriorityFeePerGas
 
-    let maxFeePerGas = ethers.BigNumber.from(Math.ceil(maxGasPrice * 1.1));
-    let maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
+   
 
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
