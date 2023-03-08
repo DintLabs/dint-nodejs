@@ -1,49 +1,62 @@
-const transferDint = async ({ amount, destAddr }) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.RPC_PROVIDER
-  );
+const ethers = require("ethers");
+const axios = require("axios");
+require("dotenv").config();
 
-  const signer = new ethers.Wallet(
-    process.env.OWNER_PRIVATE_KEY,
-    provider
-  );
+const abi = require("./DintTokenABI.json");
 
-  const abi = [
-    {
-      constant: false,
-      inputs: [
-        { name: "_to", type: "address" },
-        { name: "_amount", type: "uint256" },
-      ],
-      name: "transfer",
-      outputs: [{ name: "success", type: "bool" }],
-      payable: false,
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-  ];
+const transferDint = async ({ destAddr, amount }) => {
+  console.log('transferDint function called with destAddr:', destAddr, 'and amount:', amount);
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
+
+  const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
 
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
+  // get max fees from gas station
   try {
-    const gasPrice = await provider.getGasPrice();
-    console.log("Gas Price:", gasPrice.toString());
+    const { data } = await axios({
+      method: "get",
+      url: "https://gasstation-mainnet.matic.network/v2",
+    });
 
+    console.log('Gas station data:', data);
+
+
+    // Parse gas prices, set default values in case of errors
+    let gasPrice = ethers.utils.parseUnits(data.fast.toString(), "gwei");
+const amount = amount.toString();
     const tx = await erc20dint.transfer(destAddr, amount, {
       gasPrice,
     });
 
-    console.log("Transaction:", tx);
-    console.log("Waiting for confirmation...");
-
     const receipt = await tx.wait();
-    console.log("Transaction Hash:", receipt.transactionHash);
-    console.log("Receipt:", receipt);
-
+    console.log("Transaction Hash", receipt.transactionHash);
     return receipt;
   } catch (error) {
-    console.error("Error:", error);
-    return null;
+    if (error.message.includes("transaction underpriced")) {
+      console.log("Transaction underpriced, increasing gas fees.");
+
+      let gasPrice = ethers.utils.parseUnits(data.fast.toString(), "gwei");
+      gasPrice = gasPrice.mul(120).div(100);
+      const amount = amount.toString();
+      const tx = await erc20dint.transfer(destAddr, amount, {
+        gasPrice,
+      });
+
+      const receipt = await tx.wait();
+      console.log("Transaction Hash", receipt.transactionHash);
+      console.log("Receipt:", receipt);
+      return receipt;
+    } else {
+      console.error("Error fetching or sending transaction:", error);
+      const tx = await erc20dint.transfer(destAddr, 0);
+      const receipt = await tx.wait();
+      console.log("Transaction Hash", receipt.transactionHash);
+      console.log("Receipt:", receipt);
+      return receipt;
+    }
   }
 };
+
+module.exports = { transferDint };
