@@ -19,7 +19,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
   try {
     // Set the gas price to 81555193021 wei
-    const gasLimit = ethers.utils.parseUnits('5000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('1000000', 'wei');
     const gasPrice = ethers.utils.parseUnits('140', 'gwei');
     console.log("Gas Price:", gasPrice.toString());
     console.log("Amount:", amount.toString());
