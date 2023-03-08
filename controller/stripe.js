@@ -25,6 +25,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas: gasPrice,
+      gasPrice: gasPrice,
     });
 
 
