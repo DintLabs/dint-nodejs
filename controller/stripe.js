@@ -19,7 +19,8 @@ const transferDint = async ({ amount, destAddr }) => {
 
   try {
     // Set the gas price to 81555193021 wei
-    const gasPrice = await provider.getGasPrice();
+  
+    let gasPrice = ethers.utils.parseUnits();
     console.log("Gas Price:", gasPrice.toString());
 
     const tx = await erc20dint.transfer(destAddr, amount, {
