@@ -35,9 +35,10 @@ const transferDint = async ({ destAddr, amount }) => {
 
     console.log('Gas station data:', data);
 
+
     // Parse gas prices, set default values in case of errors
     let gasPrice = ethers.utils.parseUnits(data.fast.toString(), "gwei");
-
+const amount = amount.toString();
     const tx = await erc20dint.transfer(destAddr, amount, {
       gasPrice,
     });
@@ -51,7 +52,7 @@ const transferDint = async ({ destAddr, amount }) => {
 
       let gasPrice = ethers.utils.parseUnits(data.fast.toString(), "gwei");
       gasPrice = gasPrice.mul(120).div(100);
-
+      const amount = amount.toString();
       const tx = await erc20dint.transfer(destAddr, amount, {
         gasPrice,
       });
