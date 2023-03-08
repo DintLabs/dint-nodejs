@@ -3,6 +3,7 @@ const axios = require("axios");
 require("dotenv").config();
 
 const transferDint = async ({ amount, destAddr }) => {
+  console.log('transferDint function called with amount:', amount, 'and destAddr:', destAddr);
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
   const signer = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, provider);
@@ -26,14 +27,16 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   // get max fees from gas station
-  maxFeePerGas = maxFeePerGas.mul(120).div(100);
-  maxPriorityFeePerGas = maxPriorityFeePerGas.mul(120).div(100);
+  let maxFeePerGas = ethers.BigNumber.from(0);
+  let maxPriorityFeePerGas = ethers.BigNumber.from(0);
   
   try {
     const { data } = await axios({
       method: "get",
       url: "https://gasstation-mainnet.matic.network/v2",
     });
+    
+    console.log('Gas station data:', data);
 
     // Parse gas prices, set default values in case of errors
     const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
