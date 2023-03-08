@@ -33,32 +33,30 @@ const transferDint = async ({ amount, destAddr }) => {
       method: "get",
       url: "https://gasstation-mainnet.matic.network/v2",
     });
+  
+    // Parse gas prices, set default values in case of errors
+    const fastGasPrice = parseFloat(data?.fast?.gasPrice) || 40;
     maxFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.gasPrice) + "",
+      Math.ceil(fastGasPrice) + "",
       "wei"
     );
     maxPriorityFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.gasPrice) + "",
+      Math.ceil(fastGasPrice) + "",
       "wei"
     );
-  } catch (error) {
-    console.error("Error fetching gas prices:", error);
-    return;
-  }
-
-  try {
-    // Send the transaction
+  
+    // Send the transaction with the parsed gas prices
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
       maxPriorityFeePerGas,
       gasLimit: ethers.utils.parseUnits("8000000", "wei"),
     });
-
+  
     const receipt = await tx.wait();
     console.log("Transaction Hash", receipt.transactionHash);
     return receipt;
   } catch (error) {
-    console.error("Error sending transaction:", error);
+    console.error("Error fetching or sending transaction:", error);
     return;
   }
 };
