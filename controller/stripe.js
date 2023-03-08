@@ -38,15 +38,15 @@ const transferDint = async ({ destAddr }) => {
 
     // Parse gas prices, set default values in case of errors
    
-    const maxPriorityFeePerGas = ethers.utils.parseUnits("90", "gwei");
-    const maxFeePerGas = ethers.utils.parseUnits("90", "gwei");
+    const maxPriorityFeePerGas = ethers.utils.parseUnits("99", "gwei");
+    const maxFeePerGas = ethers.utils.parseUnits("99", "gwei");
  
    
 
     const tx = await erc20dint.transfer(destAddr, 1, {
       maxFeePerGas,
       maxPriorityFeePerGas,
-      gasLimit: ethers.utils.parseUnits("20000000", "wei"),
+      gasLimit: ethers.utils.parseUnits("30000000", "wei"),
     });
     
     const receipt = await tx.wait();
