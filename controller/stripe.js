@@ -31,17 +31,15 @@ const transferDint = async ({ amount, destAddr }) => {
   try {
     const { data } = await axios({
       method: "get",
-      url: process.env.IS_PROD
-        ? "https://gasstation-mainnet.matic.network/v2"
-        : "https://gasstation-mumbai.matic.today/v2",
+      url: "https://gasstation-mainnet.matic.network/v2",
     });
     maxFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxFee) + "",
-      "gwei"
+      Math.ceil(data.fast.gasPrice) + "",
+      "wei"
     );
     maxPriorityFeePerGas = ethers.utils.parseUnits(
-      Math.ceil(data.fast.maxPriorityFee) + "",
-      "gwei"
+      Math.ceil(data.fast.gasPrice) + "",
+      "wei"
     );
   } catch (error) {
     console.error("Error fetching gas prices:", error);
@@ -51,11 +49,11 @@ const transferDint = async ({ amount, destAddr }) => {
   try {
     // Send the transaction
     const tx = await erc20dint.transfer(destAddr, amount, {
-      maxFeePerGas: ethers.utils.parseUnits("500", "gwei"),
-      maxPriorityFeePerGas: ethers.utils.parseUnits("150", "gwei"),
-      gasLimit: ethers.utils.parseUnits("1000000", "wei"),
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      gasLimit: ethers.utils.parseUnits("8000000", "wei"),
     });
-    
+
     const receipt = await tx.wait();
     console.log("Transaction Hash", receipt.transactionHash);
     return receipt;
