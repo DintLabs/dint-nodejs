@@ -39,8 +39,8 @@ const transferDint = async ({ amount, destAddr }) => {
     const maxGasPrice = Math.max(fastGasPrice, 100); // use 100 gwei if it's higher than the fast gas price
    // Increase gas fees by 20%
   maxFeePerGas = maxFeePerGas.mul(120).div(100);
-  maxPriorityFeePerGas = maxPriorityFeePerGas.mul(120).div(100);
-    // Send the transaction with the updated gas prices
+  maxPriorityFeePerGas = ethers.utils.parseUnits(Math.min(Math.ceil(maxGasPrice / 10), 400) + "", "wei"); // max priority fee is 10% of max gas price, with a cap of 400 gwei
+  // Send the transaction with the updated gas prices
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
       maxPriorityFeePerGas,
