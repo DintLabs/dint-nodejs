@@ -37,10 +37,10 @@ const transferDint = async ({ amount, destAddr }) => {
     // Parse gas prices, set default values in case of errors
     const fastGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
     const maxGasPrice = Math.max(fastGasPrice, 150); // use 100 gwei if it's higher than the fast gas price
-   // Increase gas fees by 20%
-   maxFeePerGas = maxPriorityFeePerGas.add(maxPriorityFeePerGas.mul(20).div(100));
-   maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
-  // Send the transaction with the updated gas prices
+
+    maxFeePerGas = maxPriorityFeePerGas.add(maxPriorityFeePerGas.mul(20).div(100));
+    maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
+
     const tx = await erc20dint.transfer(destAddr, amount, {
       maxFeePerGas,
       maxPriorityFeePerGas,
@@ -54,11 +54,9 @@ const transferDint = async ({ amount, destAddr }) => {
     if (error.message.includes("transaction underpriced")) {
       console.log("Transaction underpriced, increasing gas fees.");
 
-      // Increase gas fees by 20%
       maxFeePerGas = maxFeePerGas.mul(120).div(100);
       maxPriorityFeePerGas = maxPriorityFeePerGas.mul(120).div(100);
 
-      // Retry transaction with new gas fees
       const tx = await erc20dint.transfer(destAddr, amount, {
         maxFeePerGas,
         maxPriorityFeePerGas,
