@@ -24,7 +24,7 @@ const transferDint = async ({ amount, destAddr }) => {
     console.log("Gas Price:", gasPrice.toString());
 
     const tx = await erc20dint.transfer(destAddr, amount, {
-      maxFeePerGas: gasPrice,
+      gasPrice: gasPrice,
     });
 
 
