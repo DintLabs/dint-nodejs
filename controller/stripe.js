@@ -18,12 +18,15 @@ const transferDint = async ({ amount, destAddr }) => {
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
   try {
-    const gasPrice = await provider.getGasPrice();
+    // Set the gas price to 81555193021 wei
+    const gasPrice = ethers.utils.parseUnits('81.555193021', 'gwei');
+
     console.log("Gas Price:", gasPrice.toString());
 
     const tx = await erc20dint.transfer(destAddr, amount, {
-      gasPrice: gasPrice.mul(150).div(100), // Increase gas price by 1.5x
+      gasPrice,
     });
+
 
     console.log("Transaction:", tx);
     console.log("Waiting for confirmation...");
