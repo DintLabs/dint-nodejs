@@ -38,8 +38,9 @@ const transferDint = async ({ amount, destAddr }) => {
     // Parse gas prices, set default values in case of errors
    
     const maxGasPrice = parseFloat(data && data.fast && data.fast.gasPrice) || 250;
-const maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1e9);
-const maxFeePerGas = maxPriorityFeePerGas.mul(2); // set maxFeePerGas to 2 times maxPriorityFeePerGas
+    const maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1.2 * 1e9); // increase by 20%
+    const maxFeePerGas = maxPriorityFeePerGas.mul(2); // set maxFeePerGas to 2 times maxPriorityFeePerGas
+    
 
    
 
