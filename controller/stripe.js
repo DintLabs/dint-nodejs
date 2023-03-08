@@ -1,6 +1,3 @@
-const ethers = require("ethers");
-require("dotenv").config();
-
 const transferDint = async ({ amount, destAddr }) => {
   const provider = new ethers.providers.JsonRpcProvider(
     process.env.RPC_PROVIDER
@@ -10,6 +7,7 @@ const transferDint = async ({ amount, destAddr }) => {
     process.env.OWNER_PRIVATE_KEY,
     provider
   );
+
   const abi = [
     {
       constant: false,
@@ -27,13 +25,25 @@ const transferDint = async ({ amount, destAddr }) => {
 
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
-  const gasPrice = await provider.getGasPrice();
-  const tx = await erc20dint.transfer(destAddr, amount, {
-    gasPrice,
-  }); // TRANSFER DINT to the customer
 
-  const receipt = await tx.wait(); // Wait for transaction confirmation and get receipt
-  return receipt;
+  try {
+    const gasPrice = await provider.getGasPrice();
+    console.log("Gas Price:", gasPrice.toString());
+
+    const tx = await erc20dint.transfer(destAddr, amount, {
+      gasPrice,
+    });
+
+    console.log("Transaction:", tx);
+    console.log("Waiting for confirmation...");
+
+    const receipt = await tx.wait();
+    console.log("Transaction Hash:", receipt.transactionHash);
+    console.log("Receipt:", receipt);
+
+    return receipt;
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
 };
-
-module.exports = { transferDint };
