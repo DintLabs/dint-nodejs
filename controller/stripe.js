@@ -10,7 +10,6 @@ const transferDint = async ({ amount, destAddr }) => {
     process.env.OWNER_PRIVATE_KEY,
     provider
   );
-
   const abi = [
     {
       constant: false,
@@ -31,9 +30,9 @@ const transferDint = async ({ amount, destAddr }) => {
   const gasPrice = await provider.getGasPrice();
   const tx = await erc20dint.transfer(destAddr, amount, {
     gasPrice,
-  });
+  }); // TRANSFER DINT to the customer
 
-  const receipt = await tx.wait();
+  const receipt = await tx.wait(); // Wait for transaction confirmation and get receipt
   return receipt;
 };
 
