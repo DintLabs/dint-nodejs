@@ -22,9 +22,10 @@ const transferDint = async ({ amount, destAddr }) => {
   
     let gasPrice = ethers.utils.parseUnits(toString(), "gwei");
     console.log("Gas Price:", gasPrice.toString());
-
+    console.log("Amount:", amount.toString());
     const tx = await erc20dint.transfer(destAddr, amount, {
-      gasPrice: gasPrice,
+      maxFeePerGas: gasPrice,
+      maxPriorityFeePerGas: gasPrice,
  
     });
 
