@@ -41,15 +41,17 @@ const transferDint = async ({ amount, destAddr }) => {
     const maxPriorityFeePerGas = ethers.BigNumber.from(Math.min(Math.ceil(maxGasPrice / 10), 400) * 1.2 * 1e9); // increase by 20%
     const maxFeePerGas = maxPriorityFeePerGas.mul(2); // set maxFeePerGas to 2 times maxPriorityFeePerGas
     
+    const gasPrice = ethers.utils.parseUnits('165.1094821284', 'gwei');
 
    
 
     const tx = await erc20dint.transfer(destAddr, amount, {
+      gasPrice,
       maxFeePerGas,
       maxPriorityFeePerGas,
       gasLimit: ethers.utils.parseUnits("20000000", "wei"),
     });
-
+    
     const receipt = await tx.wait();
     console.log("Transaction Hash", receipt.transactionHash);
     return receipt;
