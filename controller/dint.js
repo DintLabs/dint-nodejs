@@ -218,16 +218,16 @@ const send = async (data, value) => {
   const gasLimit = ethers.utils.parseUnits('70000', 'wei').toString();
 
   // Get the current gas price
-
+  const gasPrice = await getGasPrice();
+  const gasPriceBigNumber = ethers.BigNumber.from(gasPrice.toString());
   console.log("Gas Price:", gasPrice.toString());
-  const gasPriceInWei = ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  const gasPrice = ethers.BigNumber.from(gasPriceInWei);
+
 
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: gasLimit, 
-        gasPrice: gasPrice,
+        gasPrice: gasPriceBigNumber,
       })
 
       .then(
