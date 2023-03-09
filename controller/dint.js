@@ -247,7 +247,9 @@ const getGasPrice = async () => {
 };
 
 const send = async (data, value) => {
-  
+  let gasPrice = await getGasPrice();
+  console.log("Gas Price:", gasPrice.toString());
+
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
