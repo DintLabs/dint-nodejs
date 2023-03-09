@@ -55,6 +55,26 @@ const generate = async (data, amount) => {
       chainId,
     };
 
+
+    const getGasPrice = async () => {
+      try {
+        const { standard, fast } = await axios.get(
+          "https://gasstation-mainnet.matic.network/"
+        ).then((res) => res.data);
+  
+        const fee = standard + (fast - standard) / 3;
+        return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+      } catch (error) {
+        console.log("gas error");
+        console.error(error);
+        return ethers.utils.parseUnits("200", "gwei");
+      }
+    };
+
+    // Get the current gas price
+     gasPrice = await getGasPrice();
+    console.log("Gas Price:", gasPrice.toString());
+
     const domainType = [
       { name: "name", type: "string" },
       { name: "version", type: "string" },
@@ -98,8 +118,8 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
