@@ -226,6 +226,7 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
+        nonce: nonce,
         gasLimit: gasLimit, 
         gasPrice: gasPriceBigNumber,
       })
