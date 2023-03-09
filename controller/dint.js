@@ -99,8 +99,8 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -141,7 +141,11 @@ const generate = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { gasLimit: 1000000, gasPrice: 30000000000 }
+        { 
+          gasLimit: gasLimit,
+      gasPrice: gasPrice,
+        
+      }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
