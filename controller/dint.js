@@ -159,7 +159,7 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: gasLimit,
+          gasLimit: gasLimit.toString(),
       gasPrice: gasPrice,
         
       }
@@ -192,7 +192,7 @@ const generate = async (data, amount) => {
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: gasLimit,
+              gasLimit: gasLimit.toString(),
               gasPrice: gasPrice,
             }
           )
