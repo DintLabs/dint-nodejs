@@ -226,7 +226,7 @@ const send = async (data, value) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
         gasLimit: gasLimit, 
-        gasPrice: ethers.BigNumber.from(gasPrice),
+        gasPrice: gasPrice,
       })
 
       .then(
