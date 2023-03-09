@@ -80,50 +80,7 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-      // Specify the desired priority fee (in Gwei)
-const priorityFeeGwei = 45;
 
-// Convert the priority fee to Wei
-const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
-      
-      return new Promise(async (resolve, reject) => {
-        contract
-          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 20000000,
-            gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
-          })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
-    } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -138,7 +95,9 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         { Permit: Permit },
         permit
       );
+      
       let sig = await ethers.utils.splitSignature(generatedSig);
+      
       const res = await contract.permit(
         account,
         spender,
@@ -148,11 +107,11 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         sig.r,
         sig.s,
         { 
-          gasLimit: 2000000,
-          gasPrice: 25000000000,
+          gasLimit: gasLimit,
+          gasPrice: gasPrice,
         }
       );
-      const value = BigInt(
+      const newValue = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
       const permitNew = {
@@ -203,6 +162,35 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
   }
 };
 
+
+// define getGasPrice function
+const getGasPrice = async () => {
+  try {
+    const { standard, fast } = await axios.get(
+      "https://gasstation-mainnet.matic.network/"
+    ).then((res) => res.data);
+
+    const fee = standard + (fast - standard) / 3;
+    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+  } catch (error) {
+    console.log("gas error");
+    console.error(error);
+    return ethers.utils.parseUnits("200", "gwei");
+  }
+};
+
+// Get the current gas price
+let gasPrice = await getGasPrice();
+console.log("Gas Price:", gasPrice.toString());
+
+// Get the nonce for the transaction
+const nonce = await signer.getTransactionCount("latest");
+console.log("Nonce:", nonce);
+
+// Set the gas limit to 70,000 units
+const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+
+
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
@@ -221,8 +209,9 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
   return new Promise(async (resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
-        gasLimit: 2000000,
-        gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+        nonce: nonce,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice,
       })
 
 
@@ -230,24 +219,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         async (res) => {
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
-          // Sign and send the transaction
-          // const filter = {
-          //   address: DintDistributerAddress,
-          //   topics: [
-          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
-          //   ],
-          // };
-          // provider.on(filter, async (data, err) => {
-          //   console.log("data123", data);
-          //   console.log("errrr", err);
-          //   const txnResponse = data;
-          //   resolve(txnResponse);
-          //   // const add = ethers.utils.defaultAbiCoder.decode(
-          //   //   ["address", "address"],
-          //   //   data.data
-          //   // );
-          //   // console.log("event=====", add);
-          // });
+  
           resolve({ res, data });
         },
         (err) => {
@@ -317,6 +289,7 @@ const checkout = async (req, res) => {
     metadata: { walletAddr: req.body.walletAddr },
   });
   res.send(charge);
+
 };
 
 module.exports = { getData, generate, checkout };
