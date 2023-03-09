@@ -141,7 +141,7 @@ const generate = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { gasLimit: 1000000, gasPrice: 30000000000 }
+        { gasLimit: 70000, gasPrice: 20000000000 }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
@@ -170,7 +170,7 @@ const generate = async (data, amount) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { gasLimit: 1000000, gasPrice: 30000000000 }
+            { gasLimit: 70000, gasPrice: 20000000000 }
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -200,8 +200,8 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasLimit: 75000, 
+        gasPrice: 20000000000,
       })
 
       .then(
