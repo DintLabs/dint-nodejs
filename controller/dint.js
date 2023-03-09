@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
+          return ethers.utils.parseUnits("100", "gwei");
         }
       };
       
