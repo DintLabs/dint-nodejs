@@ -218,8 +218,8 @@ const send = async (data, value) => {
   const gasLimit = ethers.utils.parseUnits('70000', 'wei').toString();
 
   // Get the current gas price
-  const gasPrice = await getGasPrice();
-  gasPrice = ethers.utils.parseUnits(gasPrice.toString(), "wei");
+  let gasPrice = BigNumber.from(await getGasPrice());
+
   console.log("Gas Price:", gasPrice.toString());
 
 
