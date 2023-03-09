@@ -1,6 +1,5 @@
 const ethers = require("ethers");
 const Web3 = require("web3");
-const axios = require("axios");
 const DintTokenAbBI = require("../DintTokenABI.json");
 // require("dotenv").config({ path: `../env.local`, override: true });
 require("dotenv").config();
@@ -33,21 +32,18 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-const generate = async (data, amount, account) => {
-  const nonce = await contract.getTransactionCount(account);
-  console.log("Nonce:", nonce);
-
-  const contract = new ethers.Contract(
-    DintTokenAddress.toLowerCase(),
-    DintTokenAbBI,
-    ownerSigner
-  );
-
+const generate = async (data, amount) => {
+  const nonce = 0;
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
+    const contract = new ethers.Contract(
+      DintTokenAddress.toLowerCase(),
+      DintTokenAbBI,
+      ownerSigner
+    );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
+    const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
@@ -59,23 +55,6 @@ const generate = async (data, amount, account) => {
       chainId,
     };
 
-
-    const getGasPrice = async () => {
-      try {
-        const { standard, fast } = await axios.get(
-          "https://gasstation-mainnet.matic.network/"
-        ).then((res) => res.data);
-  
-        const fee = standard + (fast - standard) / 3;
-        return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-      } catch (error) {
-        console.log("gas error");
-        console.error(error);
-        return ethers.utils.parseUnits("200", "gwei");
-      }
-    };
-
-  
     const domainType = [
       { name: "name", type: "string" },
       { name: "version", type: "string" },
@@ -116,20 +95,11 @@ const generate = async (data, amount, account) => {
         permit
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
-  
-        // Get the current gas price
-    let gasPrice = await getGasPrice();
-    console.log("Gas Price:", gasPrice.toString());
-
-    // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
-
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-            nonce: newNonce + 1,
+            gasLimit: 1000000,
+            gasPrice: 30000000000,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -170,12 +140,7 @@ const generate = async (data, amount, account) => {
         sig.v,
         sig.r,
         sig.s,
-        { 
-          
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
-        
-        }
+        { gasLimit: 1000000, gasPrice: 30000000000 }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
@@ -204,12 +169,7 @@ const generate = async (data, amount, account) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { 
-              
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            
-            }
+            { gasLimit: 1000000, gasPrice: 30000000000 }
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -246,9 +206,11 @@ const getGasPrice = async () => {
   }
 };
 
+
 const send = async (data, value) => {
-  let gasPrice = await getGasPrice();
-  console.log("Gas Price:", gasPrice.toString());
+     // Get the current gas price
+     let gasPrice = await getGasPrice();
+     console.log("Gas Price:", gasPrice.toString());
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
@@ -258,8 +220,8 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
+       gasLimit: gasLimit,
+      gasPrice: gasPrice,
       })
 
       .then(
