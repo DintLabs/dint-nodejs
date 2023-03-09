@@ -37,13 +37,14 @@ const generate = async (data, amount, account) => {
   const nonce = await contract.getTransactionCount(account);
   console.log("Nonce:", nonce);
 
+  const contract = new ethers.Contract(
+    DintTokenAddress.toLowerCase(),
+    DintTokenAbBI,
+    ownerSigner
+  );
+
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
-    const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
-    );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
     const chainId = 137; // this is for the chain's ID.
@@ -119,7 +120,6 @@ const generate = async (data, amount, account) => {
         // Get the current gas price
     let gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
-
 
     // Set the gas limit to 70,000 units
     const gasLimit = ethers.utils.parseUnits('70000', 'wei');
