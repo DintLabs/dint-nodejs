@@ -72,10 +72,7 @@ const generate = async (data, amount) => {
       }
     };
 
-    // Get the current gas price
-     gasPrice = await getGasPrice();
-    console.log("Gas Price:", gasPrice.toString());
-
+  
     const domainType = [
       { name: "name", type: "string" },
       { name: "version", type: "string" },
@@ -116,6 +113,10 @@ const generate = async (data, amount) => {
         permit
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
+       // Get the current gas price
+    let gasPrice = await getGasPrice();
+    console.log("Gas Price:", gasPrice.toString());
+
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -230,8 +231,8 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice,
       })
 
       .then(
