@@ -192,26 +192,32 @@ const generate = async (data, amount) => {
 };
 
 
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios.get(
-      "https://gasstation-mainnet.matic.network/"
-    ).then((res) => res.data);
 
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("200", "gwei");
-  }
-};
 
 
 const send = async (data, value) => {
+
+  const getGasPrice = async () => {
+    try {
+      const { standard, fast } = await axios.get(
+        "https://gasstation-mainnet.matic.network/"
+      ).then((res) => res.data);
+  
+      const fee = standard + (fast - standard) / 3;
+      return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+    } catch (error) {
+      console.log("gas error");
+      console.error(error);
+      return ethers.utils.parseUnits("200", "gwei");
+    }
+  };
+  
      // Get the current gas price
      let gasPrice = await getGasPrice();
      console.log("Gas Price:", gasPrice.toString());
+
+      // Set the gas limit to 70,000 units
+    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
