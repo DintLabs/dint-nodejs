@@ -163,63 +163,48 @@ const generate = async (data, amount) => {
 };
 
 
-// define getGasPrice function
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios.get(
-      "https://gasstation-mainnet.matic.network/"
-    ).then((res) => res.data);
 
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("200", "gwei");
-  }
-};
 
-// Get the current gas price
-let gasPrice = await getGasPrice();
-console.log("Gas Price:", gasPrice.toString());
 
 // Get the nonce for the transaction
 const nonce = await signer.getTransactionCount("latest");
 console.log("Nonce:", nonce);
 
-// Set the gas limit to 70,000 units
-const gasLimit = ethers.utils.parseUnits('70000', 'wei');
-
-
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
 
-const priceInUSD =1000000;
+  const priceInUSD = 1000000;
 
-// Convert the priority fee to Wei
-const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+  // Convert the priority fee to Wei
+  const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
 
+  // Get gas price
+  let gasPrice;
+  try {
+    gasPrice = await getGasPrice();
+  } catch (error) {
+    console.log("Failed to get gas price. Using fallback gas price of 200 Gwei");
+    gasPrice = ethers.utils.parseUnits("200", "gwei");
+  }
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
+
   return new Promise(async (resolve, reject) => {
     dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
+      .sendDint(data.userAddress, data.recieverAddress, value, priceInUSD, {
         nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
       })
-
-
       .then(
         async (res) => {
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
-  
           resolve({ res, data });
         },
         (err) => {
@@ -232,6 +217,7 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
       });
   });
 };
+
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
