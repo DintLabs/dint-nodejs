@@ -92,7 +92,7 @@ const generate = async (data, amount) => {
       };
       const generatedSig = await signer._signTypedData(
         domain,
-        { Permit: Permit },
+        {Permit: Permit },
         permit
       );
       
