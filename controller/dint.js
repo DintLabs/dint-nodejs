@@ -117,7 +117,7 @@ const generate = async (data, amount) => {
  console.log("Gas Price:", gasPrice.toString());
 
  // Get the nonce for the transaction
- const nonce = await getNonce(signer);
+ const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
@@ -224,60 +224,49 @@ const generate = async (data, amount) => {
   }
 };
 
-let latestNonce = await signer.getTransactionCount('latest');
-console.log('Latest Nonce:', latestNonce);
 
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
 
-  const priceInUSD = 1000000;
+const priceInUSD =1000000;
 
-  const gasPrice = await getGasPrice().catch((err) => {
-    console.log('Error getting gas price:', err);
-    return ethers.utils.parseUnits('200', 'gwei');
-  });
 
-  // Convert the priority fee to Wei
-  const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+  // Get the nonce for the transaction
+   const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
-
   return new Promise(async (resolve, reject) => {
-    const tx = {
-      nonce: latestNonce,
-      gasLimit: gasLimit,
-      gasPrice: gasPrice,
-      to: dintDistContract.address,
-      value: value,
-      data: dintDistContract.interface.encodeFunctionData('sendDint', [
-        data.userAddress,
-        data.recieverAddress,
-        value,
-        priceInUSD,
-      ]),
-    };
+    dintDistContract
+      .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
+        nonce: nonce,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice,
+      })
 
-    try {
-      const signedTx = await signer.signTransaction(tx);
-      const txResponse = await provider.sendTransaction(signedTx);
 
-      latestNonce++;
-      console.log('Transaction Hash:', txResponse.hash);
-      console.log('dintPrice =', priceInUSD);
+      .then(
+        async (res) => {
+          console.log("Transaction Hash", res);
+          console.log('dintPrice =', priceInUSD);
 
-      resolve({ res: txResponse, data });
-    } catch (err) {
-      console.log('Error sending transaction:', err);
-      reject(err);
-    }
+          resolve({ res, data });
+        },
+        (err) => {
+          console.log("err", err);
+        }
+      )
+      .catch((err) => {
+        console.log("err", err);
+        reject(err);
+      });
   });
 };
-
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
