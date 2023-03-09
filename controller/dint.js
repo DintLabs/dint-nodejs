@@ -7,7 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const axios = require("axios");
+
 const express = require("express");
 const app = express();
 const client = new Client({
@@ -92,7 +92,7 @@ const generate = async (data, amount) => {
       };
       const generatedSig = await signer._signTypedData(
         domain,
-        {Permit: Permit },
+        { Permit: Permit },
         permit
       );
       
@@ -163,15 +163,6 @@ const generate = async (data, amount) => {
 };
 
 
-
-
-
-// Get the nonce for the transaction
-const nonce = await signer.getTransactionCount("latest");
-console.log("Nonce:", nonce);
-
-
-
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
@@ -190,9 +181,8 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
   return new Promise(async (resolve, reject) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
-        nonce: nonce,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
+        gasLimit: 2000000,
+        gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
       })
 
 
