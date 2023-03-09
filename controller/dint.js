@@ -230,6 +230,8 @@ const send = async (sender, receiver, amount) => {
   const nonce = await ownerSigner.getTransactionCount("latest");
   console.log("Nonce:", nonce);
 
+  const gasPrice = await getGasPrice();
+
   const dintDistContract = new ethers.Contract(
     DINT_DIST_ADDRESS.toLowerCase(),
     dintDistributerABI,
@@ -260,6 +262,7 @@ const send = async (sender, receiver, amount) => {
       });
   });
 };
+
 
 
 const getData = async (sender_id, reciever_id, amount) => {
