@@ -80,7 +80,46 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
+      const currentnonce = await contract.nonces(account);
+      const newNonce = currentnonce.toNumber();
+      const permit = {
+        owner: account,
+        spender,
+        value,
+        nonce: newNonce,
+        deadline,
+      };
+      const generatedSig = await signer._signTypedData(
+        domain,
+        { Permit: Permit },
+        permit
+      );
 
+
+      let sig = await ethers.utils.splitSignature(generatedSig);
+      
+      return new Promise(async (resolve, reject) => {
+        contract
+          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+            gasLimit: 20000000,
+            gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+          })
+          .then((res) => {
+            console.log("Approval Hash", res.hash);
+            send(data, value)
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          })
+          .catch((err) => {
+            console.log("err permit", err);
+            reject(err);
+          });
+      });
+    } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -95,9 +134,7 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permit
       );
-      
       let sig = await ethers.utils.splitSignature(generatedSig);
-      
       const res = await contract.permit(
         account,
         spender,
@@ -107,11 +144,11 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
+          gasLimit: 2000000,
+          gasPrice: 25000000000,
         }
       );
-      const newValue = BigInt(
+      const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
       const permitNew = {
@@ -162,7 +199,6 @@ const generate = async (data, amount) => {
   }
 };
 
-
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
@@ -190,7 +226,24 @@ const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei
         async (res) => {
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
-  
+          // Sign and send the transaction
+          // const filter = {
+          //   address: DintDistributerAddress,
+          //   topics: [
+          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+          //   ],
+          // };
+          // provider.on(filter, async (data, err) => {
+          //   console.log("data123", data);
+          //   console.log("errrr", err);
+          //   const txnResponse = data;
+          //   resolve(txnResponse);
+          //   // const add = ethers.utils.defaultAbiCoder.decode(
+          //   //   ["address", "address"],
+          //   //   data.data
+          //   // );
+          //   // console.log("event=====", add);
+          // });
           resolve({ res, data });
         },
         (err) => {
@@ -260,7 +313,6 @@ const checkout = async (req, res) => {
     metadata: { walletAddr: req.body.walletAddr },
   });
   res.send(charge);
-
 };
 
 module.exports = { getData, generate, checkout };
