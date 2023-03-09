@@ -166,18 +166,21 @@ const generate = async (data, amount) => {
 
 
 
+// Get the nonce for the transaction
+const nonce = await signer.getTransactionCount("latest");
+console.log("Nonce:", nonce);
+
+
+
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
 
-  const priceInUSD =1000000;
+const priceInUSD =1000000;
 
-  // Convert the priority fee to Wei
-  const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
+// Convert the priority fee to Wei
+const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
 
-  // Get the nonce for the transaction
-  const nonce = await signer.getTransactionCount("latest");
-  console.log("Nonce:", nonce);
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
@@ -191,6 +194,8 @@ const send = async (data, value) => {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
       })
+
+
       .then(
         async (res) => {
           console.log("Transaction Hash", res);
@@ -208,7 +213,6 @@ const send = async (data, value) => {
       });
   });
 };
-
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
