@@ -208,23 +208,7 @@ const send = async (data, value) => {
         async (res) => {
           console.log("Transaction Hash", res);
 
-          // const filter = {
-          //   address: DintDistributerAddress,
-          //   topics: [
-          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
-          //   ],
-          // };
-          // provider.on(filter, async (data, err) => {
-          //   console.log("data123", data);
-          //   console.log("errrr", err);
-          //   const txnResponse = data;
-          //   resolve(txnResponse);
-          //   // const add = ethers.utils.defaultAbiCoder.decode(
-          //   //   ["address", "address"],
-          //   //   data.data
-          //   // );
-          //   // console.log("event=====", add);
-          // });
+
           resolve({ res, data });
         },
         (err) => {
