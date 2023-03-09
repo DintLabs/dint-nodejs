@@ -217,7 +217,7 @@ const send = async (data, value) => {
      console.log("Gas Price:", gasPrice.toString());
 
       // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('35000', 'wei');
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
