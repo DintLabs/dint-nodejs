@@ -7,8 +7,8 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const axios = require('axios');
-const express = require("express");
+
+const express = require('express');
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -33,7 +33,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
-  const nonce = await ownerSigner.getTransactionCount("latest");
+  const nonce = 0;
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -43,7 +43,7 @@ const generate = async (data, amount) => {
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
+    const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
@@ -94,40 +94,12 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permit
       );
-
-
       let sig = await ethers.utils.splitSignature(generatedSig);
-
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('70000', 'wei');
-      
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
+            gasLimit: 1000000,
+            gasPrice: 30000000000,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -168,10 +140,7 @@ const generate = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
-        }
+        { gasLimit: 1000000, gasPrice: 30000000000 }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
@@ -200,10 +169,7 @@ const generate = async (data, amount) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { 
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            }
+            { gasLimit: 1000000, gasPrice: 30000000000 }
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -224,60 +190,51 @@ const generate = async (data, amount) => {
   }
 };
 
-
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
-      .then((res) => res.data);
-
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("200", "gwei");
-  }
-};
-
 const send = async (data, value) => {
-  try {
-    const priceInUSD = 1000000;
+  const dintDistContract = new ethers.Contract(
+    DintDistributerAddress.toLowerCase(),
+    dintDistributerABI,
+    ownerSigner
+  );
+  return new Promise((resolve, reject) => {
+    dintDistContract
+      .sendDint(data.userAddress, data.recieverAddress, value, {
+        gasLimit: 1000000,
+        gasPrice: 30000000000,
+      })
 
-        // Get the nonce for the transaction
-    const nonce = await ownerSigner.getTransactionCount("latest");
-    console.log("Nonce:", nonce);
-    
-    // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+      .then(
+        async (res) => {
+          console.log("Transaction Hash", res);
 
-    const gasPrice = await getGasPrice();
-    console.log("Gas Price:", gasPrice.toString());
-    const dintDistContract = new ethers.Contract(
-      DintDistributerAddress.toLowerCase(),
-      dintDistributerABI,
-      ownerSigner
-    );
-
-    const tx = await  dintDistContract.sendDint(
-      data.userAddress,
-      data.recieverAddress,
-      value,
-      priceInUSD,
-      {
-     
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
-     
-      }
-    );
-    console.log("Transaction Hash", tx.hash);
-    console.log("Dint Price =", priceInUSD);
-    return { tx };
-  } catch (error) {
-    console.log("err", error);
-    return { error };
-  }
+          // const filter = {
+          //   address: DintDistributerAddress,
+          //   topics: [
+          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+          //   ],
+          // };
+          // provider.on(filter, async (data, err) => {
+          //   console.log("data123", data);
+          //   console.log("errrr", err);
+          //   const txnResponse = data;
+          //   resolve(txnResponse);
+          //   // const add = ethers.utils.defaultAbiCoder.decode(
+          //   //   ["address", "address"],
+          //   //   data.data
+          //   // );
+          //   // console.log("event=====", add);
+          // });
+          resolve({ res, data });
+        },
+        (err) => {
+          console.log("err", err);
+        }
+      )
+      .catch((err) => {
+        console.log("err", err);
+        reject(err);
+      });
+  });
 };
 
 const getData = async (sender_id, reciever_id, amount) => {
@@ -325,17 +282,17 @@ const getData = async (sender_id, reciever_id, amount) => {
   });
 };
 
+
 const checkout = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  const charge = await stripe.charges.create({
-    receipt_email: req.body.email,
-    amount: parseInt(req.body.amount) * 100, //USD*100
-    currency: "usd",
-    card: req.body.cardDetails.card_id,
-    customer: req.body.cardDetails.customer_id,
-    metadata: { walletAddr: req.body.walletAddr },
-  });
-  res.send(charge);
-};
+   const charge = await stripe.charges.create({
+     receipt_email: req.body.email,
+     amount: parseInt(req.body.amount) * 100, //USD*100
+     currency: "usd",
+     card: req.body.cardDetails.card_id,
+     customer: req.body.cardDetails.customer_id,
+   });
+   res.send(charge);
+ };
 
-module.exports = { getData, generate, checkout };
+ module.exports = { getData, generate, checkout };
