@@ -239,51 +239,41 @@ const getGasPrice = async () => {
     return ethers.utils.parseUnits("200", "gwei");
   }
 };
-const gasPrice = await getGasPrice();
-  // Get the current gas price
 
-  gasPrice = await getGasPrice();
-  console.log("Gas Price:", gasPrice.toString());
+const send = async (data, value) => {
+  try {
+    const priceInUSD = 1000000;
+    const nonce = await ownerSigner.getTransactionCount("latest");
+    console.log("Nonce:", nonce);
+    const gasLimit = 2000000;
+    const gasPrice = await getGasPrice();
+    console.log("Gas Price:", gasPrice.toString());
+    const dintDistContract = new ethers.Contract(
+      DintDistributerAddress.toLowerCase(),
+      dintDistributerABI,
+      ownerSigner
+    );
 
-
-  const send = async (data, value) => {
-  const priceInUSD = 1000000;
-  const nonce = await ownerSigner.getTransactionCount("latest");
-  console.log("Nonce:", nonce);
-  const dintDistContract = new ethers.Contract(
-    DintDistributerAddress.toLowerCase(),
-    dintDistributerABI,
-    ownerSigner
-  );
-
-  return new Promise(async (resolve, reject) => {
-    dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value, priceInUSD, {
+    const tx = await dintDistContract.sendDint(
+      data.userAddress,
+      data.recieverAddress,
+      value,
+      priceInUSD,
+      {
         nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
         from: sender,
-      })
-      .then(
-        async (res) => {
-          console.log("Transaction Hash", res);
-          console.log("Dint Price =", priceInUSD);
-          resolve({ res });
-        },
-        (err) => {
-          console.log("err", err);
-          reject(err);
-        }
-      )
-      .catch((err) => {
-        console.log("err", err);
-        reject(err);
-      });
-  });
+      }
+    );
+    console.log("Transaction Hash", tx.hash);
+    console.log("Dint Price =", priceInUSD);
+    return { tx };
+  } catch (error) {
+    console.log("err", error);
+    return { error };
+  }
 };
-
-
-
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
