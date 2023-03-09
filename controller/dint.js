@@ -116,29 +116,24 @@ const generate = async (data, amount) => {
       console.log("Gas Price:", gasPrice.toString());
       
       // Set the gas limit to 70,000 units
-      const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+      const gasLimit = '70000';
       let sig = await ethers.utils.splitSignature(generatedSig);
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice.div(2), // use half of the current gas price
+            gasLimit: gasLimit.toString(),
+            gasPrice: gasPrice,
           })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
+          .then((result) => {
+            console.log("Permit tx result:", result);
+            resolve(result);
           })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
+          .catch((error) => {
+            console.error("Permit tx error:", error);
+            reject(error);
           });
       });
+      
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
