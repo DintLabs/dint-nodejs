@@ -239,7 +239,7 @@ const getGasPrice = async () => {
     return ethers.utils.parseUnits("200", "gwei");
   }
 };
-const gasLimit = 200000; // Replace with your desired gas limit
+const gasPrice = await getGasPrice();
   // Get the current gas price
 
   gasPrice = await getGasPrice();
