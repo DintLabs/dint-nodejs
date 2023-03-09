@@ -242,14 +242,6 @@ const getGasPrice = async () => {
 const gasLimit = 200000; // Replace with your desired gas limit
 
 const send = async (sender, receiver, amount) => {
-
-
-
-  
-  const priceInUSD = 1000000;
-  const nonce = await ownerSigner.getTransactionCount("latest");
-  console.log("Nonce:", nonce);
-
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
