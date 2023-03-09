@@ -248,13 +248,13 @@ const send = async (data, value) => {
     const gasLimit = 2000000;
     const gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
-    const DintDistributerAddress = new ethers.Contract(
+    const dintDistContract = new ethers.Contract(
       DintDistributerAddress.toLowerCase(),
       dintDistributerABI,
       ownerSigner
     );
 
-    const tx = await DintDistributerAddress.sendDint(
+    const tx = await  dintDistContract.sendDint(
       data.userAddress,
       data.recieverAddress,
       value,
