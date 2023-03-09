@@ -223,7 +223,8 @@ const generate = async (data, amount) => {
     }
   }
 };
-const gasLimit = 200000; // Replace with your desired gas limit
+
+
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
@@ -238,13 +239,12 @@ const getGasPrice = async () => {
     return ethers.utils.parseUnits("200", "gwei");
   }
 };
+const gasLimit = 200000; // Replace with your desired gas limit
 
 const send = async (sender, receiver, amount) => {
   const priceInUSD = 1000000;
   const nonce = await ownerSigner.getTransactionCount("latest");
   console.log("Nonce:", nonce);
-
-  const gasPrice = await getGasPrice();
 
   const dintDistContract = new ethers.Contract(
     DINT_DIST_ADDRESS.toLowerCase(),
@@ -258,6 +258,7 @@ const send = async (sender, receiver, amount) => {
         nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
+        from: sender,
       })
       .then(
         async (res) => {
@@ -276,6 +277,7 @@ const send = async (sender, receiver, amount) => {
       });
   });
 };
+
 
 
 
