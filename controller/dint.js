@@ -33,7 +33,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-const generate = async (data, amount) => {
+const generate = async (data, amount, account) => {
   const nonce = await contract.getTransactionCount(account);
   console.log("Nonce:", nonce);
 
