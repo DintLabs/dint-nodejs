@@ -219,7 +219,7 @@ const send = async (data, value) => {
 
   // Get the current gas price
   const gasPrice = await getGasPrice();
-  const gasPriceBigNumber = ethers.BigNumber.from(gasPrice.toString());
+  gasPrice = ethers.utils.parseUnits(gasPrice.toString(), "wei");
   console.log("Gas Price:", gasPrice.toString());
 
 
