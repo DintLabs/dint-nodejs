@@ -166,37 +166,27 @@ const generate = async (data, amount) => {
 
 
 
-// Get the nonce for the transaction
-const nonce = await signer.getTransactionCount("latest");
-console.log("Nonce:", nonce);
-
 const send = async (data, value) => {
   console.log(data);
   console.log('value =', value);
 
-  const priceInUSD = 1000000;
+  const priceInUSD =1000000;
 
   // Convert the priority fee to Wei
   const priorityFeeWei = ethers.utils.parseUnits(priorityFeeGwei.toString(), 'gwei');
 
-  // Get gas price
-  let gasPrice;
-  try {
-    gasPrice = await getGasPrice();
-  } catch (error) {
-    console.log("Failed to get gas price. Using fallback gas price of 200 Gwei");
-    gasPrice = ethers.utils.parseUnits("200", "gwei");
-  }
+  // Get the nonce for the transaction
+  const nonce = await signer.getTransactionCount("latest");
+  console.log("Nonce:", nonce);
 
   const dintDistContract = new ethers.Contract(
     DintDistributerAddress.toLowerCase(),
     dintDistributerABI,
     ownerSigner
   );
-
   return new Promise(async (resolve, reject) => {
     dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value, priceInUSD, {
+      .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
         nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
@@ -205,6 +195,7 @@ const send = async (data, value) => {
         async (res) => {
           console.log("Transaction Hash", res);
           console.log('dintPrice =', priceInUSD);
+  
           resolve({ res, data });
         },
         (err) => {
