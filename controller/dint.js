@@ -107,33 +107,38 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("100", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
       
-      // Get the current gas price
-      let gasPrice = await getGasPrice();
-      console.log("Gas Price:", gasPrice.toString());
-      
-      // Set the gas limit to 70,000 units
-      const gasLimit = '70000';
+         // Get the current gas price
+         let gasPrice = await getGasPrice();
+         console.log("Gas Price:", gasPrice.toString());
+    
+          // Set the gas limit to 70,000 units
+        const gasLimit = ethers.utils.parseUnits('70000', 'wei');
       let sig = await ethers.utils.splitSignature(generatedSig);
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit.toString(),
+            gasLimit: gasLimit,
             gasPrice: gasPrice,
           })
-          .then((result) => {
-            console.log("Permit tx result:", result);
-            resolve(result);
+          .then((res) => {
+            console.log("Approval Hash", res.hash);
+            send(data, value)
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((err) => {
+                reject(err);
+              });
           })
-          .catch((error) => {
-            console.error("Permit tx error:", error);
-            reject(error);
+          .catch((err) => {
+            console.log("err permit", err);
+            reject(err);
           });
       });
-      
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
@@ -159,7 +164,7 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: gasLimit.toString(),
+          gasLimit: gasLimit,
       gasPrice: gasPrice,
         
       }
@@ -192,7 +197,7 @@ const generate = async (data, amount) => {
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: gasLimit.toString(),
+              gasLimit: gasLimit,
               gasPrice: gasPrice,
             }
           )
@@ -252,7 +257,7 @@ const send = async (data, value) => {
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
        gasLimit: gasLimit,
-       gasLimit: gasLimit.toString(),
+      gasPrice: gasPrice,
       })
 
       .then(
