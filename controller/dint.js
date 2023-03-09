@@ -100,10 +100,10 @@ const generate = async (data, amount) => {
 
       const getGasPrice = async () => {
         try {
-          const { standard, fast } = await axios.get(
-            "https://gasstation-mainnet.matic.network/"
-          ).then((res) => res.data);
-    
+          const { standard, fast } = await axios
+            .get("https://gasstation-mainnet.matic.network/")
+            .then((res) => res.data);
+      
           const fee = standard + (fast - standard) / 3;
           return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
         } catch (error) {
@@ -169,8 +169,8 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: 2000000,
-          gasPrice: 25000000000,
+          gasLimit: gasLimit,
+          gasPrice: gasPrice,
         }
       );
       const value = BigInt(
@@ -201,8 +201,8 @@ const generate = async (data, amount) => {
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: 2000000,
-              gasPrice: 250000000000,
+              gasLimit: gasLimit,
+              gasPrice: gasPrice,
             }
           )
           .then((res) => {
