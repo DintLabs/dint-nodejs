@@ -46,8 +46,7 @@ const transferDint = async ({ amount, destAddr }) => {
 
     // Create the transaction object
     const tx = {
-      to: destAddr,
-      value: amount,
+      to: contractAddr,
       nonce: nonce,
       gasLimit: gasLimit,
       gasPrice: gasPrice,
@@ -79,11 +78,11 @@ const transferDint = async ({ amount, destAddr }) => {
 
       // Resend the transaction with the higher gas price
       const tx = {
-        to: destAddr,
-        value: amount,
+        to: contractAddr,
         nonce: nonce,
         gasLimit: gasLimit,
-        gasPrice: gasPrice
+        gasPrice: gasPrice,
+        data: erc20dint.interface.encodeFunctionData("transfer", [destAddr, amount]),
       };
 
       console.log("Resending transaction with higher gas price...");
