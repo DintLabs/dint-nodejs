@@ -127,7 +127,7 @@ const generate = async (data, amount) => {
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
-            nonce: newNonce,
+            nonce: newNonce + 1,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
