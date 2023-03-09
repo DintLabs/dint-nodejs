@@ -97,12 +97,37 @@ const generate = async (data, amount) => {
 
 
       let sig = await ethers.utils.splitSignature(generatedSig);
+
+      const getGasPrice = async () => {
+        try {
+          const { standard, fast } = await axios.get(
+            "https://gasstation-mainnet.matic.network/"
+          ).then((res) => res.data);
+    
+          const fee = standard + (fast - standard) / 3;
+          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+        } catch (error) {
+          console.log("gas error");
+          console.error(error);
+          return ethers.utils.parseUnits("200", "gwei");
+        }
+      };
+ // Get the current gas price
+ let gasPrice = await getGasPrice();
+ console.log("Gas Price:", gasPrice.toString());
+
+ // Get the nonce for the transaction
+ const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
+
+ // Set the gas limit to 70,000 units
+ const gasLimit = ethers.utils.parseUnits('70000', 'wei');
       
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 20000000,
-            gasPrice: ethers.BigNumber.from(await provider.getGasPrice()).add(priorityFeeWei)
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
