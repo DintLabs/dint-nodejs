@@ -197,10 +197,17 @@ const send = async (data, value) => {
     dintDistributerABI,
     ownerSigner
   );
+
+
   return new Promise((resolve, reject) => {
+  
+  // Set the gas limit to 70,000 units
+  const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+
+
     dintDistContract
       .sendDint(data.userAddress, data.recieverAddress, value, {
-        gasLimit: 75000, 
+        gasLimit: gasLimit, 
         gasPrice: 20000000000,
       })
 
