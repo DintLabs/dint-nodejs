@@ -212,7 +212,9 @@ const send = async (data, value) => {
       return ethers.utils.parseUnits("200", "gwei");
     }
   };
-
+  
+  // Get the current nonce for ownerSigner account
+  const nonce = await ownerSigner.getTransactionCount();
 
   // Set the gas limit to 70,000 units
   const gasLimit = ethers.utils.parseUnits('70000', 'wei').toString();
