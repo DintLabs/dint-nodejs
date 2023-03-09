@@ -111,18 +111,18 @@ const generate = async (data, amount) => {
         }
       };
       
-         // Get the current gas price
-         let gasPrice = await getGasPrice();
-         console.log("Gas Price:", gasPrice.toString());
-    
-          // Set the gas limit to 70,000 units
-        const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+      // Get the current gas price
+      let gasPrice = await getGasPrice();
+      console.log("Gas Price:", gasPrice.toString());
+      
+      // Set the gas limit to 70,000 units
+      const gasLimit = ethers.utils.parseUnits('70000', 'wei');
       let sig = await ethers.utils.splitSignature(generatedSig);
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
-            gasPrice: gasPrice,
+            gasPrice: gasPrice.div(2), // use half of the current gas price
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
