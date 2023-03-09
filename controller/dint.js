@@ -225,48 +225,88 @@ const generate = async (data, amount) => {
 };
 
 
-const send = async (data, value) => {
-  console.log(data);
-  console.log('value =', value);
-
-const priceInUSD =1000000;
-
+const send = async (sender_id, receiver_id, amount) => {
+  const priceInUSD = 1000000;
 
   // Get the nonce for the transaction
-   const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
+  const nonce = await signer.getTransactionCount("latest");
+  console.log("Nonce:", nonce);
 
-  const dintDistContract = new ethers.Contract(
-    DintDistributerAddress.toLowerCase(),
-    dintDistributerABI,
+  const dintContract = new ethers.Contract(
+    DintAddress.toLowerCase(),
+    dintABI,
     ownerSigner
   );
+
+  const senderAddress = await getWalletAddressById(sender_id);
+  const receiverAddress = await getWalletAddressById(receiver_id);
+
   return new Promise(async (resolve, reject) => {
-    dintDistContract
-      .sendDint(data.userAddress, data.recieverAddress, value,  priceInUSD, {
-        nonce: nonce,
+    const approveValue = BigInt(
+      Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+    );
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
+    const permit = {
+      owner: senderAddress,
+      spender: ownerAddress,
+      value: approveValue,
+      nonce: nonce,
+      deadline,
+    };
+
+    const domain = {
+      name: "Dint",
+      version: "1",
+      chainId: network.chainId,
+      verifyingContract: DintAddress,
+    };
+
+    const Permit = [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+    ];
+
+    const generatedSig = await signer._signTypedData(domain, { Permit }, permit);
+    let sig = await ethers.utils.splitSignature(generatedSig);
+
+    dintContract
+      .permit(senderAddress, ownerAddress, approveValue, deadline, sig.v, sig.r, sig.s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
       })
-
-
-      .then(
-        async (res) => {
-          console.log("Transaction Hash", res);
-          console.log('dintPrice =', priceInUSD);
-
-          resolve({ res, data });
-        },
-        (err) => {
-          console.log("err", err);
-        }
-      )
+      .then((res) => {
+        console.log("Approval Hash", res.hash);
+        dintContract
+          .transferFrom(senderAddress, receiverAddress, approveValue, {
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
+          })
+          .then(
+            async (res) => {
+              console.log("Transaction Hash", res.hash);
+              console.log("dintPrice =", priceInUSD);
+              resolve({ res, data });
+            },
+            (err) => {
+              console.log("err transferFrom", err);
+              reject(err);
+            }
+          )
+          .catch((err) => {
+            console.log("err transferFrom", err);
+            reject(err);
+          });
+      })
       .catch((err) => {
-        console.log("err", err);
+        console.log("err permit", err);
         reject(err);
       });
   });
 };
+
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
