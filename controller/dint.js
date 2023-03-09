@@ -241,7 +241,8 @@ const getGasPrice = async () => {
 };
 const gasLimit = 200000; // Replace with your desired gas limit
   // Get the current gas price
-  let gasPrice = await getGasPrice();
+
+  gasPrice = await getGasPrice();
   console.log("Gas Price:", gasPrice.toString());
 
 
