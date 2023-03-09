@@ -243,12 +243,11 @@ const getGasPrice = async () => {
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
+
+        // Get the nonce for the transaction
+    const nonce = await ownerSigner.getTransactionCount("latest");
+    console.log("Nonce:", nonce);
     
-   // Get the nonce for the transaction
-   const nonce = await signer.getTransactionCount("latest");
-   console.log("Nonce:", nonce);
-
-
     // Set the gas limit to 70,000 units
     const gasLimit = ethers.utils.parseUnits('70000', 'wei');
 
