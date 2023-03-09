@@ -228,7 +228,7 @@ const send = async (data, value) => {
       .sendDint(data.userAddress, data.recieverAddress, value, {
         nonce: nonce,
         gasLimit: gasLimit, 
-        gasPrice: gasPriceBigNumber,
+        gasPrice: gasPrice,
       })
 
       .then(
@@ -248,6 +248,7 @@ const send = async (data, value) => {
       });
   });
 };
+
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
