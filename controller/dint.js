@@ -243,7 +243,9 @@ const gasLimit = 200000; // Replace with your desired gas limit
   // Get the current gas price
   let gasPrice = await getGasPrice();
   console.log("Gas Price:", gasPrice.toString());
-const send = async (sender, receiver, amount) => {
+
+
+  const send = async (data, value) => {
   const priceInUSD = 1000000;
   const nonce = await ownerSigner.getTransactionCount("latest");
   console.log("Nonce:", nonce);
@@ -255,7 +257,7 @@ const send = async (sender, receiver, amount) => {
 
   return new Promise(async (resolve, reject) => {
     dintDistContract
-      .sendDint(sender, receiver, amount, priceInUSD, {
+      .sendDint(data.userAddress, data.recieverAddress, value, priceInUSD, {
         nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
