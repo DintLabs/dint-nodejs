@@ -17,29 +17,87 @@ const transferDint = async ({ amount, destAddr }) => {
   const contractAddr = process.env.DINT_TOKEN_ADDRESS;
   const erc20dint = new ethers.Contract(contractAddr, abi, signer);
 
+  const getGasPrice = async () => {
+    try {
+      const { standard, fast } = await axios.get(
+        "https://gasstation-mainnet.matic.network/"
+      ).then((res) => res.data);
+
+      const fee = standard + (fast - standard) / 3;
+      return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+    } catch (error) {
+      console.log("gas error");
+      console.error(error);
+      return ethers.utils.parseUnits("200", "gwei");
+    }
+  };
+
   try {
-    // Set the gas price to 81555193021 wei
-    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
-    const gasPrice = ethers.utils.parseUnits('200', 'gwei');
+    // Get the current gas price
+    let gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
-    console.log("Amount:", amount.toString());
-    const tx = await erc20dint.transfer(destAddr, amount, {
-      gasPrice: gasPrice,
+
+    // Get the nonce for the transaction
+    const nonce = await signer.getTransactionCount("latest");
+    console.log("Nonce:", nonce);
+
+    // Set the gas limit to 70,000 units
+    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+
+    // Create the transaction object
+    const tx = {
+      to: destAddr,
+      value: amount,
+      nonce: nonce,
       gasLimit: gasLimit,
-    
-    });
+      gasPrice: gasPrice
+    };
 
-
+    console.log("Amount:", amount.toString());
     console.log("Transaction:", tx);
-    console.log("Waiting for confirmation...");
 
-    const receipt = await tx.wait();
-    console.log("Transaction Hash:", receipt.transactionHash);
+    // Send the transaction
+    const response = await signer.sendTransaction(tx);
+    console.log("Waiting for confirmation...");
+    console.log("Transaction Hash:", response.hash);
+
+    // Wait for the transaction to be confirmed
+    const receipt = await response.wait();
     console.log("Receipt:", receipt);
 
     return receipt;
   } catch (error) {
     console.error("Error:", error);
+
+    if (error.code === "TRANSACTION_UNDERPRICED") {
+      console.log("Transaction is pending, increasing gas price...");
+
+      // Increase the gas price by 10%
+      gasPrice *= 1.1;
+      console.log("New Gas Price:", gasPrice.toString());
+
+      // Resend the transaction with the higher gas price
+      const tx = {
+        to: destAddr,
+        value: amount,
+        nonce: nonce,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice
+      };
+
+      console.log("Resending transaction with higher gas price...");
+      console.log("Transaction:", tx);
+
+      const response = await signer.sendTransaction(tx);
+      console.log("Waiting for confirmation...");
+      console.log("Transaction Hash:", response.hash);
+
+      const receipt = await response.wait();
+      console.log("Receipt:", receipt);
+
+      return receipt;
+    }
+
     return null;
   }
 };
