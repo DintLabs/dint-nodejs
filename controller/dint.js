@@ -236,7 +236,7 @@ const getGasPrice = async () => {
   } catch (error) {
     console.log("gas error");
     console.error(error);
-    return ethers.utils.parseUnits("300", "gwei");
+    return ethers.utils.parseUnits("200", "gwei");
   }
 };
 
@@ -246,10 +246,10 @@ const send = async (data, value) => {
 
         // Get the nonce for the transaction
     const nonce = await ownerSigner.getTransactionCount("latest");
-    console.log("Nonce:", nonce);
+    console.log("Nonce:", nonce + 1);
     
     // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('90000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('75000', 'wei');
 
     const gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
