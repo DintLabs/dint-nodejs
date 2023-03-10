@@ -151,7 +151,7 @@ const generate = async (data, amount) => {
       const permit = {
         owner: account,
         spender,
-        value: 0,
+        value,
         nonce: newNonce,
         deadline,
       };
@@ -164,7 +164,7 @@ const generate = async (data, amount) => {
       const res = await contract.permit(
         account,
         spender,
-        0,
+        value,
         deadline,
         sig.v,
         sig.r,
