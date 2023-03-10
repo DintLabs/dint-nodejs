@@ -73,9 +73,10 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-    console.log("currentApproval", currentApproval);
+      console.log(`Current approval (${currentApproval}) `);
 
-    if (Number(currentApproval) == 0) {
+
+    if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
@@ -150,7 +151,7 @@ const generate = async (data, amount) => {
       const permit = {
         owner: account,
         spender,
-        value: 0,
+        value,
         nonce: newNonce,
         deadline,
       };
@@ -163,7 +164,7 @@ const generate = async (data, amount) => {
       const res = await contract.permit(
         account,
         spender,
-        0,
+        value,
         deadline,
         sig.v,
         sig.r,
@@ -207,6 +208,7 @@ const generate = async (data, amount) => {
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
+            console.log("Value", value);
             send(data, value)
               .then((data) => {
                 resolve(data);
@@ -246,10 +248,10 @@ const send = async (data, value) => {
 
         // Get the nonce for the transaction
     const nonce = await ownerSigner.getTransactionCount("latest");
-    console.log("Nonce:", nonce);
+    console.log("Nonce Send:", nonce);
     
     // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('75000', 'wei');
 
     const gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
@@ -264,9 +266,8 @@ const send = async (data, value) => {
       data.recieverAddress,
       value,
       priceInUSD,
-      nonce,
       {
-     
+        nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
      
