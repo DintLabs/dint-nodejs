@@ -39,7 +39,7 @@ const generate = async (data, amount) => {
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
-      ownerSigner
+      signer,
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
@@ -243,12 +243,6 @@ const getGasPrice = async () => {
 };
 
 const send = async (data, value) => {
-  const contract = new ethers.Contract(
-    DintTokenAddress.toLowerCase(),
-    DintTokenAbBI,
-    ownerSigner
-  );
-  var account = data.userAddress.toLowerCase();
   try {
     const priceInUSD = 1000000;
 
