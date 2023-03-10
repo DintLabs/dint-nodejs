@@ -237,15 +237,6 @@ console.log("Sender balance:", accountBalance .toString());
 };
 
 
-// Print the value being sent
-console.log("Value being sent:", value.toString());
-
-// Get the allowance for the spender
-const allowance = await contract.allowance(account, spender);
-console.log("Allowance for spender:", allowance.toString());
-
-// Print the current approval
-console.log("Current approval:", currentApproval.toString());
 
 const getGasPrice = async () => {
   try {
