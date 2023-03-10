@@ -242,12 +242,14 @@ const getGasPrice = async () => {
   }
 };
 
+// Get the nonce for the transaction
+    const nonce = await ownerSigner.getTransactionCount('latest');
+
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
 
-    // Get the nonce for the transaction
-    const nonce = await ownerSigner.getTransactionCount('latest');
+
 
     console.log("Nonce Send:", nonce);
 
