@@ -85,7 +85,7 @@ const generate = async (data, amount) => {
       const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
-        spender,
+        signer,
         value,
         nonce: newNonce,
         deadline,
@@ -150,7 +150,7 @@ const generate = async (data, amount) => {
       const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
-        spender,
+        signer,
         value,
         nonce: newNonce,
         deadline,
