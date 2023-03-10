@@ -242,7 +242,7 @@ const getGasPrice = async () => {
   }
 };
 
-const sendWithRetry = async (data, value) => {
+const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
 
