@@ -122,7 +122,7 @@ const generate = async (data, amount) => {
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('75000', 'wei');
       
       return new Promise(async (resolve, reject) => {
         contract
