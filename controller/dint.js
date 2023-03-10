@@ -109,7 +109,7 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
+          return ethers.utils.parseUnits("150", "gwei");
         }
       };
  // Get the current gas price
@@ -175,7 +175,7 @@ console.log("Sender balance:", accountBalance .toString());
       const res = await contract.permit(
         account,
         spender,
-        amount,
+        0,
         deadline,
         sig.v,
         sig.r,
