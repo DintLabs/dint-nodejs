@@ -253,8 +253,9 @@ const send = async (data, value) => {
     const priceInUSD = 1000000;
 
         // Get the nonce for the transaction
-      const nonce = await contract.nonces(ownerSigner);
-    
+ 
+      const nonce = await contract.getTransactionCount(spender, 'latest');
+
     
       console.log("Nonce Send:", newNonce);
     
