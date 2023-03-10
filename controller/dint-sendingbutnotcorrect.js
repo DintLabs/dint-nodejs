@@ -116,20 +116,13 @@ const generate = async (data, amount) => {
  let gasPrice = await getGasPrice();
  console.log("Gas Price:", gasPrice.toString());
 
-
  // Get the nonce for the transaction
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('70000', 'wei');
-     // Check the allowance before transferring
-  const allowance = await contract.allowance(owner, spender);
-
-  if (allowance.lt(value)) {
-    console.log("Allowance is not enough.");
-    return;
-  }   
+      
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -161,11 +154,6 @@ const generate = async (data, amount) => {
         nonce: newNonce,
         deadline,
       };
-
-      // Get the sender's balance
-const  accountBalance = await contract.balanceOf(account);
-console.log("Sender balance:", accountBalance .toString());
-
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
@@ -237,16 +225,6 @@ console.log("Sender balance:", accountBalance .toString());
 };
 
 
-// Print the value being sent
-console.log("Value being sent:", value.toString());
-
-// Get the allowance for the spender
-const allowance = await contract.allowance(account, spender);
-console.log("Allowance for spender:", allowance.toString());
-
-// Print the current approval
-console.log("Current approval:", currentApproval.toString());
-
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
@@ -268,10 +246,10 @@ const send = async (data, value) => {
 
         // Get the nonce for the transaction
     const nonce = await ownerSigner.getTransactionCount("latest");
-    console.log("Nonce Send:", nonce);
+    console.log("Nonce:", nonce);
     
     // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('75000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('70000', 'wei');
 
     const gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
@@ -287,7 +265,7 @@ const send = async (data, value) => {
       value,
       priceInUSD,
       {
-        nonce: nonce,
+     
         gasLimit: gasLimit,
         gasPrice: gasPrice,
      
