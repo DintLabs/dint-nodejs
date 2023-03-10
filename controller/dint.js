@@ -264,6 +264,7 @@ const send = async (data, value) => {
       data.recieverAddress,
       value,
       priceInUSD,
+      nonce,
       {
      
         gasLimit: gasLimit,
