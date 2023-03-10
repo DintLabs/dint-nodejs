@@ -116,20 +116,13 @@ const generate = async (data, amount) => {
  let gasPrice = await getGasPrice();
  console.log("Gas Price:", gasPrice.toString());
 
-
  // Get the nonce for the transaction
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('75000', 'wei');
-     // Check the allowance before transferring
-  const allowance = await contract.allowance(owner, spender);
-
-  if (allowance.lt(value)) {
-    console.log("Allowance is not enough.");
-    return;
-  }   
+ const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+      
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -161,11 +154,6 @@ const generate = async (data, amount) => {
         nonce: newNonce,
         deadline,
       };
-
-      // Get the sender's balance
-const  accountBalance = await contract.balanceOf(account);
-console.log("Sender balance:", accountBalance .toString());
-
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
@@ -235,7 +223,6 @@ console.log("Sender balance:", accountBalance .toString());
     }
   }
 };
-
 
 
 const getGasPrice = async () => {
