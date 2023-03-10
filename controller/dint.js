@@ -208,6 +208,7 @@ const generate = async (data, amount) => {
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
+            console.log("Value", value);
             send(data, value)
               .then((data) => {
                 resolve(data);
