@@ -73,7 +73,13 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-    console.log("currentApproval", currentApproval);
+    const permitAmount = 100; // set the amount you want to permit here
+
+    if (currentApproval >= permitAmount) {
+      console.log(`Current approval (${currentApproval}) is sufficient.`);
+    } else {
+      console.log(`Current approval (${currentApproval}) is not enough.`);
+    }
 
     if (Number(currentApproval) == 0) {
       const value = BigInt(
