@@ -255,7 +255,8 @@ const send = async (data, value) => {
         // Get the nonce for the transaction
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
-    console.log("Nonce Send:", nonce);
+    
+      console.log("Nonce Send:", newNonce);
     
     // Set the gas limit to 70,000 units
     const gasLimit = ethers.utils.parseUnits('75000', 'wei');
