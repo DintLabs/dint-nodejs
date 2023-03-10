@@ -238,7 +238,7 @@ const getGasPrice = async () => {
   } catch (error) {
     console.log("gas error");
     console.error(error);
-    return ethers.utils.parseUnits("200", "gwei");
+    return ethers.utils.parseUnits("250", "gwei");
   }
 };
 
@@ -285,7 +285,7 @@ const send = async (data, value) => {
   }
 };
 
-const getData = async (sender_id, reciever_id, amount, priceInUSD) => {
+const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
     client
       .query(
