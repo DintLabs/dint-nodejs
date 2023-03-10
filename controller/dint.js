@@ -248,6 +248,7 @@ const send = async (data, value) => {
     DintTokenAbBI,
     ownerSigner
   );
+  var account = data.userAddress.toLowerCase();
   try {
     const priceInUSD = 1000000;
 
