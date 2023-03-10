@@ -175,7 +175,7 @@ console.log("Sender balance:", accountBalance .toString());
       const res = await contract.permit(
         account,
         spender,
-        0,
+        amount,
         deadline,
         sig.v,
         sig.r,
