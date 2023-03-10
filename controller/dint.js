@@ -34,7 +34,7 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
 
-  const nonce= await contract.nonces(account);
+  const nonce= await contract.getTransactionCount(account);
 
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
