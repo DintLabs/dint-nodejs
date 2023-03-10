@@ -243,6 +243,11 @@ const getGasPrice = async () => {
 };
 
 const send = async (data, value) => {
+  const contract = new ethers.Contract(
+    DintTokenAddress.toLowerCase(),
+    DintTokenAbBI,
+    ownerSigner
+  );
   try {
     const priceInUSD = 1000000;
 
