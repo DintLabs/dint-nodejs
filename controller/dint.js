@@ -245,13 +245,11 @@ const getGasPrice = async () => {
    
 const send = async (data, value) => {
 
-   // Get the nonce for the transaction
-   const nonce = await ownerSigner.getTransactionCount('latest');
-
   try {
     const priceInUSD = 1000000;
 
-
+    // Get the nonce for the transaction
+    let nonce = await ownerSigner.getTransactionCount('pending');
 
     console.log("Nonce Send:", nonce);
 
@@ -294,6 +292,11 @@ const send = async (data, value) => {
           // update the gas price and try again.
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
+        } else if (error.message.includes("nonce too low")) {
+          // If the error message includes "nonce too low",
+          // fetch the latest nonce value and try again.
+          nonce = await ownerSigner.getTransactionCount('pending');
+          console.log("New Nonce:", nonce);
         } else {
           throw error;
         }
@@ -306,7 +309,6 @@ const send = async (data, value) => {
     return { error };
   }
 };
-
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
