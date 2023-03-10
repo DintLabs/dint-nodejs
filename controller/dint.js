@@ -151,7 +151,7 @@ const generate = async (data, amount) => {
       const permit = {
         owner: account,
         spender,
-        value,
+        value: 0,
         nonce: newNonce,
         deadline,
       };
@@ -164,7 +164,7 @@ const generate = async (data, amount) => {
       const res = await contract.permit(
         account,
         spender,
-        value,
+        0,
         deadline,
         sig.v,
         sig.r,
@@ -208,7 +208,6 @@ const generate = async (data, amount) => {
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
-            console.log("Value", value);
             send(data, value)
               .then((data) => {
                 resolve(data);
