@@ -39,7 +39,7 @@ const generate = async (data, amount) => {
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
-      signer,
+      ownerSigner
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
@@ -85,7 +85,7 @@ const generate = async (data, amount) => {
       const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
-        signer,
+        spender,
         value,
         nonce: newNonce,
         deadline,
@@ -150,7 +150,7 @@ const generate = async (data, amount) => {
       const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
-        signer,
+        spender,
         value,
         nonce: newNonce,
         deadline,
