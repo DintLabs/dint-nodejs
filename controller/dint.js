@@ -33,7 +33,9 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
-  const nonce = await ownerSigner.getTransactionCount("latest");
+
+  const nonce= await contract.nonces(account);
+
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -267,7 +269,7 @@ const send = async (data, value) => {
       value,
       priceInUSD,
       {
-        nonce: newNonce + 2,
+        nonce: nonce,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
      
