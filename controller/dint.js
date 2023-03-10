@@ -238,52 +238,71 @@ const getGasPrice = async () => {
   } catch (error) {
     console.log("gas error");
     console.error(error);
-    return ethers.utils.parseUnits("250", "gwei");
+    return ethers.utils.parseUnits("200", "gwei");
   }
 };
 
-const send = async (data, value) => {
+const sendWithRetry = async (data, value) => {
   try {
     const priceInUSD = 1000000;
 
-        // Get the nonce for the transaction
- 
-      const nonce = await ownerSigner.getTransactionCount('latest');
+    // Get the nonce for the transaction
+    const nonce = await ownerSigner.getTransactionCount('latest');
 
-    
-      console.log("Nonce Send:", nonce);
-    
+    console.log("Nonce Send:", nonce);
+
     // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('90000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('75000', 'wei');
 
-    const gasPrice = await getGasPrice();
+    let gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
-    const dintDistContract = new ethers.Contract(
-      DintDistributerAddress.toLowerCase(),
-      dintDistributerABI,
-      ownerSigner
-    );
 
-    const tx = await  dintDistContract.sendDint(
-      data.userAddress,
-      data.recieverAddress,
-      value,
-      priceInUSD,
-      {
-        nonce: nonce,
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
-     
+    let attempt = 1;
+    let txHash = null;
+    while (!txHash) {
+      try {
+        const dintDistContract = new ethers.Contract(
+          DintDistributerAddress.toLowerCase(),
+          dintDistributerABI,
+          ownerSigner
+        );
+
+        const tx = await dintDistContract.sendDint(
+          data.userAddress,
+          data.recieverAddress,
+          value,
+          priceInUSD,
+          {
+            nonce: nonce,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
+          }
+        );
+        console.log("Transaction Hash", tx.hash);
+        console.log("Dint Price =", priceInUSD);
+        txHash = tx.hash;
+      } catch (error) {
+        console.log(`Attempt ${attempt}:`, error.message);
+        attempt++;
+
+        if (error.message.includes("replacement transaction underpriced")) {
+          // If the error message includes "replacement transaction underpriced",
+          // update the gas price and try again.
+          gasPrice = await getGasPrice();
+          console.log("New Gas Price:", gasPrice.toString());
+        } else {
+          throw error;
+        }
       }
-    );
-    console.log("Transaction Hash", tx.hash);
-    console.log("Dint Price =", priceInUSD);
-    return { tx };
+    }
+
+    return { txHash };
   } catch (error) {
     console.log("err", error);
     return { error };
   }
 };
+
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
