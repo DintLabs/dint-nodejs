@@ -247,7 +247,7 @@ const send = async (data, value) => {
     const priceInUSD = 1000000;
 
         // Get the nonce for the transaction
-    const nonce = await spender.getTransactionCount("latest");
+    const nonce = await contract.nonces(account);
     console.log("Nonce Send:", nonce);
     
     // Set the gas limit to 70,000 units
