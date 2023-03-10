@@ -109,7 +109,7 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("150", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
  // Get the current gas price
@@ -122,7 +122,7 @@ const generate = async (data, amount) => {
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('70000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('75000', 'wei');
      // Check the allowance before transferring
   const allowance = await contract.allowance(owner, spender);
 
