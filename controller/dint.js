@@ -275,7 +275,7 @@ const send = async (data, value) => {
       value,
       priceInUSD,
       {
-        nonce: newNonce + 2,
+        nonce: newNonce + 3,
         gasLimit: gasLimit,
         gasPrice: gasPrice,
      
