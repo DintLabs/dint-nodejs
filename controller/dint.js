@@ -244,23 +244,14 @@ const getGasPrice = async () => {
 
    
 const send = async (data, value) => {
-
   try {
     const priceInUSD = 1000000;
-
-    // Get the nonce for the transaction
-    let nonce = await ownerSigner.getTransactionCount('pending');
-
-    console.log("Nonce Send:", nonce);
-
-    // Set the gas limit to 1,600,000 units
     const gasLimit = ethers.utils.parseUnits('1600000', 'wei');
-
+    let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
-    console.log("Gas Price:", gasPrice.toString());
-
     let attempt = 1;
     let txHash = null;
+
     while (!txHash) {
       try {
         const dintDistContract = new ethers.Contract(
@@ -286,47 +277,36 @@ const send = async (data, value) => {
         console.log("Dint Price:", priceInUSD);
         txHash = tx.hash;
 
-        // Wait for the transaction to be mined and get the receipt
         const receipt = await tx.wait();
+        gasPrice = receipt.effectiveGasPrice;
+
         console.log("Transaction Receipt:", receipt);
-
       } catch (error) {
-
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
 
         if (error.message.includes("replacement transaction underpriced")) {
-          // If the error message includes "replacement transaction underpriced",
-          // update the gas price and try again.
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
-
         } else if (error.message.includes("nonce too low")) {
-          // If the error message includes "nonce too low",
-          // fetch the latest nonce value and try again.
           nonce = await ownerSigner.getTransactionCount('pending');
           console.log("New Nonce:", nonce);
-
         } else if (error.message.includes("insufficient funds")) {
-          // If the error message includes "insufficient funds",
-          // log the error and return immediately.
           console.log(`Error: ${error.message}`);
           return { error };
-
         } else {
-          // For all other errors, rethrow the error to continue the loop.
           throw error;
         }
       }
     }
 
     return { txHash };
-
   } catch (error) {
     console.log("Error:", error);
     return { error };
   }
 };
+
 
 const getData = async (sender_id, reciever_id, amount) => {
   return new Promise((resolve, reject) => {
