@@ -254,7 +254,7 @@ const send = async (data, value) => {
     console.log("Nonce Send:", nonce);
 
     // Set the gas limit to 70,000 units
-    const gasLimit = ethers.utils.parseUnits('1750650', 'wei');
+    const gasLimit = ethers.utils.parseUnits('2000000', 'wei');
 
     let gasPrice = await getGasPrice();
     console.log("Gas Price:", gasPrice.toString());
