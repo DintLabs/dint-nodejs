@@ -253,7 +253,7 @@ const send = async (data, value) => {
 
     console.log("Nonce Send:", nonce);
 
-    // Set the gas limit to 70,000 units
+    // Set the gas limit to 1,600,000 units
     const gasLimit = ethers.utils.parseUnits('1600000', 'wei');
 
     let gasPrice = await getGasPrice();
@@ -280,11 +280,19 @@ const send = async (data, value) => {
             gasPrice: gasPrice,
           }
         );
-        console.log("Transaction Hash", tx.hash);
-        console.log("Dint Price =", priceInUSD);
+
+        console.log("Transaction Sent Successfully");
+        console.log("Transaction Hash:", tx.hash);
+        console.log("Dint Price:", priceInUSD);
         txHash = tx.hash;
+
+        // Wait for the transaction to be mined and get the receipt
+        const receipt = await tx.wait();
+        console.log("Transaction Receipt:", receipt);
+
       } catch (error) {
-        console.log(`Attempt ${attempt}:`, error.message);
+
+        console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
 
         if (error.message.includes("replacement transaction underpriced")) {
@@ -292,20 +300,30 @@ const send = async (data, value) => {
           // update the gas price and try again.
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
+
         } else if (error.message.includes("nonce too low")) {
           // If the error message includes "nonce too low",
           // fetch the latest nonce value and try again.
           nonce = await ownerSigner.getTransactionCount('pending');
           console.log("New Nonce:", nonce);
+
+        } else if (error.message.includes("insufficient funds")) {
+          // If the error message includes "insufficient funds",
+          // log the error and return immediately.
+          console.log(`Error: ${error.message}`);
+          return { error };
+
         } else {
+          // For all other errors, rethrow the error to continue the loop.
           throw error;
         }
       }
     }
 
     return { txHash };
+
   } catch (error) {
-    console.log("err", error);
+    console.log("Error:", error);
     return { error };
   }
 };
