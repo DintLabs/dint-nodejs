@@ -246,7 +246,7 @@ const getGasPrice = async () => {
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('1600000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
     let attempt = 1;
@@ -254,6 +254,13 @@ const send = async (data, value) => {
 
     while (!txHash) {
       try {
+        const pendingTxs = await provider.getTransactionCount(ownerAddress, 'pending');
+        const higherNonceTxs = pendingTxs - nonce;
+
+        if (higherNonceTxs > 0) {
+          nonce += higherNonceTxs;
+        }
+
         const dintDistContract = new ethers.Contract(
           DintDistributerAddress.toLowerCase(),
           dintDistributerABI,
@@ -281,11 +288,15 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
+        console.log("Transaction completed successfully!");
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
 
-        if (error.message.includes("replacement transaction underpriced")) {
+        if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
+          console.log("There was an issue with your transaction. Transaction was replaced");
+          return { error };
+        } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
         } else if (error.message.includes("nonce too low")) {
@@ -305,10 +316,12 @@ const send = async (data, value) => {
 
     return { txHash };
   } catch (error) {
+    console.log("There was an issue processing your transaction.");
     console.log("Error:", error);
     return { error };
   }
 };
+
 
 
 const getData = async (sender_id, reciever_id, amount) => {
