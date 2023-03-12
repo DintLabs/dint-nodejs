@@ -243,7 +243,7 @@ const getGasPrice = async () => {
 };
 
    
-const send = async (data, value) => {
+const send = async (data, value, res) => {
   try {
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
