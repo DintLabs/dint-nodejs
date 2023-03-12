@@ -234,14 +234,16 @@ const getGasPrice = async () => {
       .then((res) => res.data);
 
     const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+    const initialGasPrice = ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+    const increasedGasPrice = initialGasPrice.mul(120).div(100); // 20% increase
+
+    return increasedGasPrice;
   } catch (error) {
     console.log("gas error");
     console.error(error);
     return ethers.utils.parseUnits("220", "gwei");
   }
 };
-
    
 const send = async (data, value) => {
   try {
