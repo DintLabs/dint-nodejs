@@ -281,6 +281,7 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
+        console.log("Transaction completed successfully");
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
