@@ -101,18 +101,20 @@ sendDint.post("/withdraw-dint", async (req, res) => {
             //   );
             //   const sender = users[0];
             //   const reciever = users[1];
-            return res.send({
-              success: true,
-              hash: data.res.hash,
-              userAddress: data.data.userAddress,
-              amount: amount,
-            });
+            return res
+              .status(201)
+              .send({
+                success: true,
+                hash: data.res.hash,
+                userAddress: data.data.userAddress,
+                amount: amount,
+              });
             // } else {
             //   return res.send("Something went wrong. Please try again");
             // }
           })
           .catch((err) => {
-            return res.send({
+            return res.status(500).send({
               success: false,
               message:
                 "Something went wrong while making transaction. Please try again!",
@@ -122,19 +124,20 @@ sendDint.post("/withdraw-dint", async (req, res) => {
       })
       .catch((error) => {
         console.log("err", error);
-        return res.send({
-          sucess: false,
+        return res.status(500).send({
+          success: false,
           message: "Something went wrong while getting user data.",
           error: error,
         });
       });
   } catch (error) {
     res.status(500).json({
-      sucess: false,
+      success: false,
       message: "Something went wrong. Please try again!",
       error: err,
     });
   }
+  
 });
 
 
