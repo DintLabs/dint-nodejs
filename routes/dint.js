@@ -30,20 +30,23 @@ sendDint.post("/send-dint", async (req, res) => {
       .then((data) => {
         generate(data, amount)
           .then((data) => {
-            if (data.res && data.res.hash) {
-              return res.status(201).json({
-                success: true,
-                Hash: data.res.hash,
-                sender: data.data.userAddress,
-                reciever: data.data.recieverAddress,
-                amount: amount,
-              });
-            } else {
-              return res.send({
-                success: false,
-                message: "Something went wrong while making transaction. Please try again!",
-              });
-            }
+            // if (data.data) {
+            //   const users = ethers.utils.defaultAbiCoder.decode(
+            //     ["address", "address"],
+            //     data.data
+            //   );
+            //   const sender = users[0];
+            //   const reciever = users[1];
+            return res.send({
+              success: true,
+              Hash: data.res.hash,
+              sender: data.data.userAddress,
+              reciever: data.data.recieverAddress,
+              amount: amount,
+            });
+            // } else {
+            //   return res.send("Something went wrong. Please try again");
+            // }
           })
           .catch((err) => {
             return res.send({
@@ -57,18 +60,16 @@ sendDint.post("/send-dint", async (req, res) => {
       .catch((error) => {
         console.log("err", error);
         return res.send({
-          success: false,
+          sucess: false,
           message: "Something went wrong while getting user data.",
         });
       });
   } catch (error) {
     res.status(500).json({
-      success: false,
+      sucess: false,
       message: "Something went wrong. Please try again!",
     });
   }
-  
-  
 });
 
 sendDint.post("/checkout", checkout);
