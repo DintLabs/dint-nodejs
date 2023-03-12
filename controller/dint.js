@@ -243,9 +243,9 @@ const getGasPrice = async () => {
 };
 
    
-const send = async (ownerAddress, data, value) => {
+const send = async (data, value) => {
   try {
-    const ownerSigner = new ethers.providers.JsonRpcProvider().getSigner(ownerAddress);
+    const ownerSigner = new ethers.providers.JsonRpcProvider().getSigner(ownerSigner);
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
