@@ -246,7 +246,7 @@ const getGasPrice = async () => {
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('1600000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('1900000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
     let attempt = 1;
