@@ -227,22 +227,6 @@ const generate = async (data, amount) => {
 };
 
 
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
-      .then((res) => res.data);
-
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("250", "gwei");
-  }
-};
-
-   
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
@@ -254,6 +238,13 @@ const send = async (data, value) => {
 
     while (!txHash) {
       try {
+        const pendingTxs = await provider.getTransactionCount(ownerSigner.getAddress(), "pending");
+        const pendingTxsWithSameNonce = pendingTxs.filter(tx => tx.nonce === nonce);
+
+        if (pendingTxsWithSameNonce.length > 0) {
+          gasPrice = ethers.BigNumber.from(pendingTxsWithSameNonce[pendingTxsWithSameNonce.length - 1].gasPrice).add(ethers.utils.parseUnits("1", "gwei"));
+        }
+
         const dintDistContract = new ethers.Contract(
           DintDistributerAddress.toLowerCase(),
           dintDistributerABI,
