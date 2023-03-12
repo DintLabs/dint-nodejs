@@ -254,13 +254,6 @@ const send = async (data, value) => {
 
     while (!txHash) {
       try {
-        const pendingTxs = await provider.getTransactionCount(ownerAddress, 'pending');
-        const higherNonceTxs = pendingTxs - nonce;
-
-        if (higherNonceTxs > 0) {
-          nonce += higherNonceTxs;
-        }
-
         const dintDistContract = new ethers.Contract(
           DintDistributerAddress.toLowerCase(),
           dintDistributerABI,
@@ -307,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
