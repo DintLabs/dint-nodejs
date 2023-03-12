@@ -242,7 +242,7 @@ const getGasPrice = async () => {
   }
 };
 
-class DintReceipt {
+class dintReceipt {
   constructor(txHash, receipt, price) {
     this.txHash = txHash;
     this.receipt = receipt;
@@ -290,7 +290,7 @@ const send = async (data, value) => {
         console.log("Transaction Receipt:", receipt);
         console.log("Transaction completed successfully!");
        
-        return new DintReceipt(txHash, receipt, priceInUSD);
+        return new dintReceipt(txHash, receipt, priceInUSD);
 
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
