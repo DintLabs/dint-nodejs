@@ -31,7 +31,7 @@ sendDint.post("/send-dint", async (req, res) => {
         generate(data, amount)
           .then((data) => {
             if (data.res && data.res.hash) {
-              return res.send({
+              return res.status(201).json({
                 success: true,
                 Hash: data.res.hash,
                 sender: data.data.userAddress,
