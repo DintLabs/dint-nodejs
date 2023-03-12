@@ -281,6 +281,7 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
+        return { txHash, success: true };
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
@@ -292,6 +293,9 @@ const send = async (data, value) => {
           nonce = await ownerSigner.getTransactionCount('pending');
           console.log("New Nonce:", nonce);
         } else if (error.message.includes("insufficient funds")) {
+          console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
           return { error };
         } else {
@@ -306,17 +310,6 @@ const send = async (data, value) => {
     return { error };
   }
 };
-
-// Example usage:
-send(data, value)
-  .then(response => {
-    console.log("Response:", response);
-    // pass response to your frontend using a callback function or other method
-  })
-  .catch(error => {
-    console.log("Error:", error);
-    // handle error
-  });
 
 
 const getData = async (sender_id, reciever_id, amount) => {
