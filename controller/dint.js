@@ -287,7 +287,7 @@ const send = async (data, value) => {
         attempt++;
 
         if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
-          console.log("There was an issue with your transaction.");
+          console.log("There was an issue with your transaction. Transaction was replaced");
           return { error };
         } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
