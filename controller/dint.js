@@ -294,6 +294,9 @@ const send = async (data, value) => {
         } else if (error.message.includes("insufficient funds")) {
           console.log(`Error: ${error.message}`);
           return { error };
+        } else if (error.message.includes("transfer amount exceeds allowance")) {
+          console.log(`Error: ${error.message}`);
+          return { error };
         } else {
           throw error;
         }
