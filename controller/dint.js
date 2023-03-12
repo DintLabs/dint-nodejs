@@ -243,7 +243,7 @@ const getGasPrice = async () => {
 };
 
    
-const send = async (data, value, res) => {
+const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
@@ -282,7 +282,6 @@ const send = async (data, value, res) => {
 
         console.log("Transaction Receipt:", receipt);
         console.log("Transaction completed successfully!");
-        res.status(201).send(charge);
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
@@ -301,6 +300,9 @@ const send = async (data, value, res) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
