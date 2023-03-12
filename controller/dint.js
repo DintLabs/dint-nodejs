@@ -234,21 +234,19 @@ const getGasPrice = async () => {
       .then((res) => res.data);
 
     const fee = standard + (fast - standard) / 3;
-    const initialGasPrice = ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-    const increasedGasPrice = initialGasPrice.mul(120).div(100); // 20% increase
-
-    return increasedGasPrice;
+    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
   } catch (error) {
     console.log("gas error");
     console.error(error);
     return ethers.utils.parseUnits("220", "gwei");
   }
 };
+
    
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('1700000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('1600000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
     let attempt = 1;
