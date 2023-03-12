@@ -254,13 +254,6 @@ const send = async (data, value) => {
 
     while (!txHash) {
       try {
-        const pendingTxs = await provider.getTransactionCount(ownerSigner.getAddress(), "pending");
-        const pendingTxsWithSameNonce = pendingTxs.filter(tx => tx.nonce === nonce);
-
-        if (pendingTxsWithSameNonce.length > 0) {
-          gasPrice = ethers.BigNumber.from(pendingTxsWithSameNonce[pendingTxsWithSameNonce.length - 1].gasPrice).add(ethers.utils.parseUnits("1", "gwei"));
-        }
-
         const dintDistContract = new ethers.Contract(
           DintDistributerAddress.toLowerCase(),
           dintDistributerABI,
@@ -308,6 +301,9 @@ const send = async (data, value) => {
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
           return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
+          return { error };
         } else {
           throw error;
         }
@@ -321,7 +317,6 @@ const send = async (data, value) => {
     return { error };
   }
 };
-
 
 
 const getData = async (sender_id, reciever_id, amount) => {
