@@ -227,6 +227,22 @@ const generate = async (data, amount) => {
 };
 
 
+const getGasPrice = async () => {
+  try {
+    const { standard, fast } = await axios
+      .get("https://gasstation-mainnet.matic.network/")
+      .then((res) => res.data);
+
+    const fee = standard + (fast - standard) / 3;
+    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+  } catch (error) {
+    console.log("gas error");
+    console.error(error);
+    return ethers.utils.parseUnits("250", "gwei");
+  }
+};
+
+   
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
@@ -305,6 +321,7 @@ const send = async (data, value) => {
     return { error };
   }
 };
+
 
 
 const getData = async (sender_id, reciever_id, amount) => {
