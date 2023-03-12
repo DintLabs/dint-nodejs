@@ -282,6 +282,7 @@ const send = async (data, value) => {
 
         console.log("Transaction Receipt:", receipt);
         console.log("Transaction completed successfully!");
+        res.status(201).send(charge);
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
