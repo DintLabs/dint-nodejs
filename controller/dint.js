@@ -294,9 +294,6 @@ const send = async (data, value) => {
         } else if (error.message.includes("insufficient funds")) {
           console.log(`Error: ${error.message}`);
           return { error };
-        } else if (error.message.includes("transfer amount exceeds allowance")) {
-          console.log(`Error: ${error.message}`);
-          return { error };
         } else {
           throw error;
         }
@@ -309,6 +306,17 @@ const send = async (data, value) => {
     return { error };
   }
 };
+
+// Example usage:
+send(data, value)
+  .then(response => {
+    console.log("Response:", response);
+    // pass response to your frontend using a callback function or other method
+  })
+  .catch(error => {
+    console.log("Error:", error);
+    // handle error
+  });
 
 
 const getData = async (sender_id, reciever_id, amount) => {
