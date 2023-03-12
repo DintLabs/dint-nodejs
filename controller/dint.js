@@ -281,11 +281,15 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
+        console.log("Transaction completed successfully!");
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
 
-        if (error.message.includes("replacement transaction underpriced")) {
+        if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
+          console.log("There was an issue with your transaction.");
+          return { error };
+        } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
         } else if (error.message.includes("nonce too low")) {
@@ -303,10 +307,9 @@ const send = async (data, value) => {
       }
     }
 
-    console.log("Transaction completed successfully");
     return { txHash };
   } catch (error) {
-    console.log("There was an issue processing your transactions");
+    console.log("There was an issue processing your transaction.");
     console.log("Error:", error);
     return { error };
   }
