@@ -70,15 +70,15 @@ const generate = async (data, amount) => {
     ];
   
     const value = BigInt(ethers.constants.MaxUint256);
-      const currentnonce = await contract.nonces(ownerSigner);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: ownerSigner,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
+    const currentnonce = await contract.nonces(ownerSigner);
+    const newNonce = BigInt(currentnonce);
+    const permit = {
+      owner: ownerSigner,
+      spender,
+      value,
+      nonce: newNonce,
+      deadline,
+    };
       
       const generatedSig = await signer._signTypedData(
         domain,
