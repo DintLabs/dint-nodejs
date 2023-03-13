@@ -69,7 +69,7 @@ const generate = async (data, amount) => {
       { name: "deadline", type: "uint256" },
     ];
     const currentApproval = await contract.allowance(
-      data.userAddress,
+      signer,
       DintDistributerAddress
     );
 
@@ -175,7 +175,7 @@ const generate = async (data, amount) => {
         }
       );
       const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+        Number(ethers.utils.parseUnits(ethers.constants.MaxUint256.toString(), "ether"))
       );
       const permitNew = {
         owner: account,
