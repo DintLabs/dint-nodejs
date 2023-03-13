@@ -35,7 +35,7 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
-    const signer = new ethers.Wallet(data.ownerPrivateKey, provider);
+    const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
