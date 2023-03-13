@@ -194,7 +194,7 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(
-            account,
+            ownerSigner,
             spender,
             value,
             deadline,
