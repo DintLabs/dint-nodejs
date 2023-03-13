@@ -35,7 +35,7 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
-    const signer = ownerSigner;
+    const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
@@ -68,18 +68,28 @@ const generate = async (data, amount) => {
       { name: "nonce", type: "uint256" },
       { name: "deadline", type: "uint256" },
     ];
-  
-    const value = BigInt(ethers.constants.MaxUint256);
-    const currentnonce = await contract.nonces(ownerSigner);
-    const newNonce = BigInt(currentnonce);
-    const permit = {
-      owner: ownerSigner,
-      spender,
-      value,
-      nonce: newNonce,
-      deadline,
-    };
-      
+    const currentApproval = await contract.allowance(
+      data.userAddress,
+      DintDistributerAddress
+    );
+
+      console.log(`Current approval (${currentApproval}) `);
+
+
+    if (Number(currentApproval) >= 0) {
+      const value = BigInt(
+        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+      );
+
+      const currentnonce = await contract.nonces(account);
+      const newNonce = currentnonce.toNumber();
+      const permit = {
+        owner: account,
+        spender,
+        value,
+        nonce: newNonce,
+        deadline,
+      };
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
@@ -136,10 +146,10 @@ const generate = async (data, amount) => {
           });
       });
     } else {
-      const currentnonce = await contract.nonces(ownerSigner);
+      const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
-        owner: ownerSigner,
+        owner: account,
         spender,
         value,
         nonce: newNonce,
@@ -152,7 +162,7 @@ const generate = async (data, amount) => {
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
       const res = await contract.permit(
-        ownerSigner,
+        account,
         spender,
         value,
         deadline,
@@ -168,7 +178,7 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
       const permitNew = {
-        owner: ownerSigner,
+        owner: account,
         spender,
         value,
         nonce: newNonce + 1,
@@ -184,7 +194,7 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(
-            ownerSigner,
+            account,
             spender,
             value,
             deadline,
@@ -214,7 +224,7 @@ const generate = async (data, amount) => {
       });
     }
   }
-
+};
 
 
 const getGasPrice = async () => {
