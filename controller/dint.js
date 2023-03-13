@@ -35,7 +35,7 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
+    const signer = ownerSigner;
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
@@ -77,9 +77,7 @@ const generate = async (data, amount) => {
 
 
     if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
+      const value = BigInt(ethers.constants.MaxUint256);
 
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
