@@ -75,8 +75,9 @@ const generate = async (data, amount) => {
 
       console.log(`Current approval (${currentApproval}) `);
 
+
+    if (Number(currentApproval) >= 0) {
       const value = ethers.constants.MaxUint256;
-  
 
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
@@ -221,7 +222,7 @@ const generate = async (data, amount) => {
       });
     }
   }
-
+};
 
 
 const getGasPrice = async () => {
