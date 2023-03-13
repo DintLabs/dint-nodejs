@@ -126,7 +126,7 @@ const generate = async (data, amount) => {
       
       return new Promise(async (resolve, reject) => {
         contract
-          .setMaxApproval(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
           })
