@@ -68,26 +68,18 @@ const generate = async (data, amount) => {
       { name: "nonce", type: "uint256" },
       { name: "deadline", type: "uint256" },
     ];
-    const currentApproval = await contract.allowance(
-      data.userAddress,
-      DintDistributerAddress
-    );
-
-      console.log(`Current approval (${currentApproval}) `);
-
-
-    if (Number(currentApproval) >= 0) {
-      const value = BigInt(ethers.constants.MaxUint256);
-
-      const currentnonce = await contract.nonces(account);
+  
+    const value = BigInt(ethers.constants.MaxUint256);
+      const currentnonce = await contract.nonces(ownerSigner);
       const newNonce = currentnonce.toNumber();
       const permit = {
-        owner: account,
+        owner: ownerSigner,
         spender,
         value,
         nonce: newNonce,
         deadline,
       };
+      
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
@@ -144,10 +136,10 @@ const generate = async (data, amount) => {
           });
       });
     } else {
-      const currentnonce = await contract.nonces(account);
+      const currentnonce = await contract.nonces(ownerSigner);
       const newNonce = currentnonce.toNumber();
       const permit = {
-        owner: account,
+        owner: ownerSigner,
         spender,
         value,
         nonce: newNonce,
@@ -160,7 +152,7 @@ const generate = async (data, amount) => {
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
       const res = await contract.permit(
-        account,
+        ownerSigner,
         spender,
         value,
         deadline,
@@ -176,7 +168,7 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
       const permitNew = {
-        owner: account,
+        owner: ownerSigner,
         spender,
         value,
         nonce: newNonce + 1,
@@ -192,7 +184,7 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(
-            account,
+            ownerSigner,
             spender,
             value,
             deadline,
@@ -222,7 +214,7 @@ const generate = async (data, amount) => {
       });
     }
   }
-};
+
 
 
 const getGasPrice = async () => {
