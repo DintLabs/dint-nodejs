@@ -35,7 +35,7 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
+    const signer = new ethers.Wallet(data.ownerPrivateKey, provider);
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
@@ -69,7 +69,7 @@ const generate = async (data, amount) => {
       { name: "deadline", type: "uint256" },
     ];
     const currentApproval = await contract.allowance(
-      ownerSigner,
+      data.userAddress,
       DintDistributerAddress
     );
 
@@ -84,7 +84,7 @@ const generate = async (data, amount) => {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
-        ownerSigner,
+        owner: account,
         spender,
         value,
         nonce: newNonce,
@@ -149,7 +149,7 @@ const generate = async (data, amount) => {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
-        ownerSigner,
+        owner: account,
         spender,
         value,
         nonce: newNonce,
@@ -162,7 +162,7 @@ const generate = async (data, amount) => {
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
       const res = await contract.permit(
-        ownerSigner,
+        account,
         spender,
         value,
         deadline,
@@ -175,10 +175,10 @@ const generate = async (data, amount) => {
         }
       );
       const value = BigInt(
-        Number(ethers.utils.parseUnits(ethers.constants.MaxUint256.toString(), "ether"))
+        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
       const permitNew = {
-        ownerSigner,
+        owner: account,
         spender,
         value,
         nonce: newNonce + 1,
@@ -194,7 +194,7 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(
-            ownerSigner,
+            account,
             spender,
             value,
             deadline,
@@ -300,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
