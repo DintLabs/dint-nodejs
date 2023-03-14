@@ -73,7 +73,17 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-      console.log(`Current approval (${currentApproval}) `);
+
+      // Get the current allowance for the spender (DintDistributerAddress) from the ownerSigner's wallet
+      const ownerAllowance = await contract.allowance(
+        ownerSigner,
+        DintDistributerAddress
+      );
+  
+
+      // Log the current allowances for debugging purposes
+      console.log(`Current allowance from signer's wallet: ${currentApproval}`);
+      console.log(`Current allowance from ownerSigner's wallet: ${ownerAllowance}`);
 
 
     if (Number(currentApproval) >= 0) {
