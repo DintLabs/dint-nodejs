@@ -34,13 +34,21 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
 
+
+  // Check if the amount is greater than or equal to 0
   if (amount >= 0) {
+
+// Create a new wallet object using the user's private key and provider object
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
+
+  // Create a new contract object using the DintTokenAddress, DintTokenAbBI, and ownerSigner
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(),
       DintTokenAbBI,
       ownerSigner
     );
+
+    // Set some variables for the permit signature
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
     const chainId = 137; // this is for the chain's ID.
@@ -55,6 +63,7 @@ const generate = async (data, amount) => {
       chainId,
     };
 
+ // Create a domain object to use in the permit signature
     const domainType = [
       { name: "name", type: "string" },
       { name: "version", type: "string" },
@@ -68,21 +77,35 @@ const generate = async (data, amount) => {
       { name: "nonce", type: "uint256" },
       { name: "deadline", type: "uint256" },
     ];
+
+  // Get the current approval for the spender
     const currentApproval = await contract.allowance(
       data.userAddress,
       DintDistributerAddress
     );
 
-      console.log(`Current approval (${currentApproval}) `);
+  // Get the current allowance for the spender (DintDistributerAddress) from the ownerSigner's wallet
+     const ownerAllowance = await contract.allowance(
+      ownerSigner,
+      DintDistributerAddress
+    );
+ 
+    // Log the current allowances for debugging purposes
+    console.log(`Current allowance from signer's wallet: ${currentApproval}`);
+    console.log(`Current allowance from ownerSigner's wallet: ${ownerAllowance}`);
 
+ // Check if the current allowances are greater than or equal to the amount
+ if (Number(currentApproval) >= amount || Number(ownerAllowance) >= amount) {
+  // Convert the amount to the appropriate format
+  const value = BigInt(
+    Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+  );
 
-    if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-
+// Get the current nonce for the account
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
+
+// Create a permit object to use in the signature   
       const permit = {
         owner: account,
         spender,
@@ -90,15 +113,18 @@ const generate = async (data, amount) => {
         nonce: newNonce,
         deadline,
       };
+
+ // Generate a signature for the permit object
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
         permit
       );
 
-
+  // Split the signature into its constituent parts
       let sig = await ethers.utils.splitSignature(generatedSig);
 
+ // Get the current gas price
       const getGasPrice = async () => {
         try {
           const { standard, fast } = await axios
@@ -113,7 +139,7 @@ const generate = async (data, amount) => {
           return ethers.utils.parseUnits("200", "gwei");
         }
       };
- // Get the current gas price
+
  let gasPrice = await getGasPrice();
  console.log("Gas Price:", gasPrice.toString());
 
@@ -121,11 +147,12 @@ const generate = async (data, amount) => {
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
- // Set the gas limit to 70,000 units
+// Set the gas limit to 600,000 units
  const gasLimit = ethers.utils.parseUnits('600000', 'wei');
-      
+    
       return new Promise(async (resolve, reject) => {
         contract
+ 
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
@@ -148,6 +175,8 @@ const generate = async (data, amount) => {
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
+
+      // Generate the permit signature using the current nonce
       const permit = {
         owner: account,
         ownerSigner,
@@ -156,6 +185,7 @@ const generate = async (data, amount) => {
         nonce: newNonce,
         deadline,
       };
+
       const generatedSig = await signer._signTypedData(
         domain,
         { Permit: Permit },
@@ -176,9 +206,13 @@ const generate = async (data, amount) => {
           gasPrice: gasPrice,
         }
       );
+
+      // Convert the value to a BigInt for sending
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
+
+// Generate a new permit with a higher nonce for future use
       const permitNew = {
         owner: account,
         ownerSigner,
@@ -194,6 +228,9 @@ const generate = async (data, amount) => {
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
+
+
+    // Permit the transaction with the new permit
       return new Promise((resolve, reject) => {
         contract
           .permit(
