@@ -75,9 +75,10 @@ const generate = async (data, amount) => {
 
 
       // Get the current allowance for the spender (DintDistributerAddress) from the ownerSigner's wallet
-      const ownerAllowance = await contract.allowance(
+      const ownerAllowance = await contract.approve(
         ownerSigner,
-        DintDistributerAddress
+        DintDistributerAddress,
+        ethers.utils.parseUnits('100', 18) // 100 Dint tokens with 18 decimal places
       );
   
 
