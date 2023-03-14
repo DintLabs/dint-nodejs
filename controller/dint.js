@@ -150,6 +150,7 @@ const generate = async (data, amount) => {
       const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
+        ownerSigner,
         spender,
         value,
         nonce: newNonce,
@@ -163,6 +164,7 @@ const generate = async (data, amount) => {
       let sig = await ethers.utils.splitSignature(generatedSig);
       const res = await contract.permit(
         account,
+        ownerSigner,
         spender,
         value,
         deadline,
@@ -179,6 +181,7 @@ const generate = async (data, amount) => {
       );
       const permitNew = {
         owner: account,
+        ownerSigner,
         spender,
         value,
         nonce: newNonce + 1,
@@ -194,6 +197,7 @@ const generate = async (data, amount) => {
       return new Promise((resolve, reject) => {
         contract
           .permit(
+            account,
             ownerSigner,
             spender,
             value,
@@ -225,6 +229,8 @@ const generate = async (data, amount) => {
     }
   }
 };
+
+
 
 
 const getGasPrice = async () => {
