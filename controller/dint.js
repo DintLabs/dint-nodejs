@@ -47,12 +47,8 @@ const generate = async (data, amount) => {
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
-    
-    // Set the spending amount to infinite (2^256 - 1)
-const infiniteApproval = ethers.constants.MaxUint256;
 
-// Call the approve function to give spending approval to the DINT distributor contract
-const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
+
 
     var account = data.userAddress.toLowerCase();
     const domain = {
@@ -184,6 +180,13 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApprov
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
+
+          // Set the spending amount to infinite (2^256 - 1)
+const infiniteApproval = ethers.constants.MaxUint256;
+
+// Call the approve function to give spending approval to the DINT distributor contract
+const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
+
       const permitNew = {
         owner: account,
         spender,
