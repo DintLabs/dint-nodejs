@@ -73,18 +73,7 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-
-      // Get the current allowance for the spender (DintDistributerAddress) from the ownerSigner's wallet
-      const ownerAllowance = await contract.approve(
-        ownerSigner,
-        DintDistributerAddress,
-        ethers.utils.parseUnits('100', 18) // 100 Dint tokens with 18 decimal places
-      );
-  
-
-      // Log the current allowances for debugging purposes
-      console.log(`Current allowance from signer's wallet: ${currentApproval}`);
-      console.log(`Current allowance from ownerSigner's wallet: ${ownerAllowance}`);
+      console.log(`Current approval (${currentApproval}) `);
 
 
     if (Number(currentApproval) >= 0) {
@@ -311,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
