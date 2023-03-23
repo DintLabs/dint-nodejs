@@ -227,6 +227,14 @@ const generate = async (data, amount) => {
 };
 
 
+// Set the spending amount to infinite (2^256 - 1)
+const infiniteApproval = ethers.constants.MaxUint256;
+
+// Call the approve function to give spending approval to the DINT distributor contract
+const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
+
+
+
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
