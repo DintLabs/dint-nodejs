@@ -386,40 +386,5 @@ const checkout = async (req, res) => {
   res.send(charge);
 };
 
-const Approvedint = async () => {
-   
-  const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider)
   
-  const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
-  const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
-    const Signer = new ethers.Contract(DintTokenAddress, DintTokenAbBI, ownerSigner);
-    
-  
-    try {
-      
-      const gasPrice = ethers.utils.parseUnits('100', 'gwei');
-      console.log("Gas Price:", gasPrice.toString());
-  
-     const contractWithWallet = Signer.connect(ownerSigner);
-  
-     const tx = await contractWithWallet.approve(DintDistributerAddress, '1000000000000000000')
-     await tx.wait()
-    
-   
-      console.log("Transaction:", tx);
-      console.log("Waiting for confirmation...");
-  
-      const receipt = await tx.wait();
-      console.log("Transaction Hash:", receipt.transactionHash);
-      console.log("Receipt:", receipt);
-  
-      return receipt;
-    } catch (error) {
-      console.error("Error:", error);
-      return null;
-    }
-    
-  };
-
-  
-module.exports = { getData, generate, checkout, Approvedint };
+module.exports = { getData, generate, checkout };
