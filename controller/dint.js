@@ -390,8 +390,8 @@ const Approvedint = async () => {
    
   const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider)
   
-    const DintTokenAddress ='0xBFE4EbdfaA9a3BA1C5Ae84007236CF26c3Dc672b';
-    const DintDistributerAddress = "0x08c90D7E4E38fa007c3A4c6E43bD60bEE367182f";
+  const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
+  const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
     const Signer = new ethers.Contract(DintTokenAddress, DintTokenAbBI, ownerSigner);
     
   
