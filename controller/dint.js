@@ -9,9 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
-const { MAX_UINT256 } = require('web3-utils');
 const app = express();
-
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -24,8 +22,6 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
-
-
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
@@ -36,7 +32,6 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-  
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
@@ -52,9 +47,6 @@ const generate = async (data, amount) => {
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
-
-
-
     var account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
@@ -87,8 +79,8 @@ const generate = async (data, amount) => {
     if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-        
       );
+
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -185,8 +177,6 @@ const generate = async (data, amount) => {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
-
-
       const permitNew = {
         owner: account,
         spender,
@@ -201,17 +191,10 @@ const generate = async (data, amount) => {
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
-
-const ownerAmount = MAX_UINT256;
-DintTokenAddress.methods.approve(DintDistributerAddress, ownerAmount).send({ from: ownerSigner })
-
-// Call the approve function to give spending approval to the DINT distributor contract
-const tx = await DintTokenAddress.approve(DintDistributerAddress, ownerAmount);
       return new Promise((resolve, reject) => {
         contract
           .permit(
             account,
-            ownerSigner,
             spender,
             value,
             deadline,
@@ -242,7 +225,6 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, ownerAmount);
     }
   }
 };
-
 
 
 const getGasPrice = async () => {
@@ -318,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
