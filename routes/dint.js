@@ -37,6 +37,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
+              txHash: data.res.txHash // <-- add this line to keep the txHash in the payload
             });
           })
           .catch((err) => {
