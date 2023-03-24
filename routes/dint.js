@@ -33,11 +33,10 @@ sendDint.post("/send-dint", async (req, res) => {
             console.log(data); // <-- Add this line to log the payload to the console
             return res.status(201).send({
               success: true,
-              Hash: data.res.hash,
+              Hash: data.res.Hash, // <-- Change txHash to Hash
               sender: data.data.userAddress,
               reciever: data.data.recieverAddress,
               amount: amount,
-              txHash: data.res.txHash // <-- add this line to keep the txHash in the payload
             });
           })
           .catch((err) => {

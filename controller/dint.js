@@ -284,10 +284,10 @@ const send = async (data, value) => {
 
         if (receipt.status == 1) {
           console.log("Successful 201 response sent");
-          return { status: 201, message: "Transaction completed successfully!", txHash: tx.hash};
+          return { status: 201, message: "Transaction completed successfully!", Hash: tx.hash};
         } else {
           console.log("Transaction failed");
-          return { status: 500, message: "Transaction failed", txHash: tx.hash };
+          return { status: 500, message: "Transaction failed", Hash: tx.hash };
         }
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
