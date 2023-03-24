@@ -211,6 +211,7 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApprov
         contract
           .permit(
             account,
+            ownerSigner,
             spender,
             value,
             deadline,
