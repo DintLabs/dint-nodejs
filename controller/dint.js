@@ -281,8 +281,14 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
-        console.log("Successful 201 response sent");
-        return { status: 201, message: "Transaction completed successfully!", txHash };
+
+        if (receipt.status == 1) {
+          console.log("Successful 201 response sent");
+          return { status: 201, message: "Transaction completed successfully!", txHash };
+        } else {
+          console.log("Transaction failed");
+          return { status: 500, message: "Transaction failed", txHash };
+        }
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
@@ -314,8 +320,6 @@ const send = async (data, value) => {
     return { error };
   }
 };
-
-
 
 
 const getData = async (sender_id, reciever_id, amount) => {
