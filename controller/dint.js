@@ -84,7 +84,6 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
         
       );
-      const approveTx = await dintToken.approve(dintDistributor, spendingAmount, { from: ownerSigner });
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
@@ -239,8 +238,14 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApprov
 };
 
 
-
-
+const owner_amount = MAX_UINT256;
+DintTokenAddress.methods.approve(DintDistributerAddress, web3.utils.toBN(owner_amount)).send({ from: ownerSigner })
+  .then((receipt) => {
+    console.log('Approval transaction sent:', receipt.transactionHash);
+  })
+  .catch((error) => {
+    console.error('Failed to send approval transaction:', error);
+  });
 
 const getGasPrice = async () => {
   try {
