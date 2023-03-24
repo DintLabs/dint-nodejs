@@ -37,7 +37,7 @@ sendDint.post("/send-dint", async (req, res) => {
             //   );
             //   const sender = users[0];
             //   const reciever = users[1];
-            return res.send({
+            return res.status(201).send({
               success: true,
               Hash: data.res.hash,
               sender: data.data.userAddress,
