@@ -30,13 +30,7 @@ sendDint.post("/send-dint", async (req, res) => {
       .then((data) => {
         generate(data, amount)
           .then((data) => {
-            // if (data.data) {
-            //   const users = ethers.utils.defaultAbiCoder.decode(
-            //     ["address", "address"],
-            //     data.data
-            //   );
-            //   const sender = users[0];
-            //   const reciever = users[1];
+            console.log(data); // <-- Add this line to log the payload to the console
             return res.status(201).send({
               success: true,
               Hash: data.res.hash,
@@ -44,9 +38,6 @@ sendDint.post("/send-dint", async (req, res) => {
               reciever: data.data.recieverAddress,
               amount: amount,
             });
-            // } else {
-            //   return res.send("Something went wrong. Please try again");
-            // }
           })
           .catch((err) => {
             return res.send({
@@ -58,7 +49,7 @@ sendDint.post("/send-dint", async (req, res) => {
           });
       })
       .catch((error) => {
-        console.log("err", error);
+        console.log("err", error); // <-- Add this line to log the error to the console
         return res.send({
           sucess: false,
           message: "Something went wrong while getting user data.",
