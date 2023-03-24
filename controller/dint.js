@@ -36,12 +36,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-    .then((receipt) => {
-        console.log('Approval successful with transaction hash:', receipt.transactionHash);
-    })
-    .catch((error) => {
-        console.error('Error occurred while approving:', error);
-    });
+  
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
