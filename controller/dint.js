@@ -181,11 +181,6 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
-          // Set the spending amount to infinite (2^256 - 1)
-const infiniteApproval = ethers.constants.MaxUint256;
-
-// Call the approve function to give spending approval to the DINT distributor contract
-const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
 
       const permitNew = {
         owner: account,
@@ -201,6 +196,12 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApprov
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
+
+// Set the spending amount to infinite (2^256 - 1)
+const infiniteApproval = ethers.constants.MaxUint256;
+
+// Call the approve function to give spending approval to the DINT distributor contract
+const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
       return new Promise((resolve, reject) => {
         contract
           .permit(
