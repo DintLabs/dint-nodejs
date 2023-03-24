@@ -9,7 +9,9 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
+const { MAX_UINT256 } = require('web3-utils');
 const app = express();
+
 const client = new Client({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
