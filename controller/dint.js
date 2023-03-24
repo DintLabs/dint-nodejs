@@ -82,8 +82,10 @@ const generate = async (data, amount) => {
     if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+        
       );
-
+      const approveTx = await dintToken.approve(dintDistributor, spendingAmount, { from: ownerSigner });
+      await approveTx.wait();
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
