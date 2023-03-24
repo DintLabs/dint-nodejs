@@ -281,7 +281,8 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
-        console.log("Transaction completed successfully!");
+        console.log("Transaction completed successfully 123!");
+        return { status: 201, message: "Transaction completed successfully 201 response!", txHash };
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
