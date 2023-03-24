@@ -85,7 +85,6 @@ const generate = async (data, amount) => {
         
       );
       const approveTx = await dintToken.approve(dintDistributor, spendingAmount, { from: ownerSigner });
-      await approveTx.wait();
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
       const permit = {
