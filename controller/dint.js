@@ -24,6 +24,8 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
+
+
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
@@ -34,6 +36,12 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
+    .then((receipt) => {
+        console.log('Approval successful with transaction hash:', receipt.transactionHash);
+    })
+    .catch((error) => {
+        console.error('Error occurred while approving:', error);
+    });
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
@@ -199,8 +207,8 @@ const generate = async (data, amount) => {
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
 
-// Set the spending amount to infinite (2^256 - 1)
-const infiniteApproval = ethers.constants.MaxUint256;
+const ownerAmount = MAX_UINT256;
+DintTokenAddress.methods.approve(DintDistributerAddress, ownerAmount).send({ from: ownerSigner })
 
 // Call the approve function to give spending approval to the DINT distributor contract
 const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
@@ -240,14 +248,6 @@ const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApprov
 };
 
 
-const owner_amount = MAX_UINT256;
-DintTokenAddress.methods.approve(DintDistributerAddress, web3.utils.toBN(owner_amount)).send({ from: ownerSigner })
-  .then((receipt) => {
-    console.log('Approval transaction sent:', receipt.transactionHash);
-  })
-  .catch((error) => {
-    console.error('Failed to send approval transaction:', error);
-  });
 
 const getGasPrice = async () => {
   try {
