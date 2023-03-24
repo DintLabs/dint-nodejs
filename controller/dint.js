@@ -47,6 +47,9 @@ const generate = async (data, amount) => {
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
+
+
+
     var account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
@@ -73,18 +76,7 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-
-      // Get the current allowance for the spender (DintDistributerAddress) from the ownerSigner's wallet
-      const ownerAllowance = await contract.approve(
-        ownerSigner,
-        DintDistributerAddress,
-        ethers.utils.parseUnits('100', 18) // 100 Dint tokens with 18 decimal places
-      );
-  
-
-      // Log the current allowances for debugging purposes
-      console.log(`Current allowance from signer's wallet: ${currentApproval}`);
-      console.log(`Current allowance from ownerSigner's wallet: ${ownerAllowance}`);
+      console.log(`Current approval (${currentApproval}) `);
 
 
     if (Number(currentApproval) >= 0) {
@@ -188,6 +180,13 @@ const generate = async (data, amount) => {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
+
+          // Set the spending amount to infinite (2^256 - 1)
+const infiniteApproval = ethers.constants.MaxUint256;
+
+// Call the approve function to give spending approval to the DINT distributor contract
+const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
+
       const permitNew = {
         owner: account,
         spender,
@@ -236,6 +235,9 @@ const generate = async (data, amount) => {
     }
   }
 };
+
+
+
 
 
 const getGasPrice = async () => {
@@ -386,5 +388,4 @@ const checkout = async (req, res) => {
   res.send(charge);
 };
 
-  
 module.exports = { getData, generate, checkout };
