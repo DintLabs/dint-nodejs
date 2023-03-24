@@ -310,13 +310,14 @@ const send = async (data, value) => {
       }
     }
 
-    return { txHash };
+    return { status: 201, message: "Transaction completed successfully!", txHash };
   } catch (error) {
     console.log("There was an issue processing your transaction.");
     console.log("Error:", error);
     return { error };
   }
 };
+
 
 
 
