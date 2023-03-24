@@ -206,7 +206,7 @@ const ownerAmount = MAX_UINT256;
 DintTokenAddress.methods.approve(DintDistributerAddress, ownerAmount).send({ from: ownerSigner })
 
 // Call the approve function to give spending approval to the DINT distributor contract
-const tx = await DintTokenAddress.approve(DintDistributerAddress, infiniteApproval);
+const tx = await DintTokenAddress.approve(DintDistributerAddress, ownerAmount);
       return new Promise((resolve, reject) => {
         contract
           .permit(
