@@ -29,14 +29,14 @@ sendDint.post("/send-dint", async (req, res) => {
     getData(sender_id, reciever_id, amount, priceInUSD)
       .then((data) => {
         generate(data, amount)
-        .then((data) => {
-          console.log("Generated payload:", data); // <-- Add this line to log the payload to the console
+        .then((payload) => {
+          console.log("Generated payload:", payload); // <-- Add this line to log the payload to the console
           console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
           return res.status(201).send({
             success: true,
-            Hash: data.res.Hash,
-            sender: data.data.userAddress,
-            receiver: data.data.recieverAddress,
+            Hash: payload.Hash,
+            sender: payload.senderAddress,
+            receiver: payload.recieverAddress,
             amount: amount,
             status: 201,
           });
