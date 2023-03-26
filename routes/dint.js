@@ -31,6 +31,7 @@ sendDint.post("/send-dint", async (req, res) => {
         generate(data, amount)
         .then((data) => {
           console.log("Generated payload:", data); // <-- Add this line to log the payload to the console
+          console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
           return res.status(201).send({
             success: true,
             Hash: data.res.Hash,
@@ -40,6 +41,7 @@ sendDint.post("/send-dint", async (req, res) => {
             status: 201,
           });
         })
+      
           .catch((err) => {
             console.log("Error in generating transaction:", err);
             return res.send({
