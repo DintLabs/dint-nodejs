@@ -31,12 +31,13 @@ sendDint.post("/send-dint", async (req, res) => {
         generate(data, amount)
           .then((data) => {
             console.log(data); // <-- Add this line to log the payload to the console
-            return res.status(201).send({
+            return res.status(1).send({
               success: true,
               Hash: data.res.Hash,
               sender: data.data.userAddress,
               receiver: data.data.recieverAddress,
               amount: amount,
+              Status: 1,
             });
           })
           .catch((err) => {
