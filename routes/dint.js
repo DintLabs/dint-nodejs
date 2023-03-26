@@ -34,7 +34,7 @@ sendDint.post("/send-dint", async (req, res) => {
           console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
           return res.status(201).send({
             success: true,
-            Hash: payload.Hash,
+            Hash: data.res.Hash,
             sender: payload.senderAddress,
             receiver: payload.recieverAddress,
             amount: amount,
