@@ -37,7 +37,7 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               receiver: data.data.recieverAddress,
               amount: amount,
-              Status: 1,
+              status: 201,
             });
           })
           .catch((err) => {
