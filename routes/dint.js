@@ -29,17 +29,17 @@ sendDint.post("/send-dint", async (req, res) => {
     getData(sender_id, reciever_id, amount, priceInUSD)
       .then((data) => {
         generate(data, amount)
-          .then((data) => {
-            console.log(data); // <-- Add this line to log the payload to the console
-            return res.status(201).send({
-              success: true,
-              Hash: data.res.Hash,
-              sender: data.data.userAddress,
-              receiver: data.data.recieverAddress,
-              amount: amount,
-              status: 201,
-            });
-          })
+        .then((data) => {
+          console.log("Generated payload:", data); // <-- Add this line to log the payload to the console
+          return res.status(201).send({
+            success: true,
+            Hash: data.res.Hash,
+            sender: data.data.userAddress,
+            receiver: data.data.recieverAddress,
+            amount: amount,
+            status: 201,
+          });
+        })
           .catch((err) => {
             console.log("Error in generating transaction:", err);
             return res.send({
