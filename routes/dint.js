@@ -37,7 +37,6 @@ sendDint.post("/send-dint", async (req, res) => {
               sender: data.data.userAddress,
               receiver: data.data.recieverAddress,
               amount: amount,
-              success_message: "Transaction completed successfully",
             });
           })
           .catch((err) => {
