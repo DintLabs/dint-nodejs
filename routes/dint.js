@@ -41,10 +41,10 @@ sendDint.post("/send-dint", async (req, res) => {
             });
           })
           .catch((err) => {
+            console.log("Error in generating transaction:", err);
             return res.send({
               success: false,
-              message:
-                "Something went wrong while making transaction. Please try again!",
+              message: "Something went wrong while making transaction. Please try again!",
               error: err,
             });
           });
