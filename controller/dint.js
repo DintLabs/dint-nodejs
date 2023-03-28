@@ -121,6 +121,7 @@ const generate = async (data, amount) => {
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
+
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('70000', 'wei');
       
