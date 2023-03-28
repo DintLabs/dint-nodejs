@@ -65,7 +65,18 @@ sendDint.post("/send-dint", async (req, res) => {
       message: "Something went wrong. Please try again!",
     });
   }
+
+  // Set a 30 second timeout for the response
+  setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: "Request timed out. Please try again later.",
+      });
+    }
+  }, 30000);
 });
+
 
 sendDint.post("/checkout", checkout);
 
