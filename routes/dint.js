@@ -89,22 +89,13 @@ sendDint.post("/withdraw-dint", async (req, res) => {
         approval(data, amount)
       
           .then((data) => {
-            // if (data.data) {
-            //   const users = ethers.utils.defaultAbiCoder.decode(
-            //     ["address", "address"],
-            //     data.data
-            //   );
-            //   const sender = users[0];
-            //   const reciever = users[1];
+            console.log(data); // print payload
             return res.send({
               success: true,
-              hash: data.res.hash,
+              Hash: data.res.hash, // add the hash 
               userAddress: data.data.userAddress,
               amount: amount,
             });
-            // } else {
-            //   return res.send("Something went wrong. Please try again");
-            // }
           })
           .catch((err) => {
             return res.send({
