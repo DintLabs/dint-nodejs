@@ -281,14 +281,7 @@ const send = async (data, value) => {
         gasPrice = receipt.effectiveGasPrice;
 
         console.log("Transaction Receipt:", receipt);
-
-        if (receipt.status == 1) {
-          console.log("Successful 201 response sent");
-          return { status: 201, message: "Transaction completed successfully!", Hash: tx.hash};
-        } else {
-          console.log("Transaction failed");
-          return { status: 500, message: "Transaction failed", Hash: tx.hash };
-        }
+        console.log("Transaction completed successfully!");
       } catch (error) {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
@@ -308,18 +301,23 @@ const send = async (data, value) => {
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
           return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
+          return { error };
         } else {
           throw error;
         }
       }
     }
 
+    return { txHash };
   } catch (error) {
     console.log("There was an issue processing your transaction.");
     console.log("Error:", error);
     return { error };
   }
 };
+
 
 
 const getData = async (sender_id, reciever_id, amount) => {
