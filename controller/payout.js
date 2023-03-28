@@ -76,7 +76,7 @@ const approval = async (data, amount) => {
 
     console.log("currentApproval", currentApproval);
 
-    if (Number(currentApproval) == 0) {
+    if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
