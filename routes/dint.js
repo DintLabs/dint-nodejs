@@ -48,7 +48,7 @@ sendDint.post("/send-dint", async (req, res, next) => {
                   message: "Request timed out. Please try again later.",
                 });
               }
-            }, 30000);
+            }, 90000);
           })
           .catch((err) => {
             console.log("Error in generating transaction:", err);
