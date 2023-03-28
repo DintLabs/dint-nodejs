@@ -271,9 +271,7 @@ const send = async (data, value) => {
           }
         );
 
-        console.log("Transaction Hashes payouts", res);
-        console.log("Transaction Hash:", tx.hash);
-        console.log("Dint Price:", priceInUSD);
+        console.log("Transaction Hashes payouts", tx.hash);
         txHash = tx.hash;
 
         const receipt = await tx.wait();
