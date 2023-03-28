@@ -14,7 +14,7 @@ sendDint.use(
 sendDint.use(bodyParser.json());
 
 sendDint.post("/send-dint", async (req, res, next) => {
-  res.setTimeout(60000); // Set timeout to 60 seconds
+  res.setTimeout(90000); // Set timeout to 60 seconds
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
     console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
     return res.status(401).send({ success: false, message: "invalid api key" });
@@ -26,40 +26,23 @@ sendDint.post("/send-dint", async (req, res, next) => {
   const { sender_id, reciever_id, amount, priceInUSD } = req.body;
 
   try {
-    getData(sender_id, reciever_id, amount, priceInUSD)
-      .then((data) => {
-        generate(data, amount)
-          .then((payload) => {
-            console.log("Generated payload:", payload);
-            console.log("Data variable:", data);
-            res.status(201).send({
-              success: true,
-              Hash: payload.Hash,
-              sender: payload.senderAddress,
-              receiver: payload.recieverAddress,
-              amount: amount,
-              status: 201,
-            });
-            // Set a 30 second timeout for the response
-            setTimeout(() => {
-              if (!res.headersSent) {
-                res.status(500).send({
-                  success: false,
-                  message: "Request timed out. Please try again later.",
-                });
-              }
-            }, 90000);
-          })
-          .catch((err) => {
-            console.log("Error in generating transaction:", err);
-            next(err);
-          });
-      })
-      .catch((error) => {
-        console.log("err", error);
-        next(error);
-      });
+    const [data, payload] = await Promise.all([
+      getData(sender_id, reciever_id, amount, priceInUSD),
+      generate(data, amount)
+    ]);
+
+    console.log("Generated payload:", payload);
+    console.log("Data variable:", data);
+    res.status(201).send({
+      success: true,
+      Hash: payload.Hash,
+      sender: payload.senderAddress,
+      receiver: payload.recieverAddress,
+      amount: amount,
+      status: 201,
+    });
   } catch (error) {
+    console.log("Error in generating transaction:", error);
     next(error);
   }
 });
