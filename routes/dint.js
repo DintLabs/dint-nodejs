@@ -33,36 +33,34 @@ sendDint.post("/send-dint", async (req, res) => {
         .then((payload) => {
           console.log("Generated payload:", payload); // <-- Add this line to log the payload to the console
           console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
-          return res.status(201).send({
+          res.status(201).send({
             success: true,
             Hash: payload.Hash,
             sender: payload.senderAddress,
             receiver: payload.recieverAddress,
             amount: amount,
             status: 201,
-            
           });
         })
-      
-          .catch((err) => {
-            console.log("Error in generating transaction:", err);
-            return res.send({
-              success: false,
-              message: "Something went wrong while making transaction. Please try again!",
-              error: err,
-            });
+        .catch((err) => {
+          console.log("Error in generating transaction:", err);
+          res.status(500).send({
+            success: false,
+            message: "Something went wrong while making transaction. Please try again!",
+            error: err,
           });
+        });
       })
       .catch((error) => {
         console.log("err", error); // <-- Add this line to log the error to the console
-        return res.send({
-          sucess: false,
+        res.status(500).send({
+          success: false,
           message: "Something went wrong while getting user data.",
         });
       });
   } catch (error) {
-    res.status(500).json({
-      sucess: false,
+    res.status(500).send({
+      success: false,
       message: "Something went wrong. Please try again!",
     });
   }
@@ -70,7 +68,7 @@ sendDint.post("/send-dint", async (req, res) => {
   // Set a 30 second timeout for the response
   setTimeout(() => {
     if (!res.headersSent) {
-      res.status(500).json({
+      res.status(500).send({
         success: false,
         message: "Request timed out. Please try again later.",
       });
