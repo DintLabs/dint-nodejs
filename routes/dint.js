@@ -13,59 +13,45 @@ sendDint.use(
 );
 sendDint.use(bodyParser.json());
 
-sendDint.post("/send-dint", async (req, res) => {
+sendDint.post("/send-dint", async (req, res, next) => {
   res.setTimeout(60000); // Set timeout to 60 seconds
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
     console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
-
-    return res.send({ success: false, message: "invalid api key" });
+    return res.status(401).send({ success: false, message: "invalid api key" });
   }
   if (!process.env.OWNER_PRIVATE_KEY) {
-    return res.send({ success: false, message: "private key not found" });
+    return res.status(500).send({ success: false, message: "private key not found" });
   }
- 
-  const { sender_id, reciever_id, amount, priceInUSD} = req.body;
+
+  const { sender_id, reciever_id, amount, priceInUSD } = req.body;
 
   try {
     getData(sender_id, reciever_id, amount, priceInUSD)
       .then((data) => {
         generate(data, amount)
-        .then((payload) => {
-          console.log("Generated payload:", payload); // <-- Add this line to log the payload to the console
-          console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
-          res.status(201).send({
-            success: true,
-            Hash: payload.Hash,
-            sender: payload.senderAddress,
-            receiver: payload.recieverAddress,
-            amount: amount,
-            status: 201,
+          .then((payload) => {
+            console.log("Generated payload:", payload);
+            console.log("Data variable:", data);
+            res.status(201).send({
+              success: true,
+              Hash: payload.Hash,
+              sender: payload.senderAddress,
+              receiver: payload.recieverAddress,
+              amount: amount,
+              status: 201,
+            });
+          })
+          .catch((err) => {
+            console.log("Error in generating transaction:", err);
+            next(err);
           });
-        })
-        .catch((err) => {
-          console.log("Error in generating transaction:", err);
-          res.status(500).send({
-            success: false,
-            message: "Something went wrong while making transaction. Please try again!",
-            error: err,
-          });
-        });
       })
       .catch((error) => {
-        console.log("Error in getData():", error);
-        res.status(500).send({
-          success: false,
-          message: "Error getting data",
-          error: error,
-        });
+        console.log("err", error);
+        next(error);
       });
   } catch (error) {
-    console.log("Error in try-catch:", error);
-    res.status(500).send({
-      success: false,
-      message: "Error in try-catch",
-      error: error,
-    });
+    next(error);
   }
 
   // Set a 30 second timeout for the response
@@ -78,6 +64,16 @@ sendDint.post("/send-dint", async (req, res) => {
     }
   }, 30000);
 });
+
+// Error handler middleware
+sendDint.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send({
+    success: false,
+    message: "Something went wrong. Please try again!",
+  });
+});
+
 
 
 
