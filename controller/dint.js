@@ -110,7 +110,7 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("220", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
  // Get the current gas price
@@ -122,7 +122,7 @@ const generate = async (data, amount) => {
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('3500000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
       
       return new Promise(async (resolve, reject) => {
         contract
@@ -294,7 +294,6 @@ const send = async (data, value) => {
           console.log("New Gas Price:", gasPrice.toString());
         } else if (error.message.includes("nonce too low")) {
           nonce = await ownerSigner.getTransactionCount('pending');
-          nonce += 1; // increment nonce for next attempt
           console.log("New Nonce:", nonce);
         } else if (error.message.includes("insufficient funds")) {
           console.log(`Error: ${error.message}`);
@@ -318,6 +317,7 @@ const send = async (data, value) => {
     return { error };
   }
 };
+
 
 
 const getData = async (sender_id, reciever_id, amount) => {
