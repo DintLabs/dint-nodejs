@@ -39,6 +39,7 @@ sendDint.post("/send-dint", async (req, res) => {
             receiver: payload.recieverAddress,
             amount: amount,
             status: 201,
+            
           });
         })
       
