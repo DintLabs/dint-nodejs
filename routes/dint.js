@@ -52,16 +52,19 @@ sendDint.post("/send-dint", async (req, res) => {
         });
       })
       .catch((error) => {
-        console.log("err", error); // <-- Add this line to log the error to the console
+        console.log("Error in getData():", error);
         res.status(500).send({
           success: false,
-          message: "Something went wrong while getting user data.",
+          message: "Error getting data",
+          error: error,
         });
       });
   } catch (error) {
+    console.log("Error in try-catch:", error);
     res.status(500).send({
       success: false,
-      message: "Something went wrong. Please try again!",
+      message: "Error in try-catch",
+      error: error,
     });
   }
 
@@ -75,6 +78,7 @@ sendDint.post("/send-dint", async (req, res) => {
     }
   }, 30000);
 });
+
 
 
 sendDint.post("/checkout", checkout);
