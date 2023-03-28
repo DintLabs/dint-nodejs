@@ -110,7 +110,7 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("220", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
  // Get the current gas price
@@ -121,9 +121,8 @@ const generate = async (data, amount) => {
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
-
  // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('80000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
       
       return new Promise(async (resolve, reject) => {
         contract
@@ -239,7 +238,7 @@ const getGasPrice = async () => {
   } catch (error) {
     console.log("gas error");
     console.error(error);
-    return ethers.utils.parseUnits("250", "gwei");
+    return ethers.utils.parseUnits("220", "gwei");
   }
 };
 
@@ -247,7 +246,7 @@ const getGasPrice = async () => {
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('3000000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
     let attempt = 1;
@@ -301,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
