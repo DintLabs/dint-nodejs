@@ -32,7 +32,8 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const approval = async (data, amount) => {
-  const nonce = 0;
+
+ 
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -93,12 +94,48 @@ const approval = async (data, amount) => {
         { Permit: Permit },
         permit
       );
+
+
       let sig = await ethers.utils.splitSignature(generatedSig);
+      
+      
+      const getGasPrice = async () => {
+        try {
+          const { standard, fast } = await axios
+            .get("https://gasstation-mainnet.matic.network/")
+            .then((res) => res.data);
+      
+          const fee = standard + (fast - standard) / 3;
+          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+        } catch (error) {
+          console.log("gas error");
+          console.error(error);
+          return ethers.utils.parseUnits("200", "gwei");
+        }
+      };
+ // Get the current gas price
+ let gasPrice = await getGasPrice();
+ console.log("Gas Price:", gasPrice.toString());
+
+ // Get the nonce for the transaction
+ const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
+
+ // Set the gas limit to 70,000 units
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+      
+      
+      
+      
+      
+      
+      
+      
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: 1000000,
-            gasPrice: 30000000000,
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -139,7 +176,10 @@ const approval = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { gasLimit: 1000000, gasPrice: 30000000000 }
+        { 
+          gasLimit: gasLimit,
+          gasPrice: gasPrice,
+        }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
@@ -198,8 +238,8 @@ const send = async (data, value) => {
   return new Promise((resolve, reject) => {
     contract
       .transferFrom(data.userAddress, DintDistributerAddress, value, {
-        gasLimit: 1000000,
-        gasPrice: 30000000000,
+        gasLimit: gasLimit,
+        gasPrice: gasPrice,
       })
 
       .then(
