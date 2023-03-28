@@ -7,6 +7,7 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
+const axios = require('axios');
 
 const client = new Client({
   user: process.env.DB_USER,
@@ -125,12 +126,6 @@ const approval = async (data, amount) => {
  const gasLimit = ethers.utils.parseUnits('600000', 'wei');
       
       
-      
-      
-      
-      
-      
-      
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -208,7 +203,10 @@ const approval = async (data, amount) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { gasLimit: 1000000, gasPrice: 30000000000 }
+            { 
+              gasLimit: gasLimit,
+              gasPrice: gasPrice,
+            }
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -246,23 +244,7 @@ const send = async (data, value) => {
         async (res) => {
           console.log("Transaction Hashes payouts", res);
 
-          // const filter = {
-          //   address: DintDistributerAddress,
-          //   topics: [
-          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
-          //   ],
-          // };
-          // provider.on(filter, async (data, err) => {
-          //   console.log("data123", data);
-          //   console.log("errrr", err);
-          //   const txnResponse = data;
-          //   resolve(txnResponse);
-          //   // const add = ethers.utils.defaultAbiCoder.decode(
-          //   //   ["address", "address"],
-          //   //   data.data
-          //   // );
-          //   // console.log("event=====", add);
-          // });
+  
           resolve({ res, data });
         },
         (err) => {
