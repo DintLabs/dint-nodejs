@@ -30,8 +30,8 @@ sendDint.post("/send-dint", async (req, res) => {
       .then((data) => {
         generate(data, amount)
         .then((payload) => {
-          console.log("Generated payload:", payload); // <-- Add this line to log the payload to the console
-          console.log("Data variable:", data); // <-- Add this line to log the data variable to the console
+          console.log("Generated payload:", payload); // <--   payload to the console
+          console.log("Data variable:", data); // <--  log the data variable to the console
           return res.status(201).send({
             success: true,
             Hash: payload.Hash,
@@ -70,10 +70,7 @@ sendDint.post("/checkout", checkout);
 
 sendDint.post("/withdraw-dint", async (req, res) => {
    if (req.headers.apikey !== process.env.SECURITY_KEY) {
-     console.log(
-       "req.headers",
-       req.headers.apikey === process.env.SECURITY_KEY
-     );
+     console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
 
      return res.send({ success: false, message: "invalid api key" });
    }
@@ -81,22 +78,24 @@ sendDint.post("/withdraw-dint", async (req, res) => {
      return res.send({ success: false, message: "private key not found" });
    }
   const { user_id, amount } = req.body;
-  console.log(" req.body", req.body);
+ 
 
   try {
     getUserData(user_id, amount)
       .then((data) => {
         approval(data, amount)
-      
-          .then((data) => {
-            console.log(data); // print payload
-            return res.send({
+          .then((payload) => {
+            console.log("Generated payload:", payload); // <-- payload to the console
+            console.log("Data variable:", data); // <-- data variable to the console
+            return res.status(201).send({
               success: true,
-              Hash: data.res.hash, // add the hash 
+              Hash: payload.Hash,
               userAddress: data.data.userAddress,
               amount: amount,
+              status: 201,
             });
           })
+          
           .catch((err) => {
             return res.send({
               success: false,
