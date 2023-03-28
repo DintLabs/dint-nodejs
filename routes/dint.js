@@ -40,6 +40,15 @@ sendDint.post("/send-dint", async (req, res, next) => {
               amount: amount,
               status: 201,
             });
+            // Set a 30 second timeout for the response
+            setTimeout(() => {
+              if (!res.headersSent) {
+                res.status(500).send({
+                  success: false,
+                  message: "Request timed out. Please try again later.",
+                });
+              }
+            }, 30000);
           })
           .catch((err) => {
             console.log("Error in generating transaction:", err);
@@ -53,16 +62,6 @@ sendDint.post("/send-dint", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
-  // Set a 30 second timeout for the response
-  setTimeout(() => {
-    if (!res.headersSent) {
-      res.status(500).send({
-        success: false,
-        message: "Request timed out. Please try again later.",
-      });
-    }
-  }, 30000);
 });
 
 // Error handler middleware
