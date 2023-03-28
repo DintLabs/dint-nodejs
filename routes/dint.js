@@ -14,7 +14,8 @@ sendDint.use(
 sendDint.use(bodyParser.json());
 
 sendDint.post("/send-dint", async (req, res, next) => {
-  res.setTimeout(180000); // Set timeout to 60 seconds
+  res.setTimeout(180000); // Set timeout to 180 seconds
+  console.log(`Timeout set to ${res.timeout} ms`);
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
     console.log("req.headers", req.headers.apikey === process.env.SECURITY_KEY);
     return res.status(401).send({ success: false, message: "invalid api key" });
@@ -39,7 +40,7 @@ sendDint.post("/send-dint", async (req, res, next) => {
           amount: amount,
           status: 201,
         });
-        // Set a 90 second timeout for the response
+        // Set a timeout for the response
         setTimeout(() => {
           if (!res.headersSent) {
             res.status(500).send({
@@ -67,6 +68,7 @@ sendDint.use((err, req, res, next) => {
     message: "Something went wrong. Please try again!",
   });
 });
+
 
 
 
