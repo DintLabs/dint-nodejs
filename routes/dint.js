@@ -70,12 +70,7 @@ sendDint.use((err, req, res, next) => {
   });
 });
 
-const app = express();
-const server = app.listen(3000, () => {
-  console.log("Server started on port 3000");
-});
 
-server.setTimeout(180000); // Set timeout to 180 seconds
 
 
 
