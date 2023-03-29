@@ -52,7 +52,8 @@ app.use((err, req, res, next) => {
   res.send("get your ip whitelisted for accessing this");
 });
 
-app.listen(PORT, (error) => {
+const server = app.listen(PORT, (error) => {
+  server.setTimeout(180000);
   if (!error)
     console.log(
       "Server is Successfully Running, and App is listening on port " + PORT
