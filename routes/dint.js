@@ -33,7 +33,7 @@ sendDint.post("/send-dint", async (req, res, next) => {
         console.log("Data variable:", data);
         res.status(201).send({
           success: true,
-          txHash: payload.Hash,
+          Hash: payload.txHash,
           sender: payload.senderAddress,
           receiver: payload.recieverAddress,
           amount: amount,
