@@ -242,37 +242,45 @@ const generate = async (data, amount) => {
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise((resolve, reject) => {
-        contract
-          .permit(
+      return new Promise(async (resolve, reject) => {
+       
+       
+        try {
+          const res = await contract.permit(
             account,
             spender,
             value,
             deadline,
-            sigNew.v,
-            sigNew.r,
-            sigNew.s,
+            sig.v,
+            sig.r,
+            sig.s,
             { 
               gasLimit: gasLimit,
               gasPrice: gasPrice,
             }
-          )
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            console.log("Value", value);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
+          );
+          console.log("Approval Hash", res.hash);
+          send(data, value)
+            .then((data) => {
+              resolve(data);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        } catch (err) {
+          console.log("err permit", err);
+          
+          // retry the permit function for all other errors
+          permit(data, amount)
+            .then((data) => {
+              resolve(data);
+            })
+            .catch((err) => {
+              reject(err);
+            });
+          }}
+      
+      );
     }}
   }
 };
