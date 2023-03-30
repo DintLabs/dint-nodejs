@@ -32,22 +32,22 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-
 const generate = async (data, amount) => {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider); // create a signer instance using the user's private key
+
+  if (amount >= 0) {
+    const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(), // the address of the token contract
-      DintTokenAbBI, // the ABI (Application Binary Interface) of the token contract
-      ownerSigner // the owner's signer instance used for non-constant functions
+      DintTokenAddress.toLowerCase(),
+      DintTokenAbBI,
+      ownerSigner
     );
     const domainName = "Dint"; // token name
-    const domainVersion = "MMT_0.1"; // token version
+    const domainVersion = "MMT_0.1";
     const chainId = 137; // this is for the chain's ID.
-    const contractAddress = DintTokenAddress.toLowerCase(); // the address of the token contract
-    const spender = DintDistributerAddress.toLowerCase(); // the address of the contract that will spend the user's tokens
-    const deadline = 2673329804; // deadline timestamp in seconds since Unix epoch (Monday, January 1, 1970)
-    
-    var account = data.userAddress.toLowerCase();  // the address of the user
+    const contractAddress = DintTokenAddress.toLowerCase();
+    const spender = DintDistributerAddress.toLowerCase();
+    const deadline = 2673329804;
+    var account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
       version: domainVersion,
@@ -75,37 +75,10 @@ const generate = async (data, amount) => {
 
       console.log(`Current approval (${currentApproval}) `);
 
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = fast;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("132", "gwei");
-        }
-      };
-      
 
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price for permit:", gasPrice.toString());
-
- // Set the gas limit to 600,000 units
- const gasLimit = ethers.utils.parseUnits('75000', 'wei');
-
-  // Get the nonce for the transaction
-  const nonce = await signer.getTransactionCount("latest");
-  console.log("Nonce for permit:", nonce); 
-
-
-if (Number(currentApproval) >= 0) {
+    if (Number(currentApproval) >= 0) {
       const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether")) // convert the amount to Wei (smallest unit of Ether)
+        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
       const currentnonce = await contract.nonces(account);
@@ -122,14 +95,35 @@ if (Number(currentApproval) >= 0) {
         { Permit: Permit },
         permit
       );
-     let sig = await ethers.utils.splitSignature(generatedSig);
 
-    
+
+      let sig = await ethers.utils.splitSignature(generatedSig);
+
+      const getGasPrice = async () => {
+        try {
+          const { standard, fast } = await axios
+            .get("https://gasstation-mainnet.matic.network/")
+            .then((res) => res.data);
+      
+          const fee = standard + (fast - standard) / 3;
+          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+        } catch (error) {
+          console.log("gas error");
+          console.error(error);
+          return ethers.utils.parseUnits("200", "gwei");
+        }
+      };
+ // Get the current gas price
+ let gasPrice = await getGasPrice();
+ console.log("Gas Price:", gasPrice.toString());
+
  // Get the nonce for the transaction
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
-
+ // Set the gas limit to 70,000 units
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+      
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -167,8 +161,6 @@ if (Number(currentApproval) >= 0) {
         permit
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
-
-      try {
       const res = await contract.permit(
         account,
         spender,
@@ -182,59 +174,6 @@ if (Number(currentApproval) >= 0) {
           gasPrice: gasPrice,
         }
       );
-      console.log("Approval Hash", res.hash);
-      send(data, value)
-        .then((data) => {
-          resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    } catch (err) {
-      console.log("err permit", err);
-  
-  // check if the error is a 'transaction underpriced' error
-  if (err.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
-    // Get the new gas price
-    gasPrice = await getGasPrice();
-    console.log("New Gas Price for permit:", gasPrice.toString());
-
-    // Get the new nonce
-    const newNonce = await signer.getTransactionCount("latest");
-    console.log("New Nonce for permit:", newNonce);
-
-    // Resubmit the transaction with the new gas fee and nonce
-    const resubmit = await contract.permit(
-      account,
-      spender,
-      value,
-      deadline,
-      sig.v,
-      sig.r,
-      sig.s,
-      {
-        gasLimit: gasLimit,
-        gasPrice: gasPrice,
-        nonce: newNonce
-      }
-    );
-if (err.errorType === "REPLACEMENT_UNDERPRICED") {
-  console.log("we need to retry with higher fees");
-}
-
-
-    console.log("Resubmitted Approval Hash", resubmit.hash);
-    send(data, value)
-      .then((data) => {
-        resolve(data);
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  } else {
-    reject(err);
-  }
-
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
@@ -252,49 +191,40 @@ if (err.errorType === "REPLACEMENT_UNDERPRICED") {
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise(async (resolve, reject) => {
-       
-       
-        try {
-          const res = await contract.permit(
+      return new Promise((resolve, reject) => {
+        contract
+          .permit(
             account,
             spender,
             value,
             deadline,
-            sig.v,
-            sig.r,
-            sig.s,
+            sigNew.v,
+            sigNew.r,
+            sigNew.s,
             { 
               gasLimit: gasLimit,
               gasPrice: gasPrice,
             }
-          );
-          console.log("Approval Hash", res.hash);
-          send(data, value)
-            .then((data) => {
-              resolve(data);
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        } catch (err) {
-          console.log("err permit", err);
-          
-          // retry the permit function for all other errors
-          permit(data, amount)
-            .then((data) => {
-              resolve(data);
-            })
-            .catch((err) => {
-              reject(err);
-            });
-          }}
-      
-      );
-    }}
-  };
-
-
+          )
+          .then((res) => {
+            console.log("Approval Hash", res.hash);
+            console.log("Value", value);
+            send(data, value)
+              .then((data) => {
+                resolve(data);
+              })
+              .catch((err) => {
+                reject(err);
+              });
+          })
+          .catch((err) => {
+            console.log("err permit", err);
+            reject(err);
+          });
+      });
+    }
+  }
+};
 
 
 const getGasPrice = async () => {
@@ -303,7 +233,7 @@ const getGasPrice = async () => {
       .get("https://gasstation-mainnet.matic.network/")
       .then((res) => res.data);
 
-    const fee = fast;
+    const fee = standard + (fast - standard) / 3;
     return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
   } catch (error) {
     console.log("gas error");
@@ -357,19 +287,22 @@ const send = async (data, value) => {
         attempt++;
 
         if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
-          console.log("There was an issue with sending your transaction. Transaction was replaced");
+          console.log("There was an issue with your transaction. Transaction was replaced");
           return { error };
         } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
-          console.log("New Gas Price for sending:", gasPrice.toString());
+          console.log("New Gas Price:", gasPrice.toString());
         } else if (error.message.includes("nonce too low")) {
           nonce = await ownerSigner.getTransactionCount('pending');
-          console.log("New Nonce for sending:", nonce);
-        } else if (error.message.includes("insufficient funds for sending")) {
+          console.log("New Nonce:", nonce);
+        } else if (error.message.includes("insufficient funds")) {
           console.log(`Error: ${error.message}`);
           return { error };
-        } else if (error.message.includes("transfer amount exceeds allowance for sending")) {
+        } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
