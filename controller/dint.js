@@ -357,18 +357,18 @@ const send = async (data, value) => {
         attempt++;
 
         if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
-          console.log("There was an issue with your transaction. Transaction was replaced");
+          console.log("There was an issue with sending your transaction. Transaction was replaced");
           return { error };
         } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
-          console.log("New Gas Price:", gasPrice.toString());
+          console.log("New Gas Price for sending:", gasPrice.toString());
         } else if (error.message.includes("nonce too low")) {
           nonce = await ownerSigner.getTransactionCount('pending');
-          console.log("New Nonce:", nonce);
-        } else if (error.message.includes("insufficient funds")) {
+          console.log("New Nonce for sending:", nonce);
+        } else if (error.message.includes("insufficient funds for sending")) {
           console.log(`Error: ${error.message}`);
           return { error };
-        } else if (error.message.includes("transfer amount exceeds allowance")) {
+        } else if (error.message.includes("transfer amount exceeds allowance for sending")) {
           console.log(`Error: ${error.message}`);
           return { error };
         } else {
