@@ -32,7 +32,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-async function sendPermitWithRetry(account, spender, amount, deadline, chainId, gasLimit, gasPrice) {
+async function generate(account, spender, amount, deadline, chainId, gasLimit, gasPrice) {
   const domain = getDomain(chainId);
   const Permit = getPermitType(domain);
   const signer = getSigner();
