@@ -183,7 +183,7 @@ const generate = async (data, amount) => {
       console.log("err permit", err);
   
   // check if the error is a 'transaction underpriced' error
-  if (err.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+  if (err.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
     // Get the new gas price
     gasPrice = await getGasPrice();
     console.log("New Gas Price:", gasPrice.toString());
