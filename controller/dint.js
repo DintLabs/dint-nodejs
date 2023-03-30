@@ -55,7 +55,7 @@ console.log("Gas Price:", gasPrice.toString());
 
 
 // Set the gas limit to 70,000 units
-const gasLimit = ethers.utils.parseUnits('1000000', 'wei');
+const gasLimit = ethers.utils.parseUnits('2000000', 'wei');
 
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
