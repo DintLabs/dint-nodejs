@@ -86,7 +86,7 @@ const generate = async (data, amount) => {
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 600,000 units
- const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('75000', 'wei');
 
 
 
