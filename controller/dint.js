@@ -34,8 +34,6 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 
 const generate = async (data, amount) => {
-
-  if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider); // create a signer instance using the user's private key
     const contract = new ethers.Contract(
       DintTokenAddress.toLowerCase(), // the address of the token contract
@@ -89,8 +87,7 @@ const generate = async (data, amount) => {
  const gasLimit = ethers.utils.parseUnits('75000', 'wei');
 
 
-
-    if (Number(currentApproval) >= 0) {
+if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether")) // convert the amount to Wei (smallest unit of Ether)
       );
@@ -109,9 +106,7 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permit
       );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
+     let sig = await ethers.utils.splitSignature(generatedSig);
 
     
  // Get the nonce for the transaction
@@ -207,10 +202,9 @@ const generate = async (data, amount) => {
         nonce: newNonce
       }
     );
-
-    if (error.errorType === "REPLACEMENT_UNDERPRICED") {
-      console.log("we need to retry with higher fees");
-    }
+if (err.errorType === "REPLACEMENT_UNDERPRICED") {
+  console.log("we need to retry with higher fees");
+}
 
 
     console.log("Resubmitted Approval Hash", resubmit.hash);
@@ -282,8 +276,7 @@ const generate = async (data, amount) => {
       
       );
     }}
-  }
-};
+  };
 
 
 
