@@ -38,6 +38,7 @@ const generate = async (data, amount) => {
 
   const getGasPrice = async () => {
     try {
+
       const { standard, fast } = await axios
         .get("https://gasstation-mainnet.matic.network/")
         .then((res) => res.data);
@@ -125,7 +126,7 @@ const generate = async (data, amount) => {
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
+            gasLimit: ethers.utils.parseUnits('1000000', 'wei'),
             gasPrice: await getGasPrice(),
           })
           .then((res) => {
@@ -168,7 +169,7 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: gasLimit,
+          gasLimit: ethers.utils.parseUnits('1000000', 'wei'),
           gasPrice: await getGasPrice(),
         }
       );
