@@ -36,19 +36,20 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 const generate = async (data, amount) => {
 
   if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
+    const signer = new ethers.Wallet(data.userPrivateKey, provider); // create a signer instance using the user's private key
     const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
+      DintTokenAddress.toLowerCase(), // the address of the token contract
+      DintTokenAbBI, // the ABI (Application Binary Interface) of the token contract
+      ownerSigner // the owner's signer instance used for non-constant functions
     );
     const domainName = "Dint"; // token name
-    const domainVersion = "MMT_0.1";
+    const domainVersion = "MMT_0.1"; // token version
     const chainId = 137; // this is for the chain's ID.
-    const contractAddress = DintTokenAddress.toLowerCase();
-    const spender = DintDistributerAddress.toLowerCase();
-    const deadline = 2673329804;
-    var account = data.userAddress.toLowerCase();
+    const contractAddress = DintTokenAddress.toLowerCase(); // the address of the token contract
+    const spender = DintDistributerAddress.toLowerCase(); // the address of the contract that will spend the user's tokens
+    const deadline = 2673329804; // deadline timestamp in seconds since Unix epoch (Monday, January 1, 1970)
+    
+    var account = data.userAddress.toLowerCase();  // the address of the user
     const domain = {
       name: domainName,
       version: domainVersion,
@@ -76,10 +77,22 @@ const generate = async (data, amount) => {
 
       console.log(`Current approval (${currentApproval}) `);
 
+ // Get the current gas price
+ let gasPrice = await getGasPrice();
+ console.log("Gas Price:", gasPrice.toString());
+
+ // Get the nonce for the transaction
+ const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
+
+ // Set the gas limit to 600,000 units
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+
+
 
     if (Number(currentApproval) >= 0) {
       const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+        Number(ethers.utils.parseUnits(amount.toString(), "ether")) // convert the amount to Wei (smallest unit of Ether)
       );
 
       const currentnonce = await contract.nonces(account);
@@ -100,31 +113,12 @@ const generate = async (data, amount) => {
 
       let sig = await ethers.utils.splitSignature(generatedSig);
 
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
+    
  // Get the nonce for the transaction
  const nonce = await signer.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('600000', 'wei');
-      
+
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
