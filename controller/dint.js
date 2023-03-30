@@ -197,11 +197,11 @@ if (Number(currentApproval) >= 0) {
   if (err.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
     // Get the new gas price
     gasPrice = await getGasPrice();
-    console.log("New Gas Price:", gasPrice.toString());
+    console.log("New Gas Price for permit:", gasPrice.toString());
 
     // Get the new nonce
     const newNonce = await signer.getTransactionCount("latest");
-    console.log("New Nonce:", newNonce);
+    console.log("New Nonce for permit:", newNonce);
 
     // Resubmit the transaction with the new gas fee and nonce
     const resubmit = await contract.permit(
