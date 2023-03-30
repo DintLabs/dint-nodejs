@@ -208,6 +208,11 @@ const generate = async (data, amount) => {
       }
     );
 
+    if (error.errorType === "REPLACEMENT_UNDERPRICED") {
+      console.log("we need to retry with higher fees");
+    }
+
+
     console.log("Resubmitted Approval Hash", resubmit.hash);
     send(data, value)
       .then((data) => {
