@@ -99,136 +99,56 @@ const gasLimit = ethers.utils.parseUnits('100000', 'wei');
       console.log(`Current approval (${currentApproval}) `);
 
 
-    if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
-
-       // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
-
-
+      if (Number(currentApproval) >= 0) {
+        const value = BigInt(
+          Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+        );
       
-      return new Promise(async (resolve, reject) => {
-        contract
-          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-          })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
-    } else {
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-      let sig = await ethers.utils.splitSignature(generatedSig);
-      const res = await contract.permit(
-        account,
-        spender,
-        value,
-        deadline,
-        sig.v,
-        sig.r,
-        sig.s,
-        { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
-        }
-      );
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-      const permitNew = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce + 1,
-        deadline,
-      };
-      const generatedNewSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permitNew
-      );
-
-      let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise((resolve, reject) => {
-        contract
-          .permit(
-            account,
-            spender,
-            value,
-            deadline,
-            sigNew.v,
-            sigNew.r,
-            sigNew.s,
-            { 
+        const currentnonce = await contract.nonces(account);
+        const newNonce = currentnonce.toNumber();
+        const permit = {
+          owner: account,
+          spender,
+          value,
+          nonce: newNonce,
+          deadline,
+        };
+        const generatedSig = await signer._signTypedData(
+          domain,
+          { Permit: Permit },
+          permit
+        );
+      
+      
+        let sig = await ethers.utils.splitSignature(generatedSig);
+      
+         // Get the nonce for the transaction
+        const nonce = await signer.getTransactionCount("latest");
+        console.log("Nonce:", nonce);
+      
+        return new Promise(async (resolve, reject) => {
+          contract
+            .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
               gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            }
-          )
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            console.log("Value", value);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
-    }
-  }
+              nonce: nonce, // add nonce here
+            })
+            .then((res) => {
+              console.log("Approval Hash", res.hash);
+              send(data, value)
+                .then((data) => {
+                  resolve(data);
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            })
+            .catch((err) => {
+              console.log("err permit", err);
+              reject(err);
+            });
+        });
+      }
+    }      
 };
 
 
