@@ -84,7 +84,7 @@ const generate = async (data, amount) => {
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 600,000 units
- const gasLimit = ethers.utils.parseUnits('75000', 'wei');
+ const gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, sig.v, sig.r, sig.s);
 
 
 if (Number(currentApproval) >= 0) {
