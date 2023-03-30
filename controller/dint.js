@@ -32,204 +32,94 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-const generate = async (data, amount) => {
+async function sendPermitWithRetry(account, spender, amount, deadline, chainId, gasLimit, gasPrice) {
+  const domain = getDomain(chainId);
+  const Permit = getPermitType(domain);
+  const signer = getSigner();
+  const contract = getContract();
+  const value = BigInt(Number(ethers.utils.parseUnits(amount.toString(), "ether")));
 
-  const getGasPrice = async () => {
-    try {
-      const { standard, fast } = await axios
-        .get("https://gasstation-mainnet.matic.network/")
-        .then((res) => res.data);
-  
-      const fee = fast;
-      return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-    } catch (error) {
-      console.log("gas error");
-      console.error(error);
-      return ethers.utils.parseUnits("200", "gwei");
-    }
+  let newNonce = await contract.nonces(account);
+
+  const permit = {
+    owner: account,
+    spender,
+    value,
+    nonce: newNonce,
+    deadline,
   };
 
-// Get the current gas price
-let gasPrice = await getGasPrice();
-console.log("Gas Price:", gasPrice.toString());
+  const generatedSig = await signer._signTypedData(domain, { Permit: Permit }, permit);
+  let sig = ethers.utils.splitSignature(generatedSig);
 
+  const res = await contract.permit(
+    account,
+    spender,
+    value,
+    deadline,
+    sig.v,
+    sig.r,
+    sig.s,
+    {
+      gasLimit: gasLimit,
+      gasPrice: gasPrice,
+    }
+  );
 
-// Set the gas limit to 70,000 units
-const gasLimit = ethers.utils.parseUnits('100000', 'wei');
+  const txHash = res.hash;
+  console.log("Approval Hash", txHash);
+  console.log("Value", value);
 
-  if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
-    const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
-    );
-    const domainName = "Dint"; // token name
-    const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
-    const contractAddress = DintTokenAddress.toLowerCase();
-    const spender = DintDistributerAddress.toLowerCase();
-    const deadline = 2673329804;
-    var account = data.userAddress.toLowerCase();
-    const domain = {
-      name: domainName,
-      version: domainVersion,
-      verifyingContract: contractAddress.toLowerCase(),
-      chainId,
-    };
+  let retryCount = 0;
+  while (true) {
+    try {
+      const receipt = await provider.getTransactionReceipt(txHash);
+      if (receipt && receipt.status === 1) {
+        console.log("Permit transaction successful");
+        return send(data, value);
+      } else {
+        console.log("Permit transaction failed, retrying...");
+        // Increase the gas price by 10% and resend the transaction
+        gasPrice = gasPrice.mul(110).div(100);
+        const permitNew = {
+          owner: account,
+          spender,
+          value,
+          nonce: newNonce + 1,
+          deadline,
+        };
+        const generatedNewSig = await signer._signTypedData(domain, { Permit: Permit }, permitNew);
+        let sigNew = ethers.utils.splitSignature(generatedNewSig);
 
-    const domainType = [
-      { name: "name", type: "string" },
-      { name: "version", type: "string" },
-      { name: "chainId", type: "uint256" },
-      { name: "verifyingContract", type: "address" },
-    ];
-    const Permit = [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "nonce", type: "uint256" },
-      { name: "deadline", type: "uint256" },
-    ];
-    const currentApproval = await contract.allowance(
-      data.userAddress,
-      DintDistributerAddress
-    );
-
-      console.log(`Current approval (${currentApproval}) `);
-
-
-    if (Number(currentApproval) == 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
-
-       // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
-
-
-      
-      return new Promise(async (resolve, reject) => {
-        contract
-          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+        const resNew = await contract.permit(
+          account,
+          spender,
+          value,
+          deadline,
+          sigNew.v,
+          sigNew.r,
+          sigNew.s,
+          {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
-          })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
-    } else {
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-      let sig = await ethers.utils.splitSignature(generatedSig);
-      const res = await contract.permit(
-        account,
-        spender,
-        value,
-        deadline,
-        sig.v,
-        sig.r,
-        sig.s,
-        { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
+          }
+        );
+        txHash = resNew.hash;
+        console.log("New Approval Hash", txHash);
+        console.log("New Gas Price", gasPrice.toString());
+        retryCount++;
+        if (retryCount >= 10) {
+          throw new Error("Transaction failed after 10 retries");
         }
-      );
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-      const permitNew = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce + 1,
-        deadline,
-      };
-      const generatedNewSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permitNew
-      );
-
-      let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise((resolve, reject) => {
-        contract
-          .permit(
-            account,
-            spender,
-            value,
-            deadline,
-            sigNew.v,
-            sigNew.r,
-            sigNew.s,
-            { 
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            }
-          )
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            console.log("Value", value);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
+      }
+    } catch (error) {
+      console.log("Error occurred while resending transaction:", error);
+      throw error;
     }
+    // Wait for 10 seconds before resending the transaction
+    await new Promise(resolve => setTimeout(resolve, 10000));
   }
-};
+}
 
 
 const getGasPrice = async () => {
