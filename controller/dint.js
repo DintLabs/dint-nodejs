@@ -32,27 +32,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
-
 const generate = async (data, amount) => {
-
-
-  const getGasPrice = async () => {
-    try {
-
-      const { standard, fast } = await axios
-        .get("https://gasstation-mainnet.matic.network/")
-        .then((res) => res.data);
-
-      const fee = standard + (fast - standard) / 3;
-      return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-    } catch (error) {
-      console.log("gas error");
-      console.error(error);
-      return ethers.utils.parseUnits("120", "gwei");
-    }
-  };
-
-
 
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
@@ -88,9 +68,6 @@ const generate = async (data, amount) => {
       { name: "nonce", type: "uint256" },
       { name: "deadline", type: "uint256" },
     ];
-
-
-    
     const currentApproval = await contract.allowance(
       data.userAddress,
       DintDistributerAddress
@@ -122,12 +99,36 @@ const generate = async (data, amount) => {
 
       let sig = await ethers.utils.splitSignature(generatedSig);
 
-   
+      const getGasPrice = async () => {
+        try {
+          const { standard, fast } = await axios
+            .get("https://gasstation-mainnet.matic.network/")
+            .then((res) => res.data);
+      
+          const fee = standard + (fast - standard) / 3;
+          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+        } catch (error) {
+          console.log("gas error");
+          console.error(error);
+          return ethers.utils.parseUnits("200", "gwei");
+        }
+      };
+ // Get the current gas price
+ let gasPrice = await getGasPrice();
+ console.log("Gas Price:", gasPrice.toString());
+
+ // Get the nonce for the transaction
+ const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
+
+ // Set the gas limit to 70,000 units
+ const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+      
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: ethers.utils.parseUnits('75000', 'wei'),
-            gasPrice: await getGasPrice(),
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -169,8 +170,8 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: ethers.utils.parseUnits('75000', 'wei'),
-          gasPrice: await getGasPrice(),
+          gasLimit: gasLimit,
+          gasPrice: gasPrice,
         }
       );
       const value = BigInt(
@@ -237,7 +238,7 @@ const getGasPrice = async () => {
   } catch (error) {
     console.log("gas error");
     console.error(error);
-    return ethers.utils.parseUnits("200", "gwei");
+    return ethers.utils.parseUnits("220", "gwei");
   }
 };
 
@@ -245,7 +246,7 @@ const getGasPrice = async () => {
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('1000000', 'wei');
+    const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
     let nonce = await ownerSigner.getTransactionCount('pending');
     let gasPrice = await getGasPrice();
     let attempt = 1;
@@ -299,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
