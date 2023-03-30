@@ -45,7 +45,7 @@ const generate = async (data, amount) => {
     } catch (error) {
       console.log("gas error");
       console.error(error);
-      return ethers.utils.parseUnits("113830000000", "gwei");
+      return ethers.utils.parseUnits("300", "gwei");
     }
   };
 
@@ -55,7 +55,7 @@ console.log("Gas Price:", gasPrice.toString());
 
 
 // Set the gas limit to 70,000 units
-const gasLimit = ethers.utils.parseUnits('100000', 'wei');
+const gasLimit = ethers.utils.parseUnits('1000000', 'wei');
 
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
