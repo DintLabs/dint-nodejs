@@ -110,11 +110,11 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("130", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
  // Get the current gas price
- let gasPrice = ethers.utils.parseUnits('130', 'gwei');
+ let gasPrice = ethers.utils.parseUnits('200', 'gwei');
  console.log("Gas Price Permit:", gasPrice.toString());
 
  // Get the nonce for the transaction
