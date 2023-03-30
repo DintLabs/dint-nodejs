@@ -32,6 +32,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
+
 const generate = async (data, amount) => {
 
 
@@ -49,24 +50,6 @@ const generate = async (data, amount) => {
       return ethers.utils.parseUnits("200", "gwei");
     }
   };
-
-  const sendTransaction = async (transactionObject, gasPrice) => {
-    try {
-      transactionObject.gasPrice = gasPrice;
-      const tx = await signer.sendTransaction(transactionObject);
-      return tx;
-    } catch (error) {
-      console.log("error:", error.message);
-      if (error.message.includes("gas price")) {
-        console.log("Retrying with a higher gas price...");
-        const newGasPrice = gasPrice.add(ethers.utils.parseUnits("1", "gwei"));
-        return await sendTransaction(transactionObject, newGasPrice);
-      }
-      throw error;
-    }
-  };
-
-
 
 
 
@@ -143,7 +126,7 @@ const generate = async (data, amount) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
-            gasPrice: gasPrice,
+            gasPrice: await getGasPrice(),
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -186,7 +169,7 @@ const generate = async (data, amount) => {
         sig.s,
         { 
           gasLimit: gasLimit,
-          gasPrice: gasPrice,
+          gasPrice: await getGasPrice(),
         }
       );
       const value = BigInt(
