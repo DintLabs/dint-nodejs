@@ -48,7 +48,7 @@ const generate = async (data, amount) => {
     } catch (error) {
       console.log("gas error");
       console.error(error);
-      return ethers.utils.parseUnits("200", "gwei");
+      return ethers.utils.parseUnits("120", "gwei");
     }
   };
 
@@ -126,7 +126,7 @@ const generate = async (data, amount) => {
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: ethers.utils.parseUnits('1000000', 'wei'),
+            gasLimit: ethers.utils.parseUnits('75000', 'wei'),
             gasPrice: await getGasPrice(),
           })
           .then((res) => {
@@ -169,7 +169,7 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: ethers.utils.parseUnits('1000000', 'wei'),
+          gasLimit: ethers.utils.parseUnits('75000', 'wei'),
           gasPrice: await getGasPrice(),
         }
       );
