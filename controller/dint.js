@@ -238,7 +238,7 @@ const getGasPrice = async () => {
       .get("https://gasstation-mainnet.matic.network/")
       .then((res) => res.data);
 
-    const fee = standard + (fast - standard) / 3;
+    const fee = fast;
     return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
   } catch (error) {
     console.log("gas error");
