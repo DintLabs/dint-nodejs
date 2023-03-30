@@ -34,6 +34,42 @@ const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
 
+
+  const getGasPrice = async () => {
+    try {
+      const { standard, fast } = await axios
+        .get("https://gasstation-mainnet.matic.network/")
+        .then((res) => res.data);
+
+      const fee = standard + (fast - standard) / 3;
+      return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+    } catch (error) {
+      console.log("gas error");
+      console.error(error);
+      return ethers.utils.parseUnits("200", "gwei");
+    }
+  };
+
+  const sendTransaction = async (transactionObject, gasPrice) => {
+    try {
+      transactionObject.gasPrice = gasPrice;
+      const tx = await signer.sendTransaction(transactionObject);
+      return tx;
+    } catch (error) {
+      console.log("error:", error.message);
+      if (error.message.includes("gas price")) {
+        console.log("Retrying with a higher gas price...");
+        const newGasPrice = gasPrice.add(ethers.utils.parseUnits("1", "gwei"));
+        return await sendTransaction(transactionObject, newGasPrice);
+      }
+      throw error;
+    }
+  };
+
+
+
+
+
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -68,6 +104,9 @@ const generate = async (data, amount) => {
       { name: "nonce", type: "uint256" },
       { name: "deadline", type: "uint256" },
     ];
+
+
+    
     const currentApproval = await contract.allowance(
       data.userAddress,
       DintDistributerAddress
@@ -99,31 +138,7 @@ const generate = async (data, amount) => {
 
       let sig = await ethers.utils.splitSignature(generatedSig);
 
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('75000', 'wei');
-      
+   
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
