@@ -75,16 +75,32 @@ const generate = async (data, amount) => {
 
       console.log(`Current approval (${currentApproval}) `);
 
+      const getGasPrice = async () => {
+        try {
+          const { standard, fast } = await axios
+            .get("https://gasstation-mainnet.matic.network/")
+            .then((res) => res.data);
+      
+          const fee = fast;
+          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+        } catch (error) {
+          console.log("gas error");
+          console.error(error);
+          return ethers.utils.parseUnits("220", "gwei");
+        }
+      };
+      
+
  // Get the current gas price
  let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
+ console.log("Gas Price for permit:", gasPrice.toString());
 
  // Set the gas limit to 600,000 units
- const gasLimit = ethers.utils.parseUnits('95000', 'wei');
+ const gasLimit = ethers.utils.parseUnits('75000', 'wei');
+
+  // Get the nonce for the transaction
+  const nonce = await signer.getTransactionCount("latest");
+  console.log("Nonce for permit:", nonce); 
 
 
 if (Number(currentApproval) >= 0) {
