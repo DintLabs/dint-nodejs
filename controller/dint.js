@@ -114,7 +114,7 @@ const generate = async (data, amount) => {
         }
       };
  // Get the current gas price
- let gasPrice = await getGasPrice();
+ let gasPrice = ethers.utils.parseUnits('130000', 'wei');
  console.log("Gas Price Permit:", gasPrice.toString());
 
  // Get the nonce for the transaction
