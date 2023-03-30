@@ -52,9 +52,6 @@ const generate = async (data, amount) => {
 let gasPrice = await getGasPrice();
 console.log("Gas Price:", gasPrice.toString());
 
-// Get the nonce for the transaction
-const nonce = await signer.getTransactionCount("latest");
-console.log("Nonce:", nonce);
 
 // Set the gas limit to 70,000 units
 const gasLimit = ethers.utils.parseUnits('75000', 'wei');
@@ -99,6 +96,7 @@ const gasLimit = ethers.utils.parseUnits('75000', 'wei');
       DintDistributerAddress
     );
 
+    
       console.log(`Current approval (${currentApproval}) `);
 
 
