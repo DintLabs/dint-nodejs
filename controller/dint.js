@@ -109,30 +109,19 @@ console.log(`v: ${sig.v}`);
 console.log(`r: ${sig.r}`);
 console.log(`s: ${sig.s}`);
 
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
 
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
 
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('75000', 'wei');
+const estimatedGas = await contract.estimateGas.permit(account, spender, value, deadline, true);
+const gasPrice = await provider.getGasPrice();
+
+const gasLimit = Math.ceil(estimatedGas.toNumber() * 1.2);
+const maxPriorityFeePerGas = ethers.BigNumber.from(await provider.getFeeData()).maxPriorityFeePerGas;
+const maxFeePerGas = gasPrice.add(maxPriorityFeePerGas);
+
+// Update gas price based on the desired maximum
+const maxGasPrice = ethers.utils.parseUnits('161', 'gwei');
+const updatedGasPrice = ethers.BigNumber.min(gasPrice.add(maxPriorityFeePerGas), maxGasPrice);
+
       
       return new Promise(async (resolve, reject) => {
         contract
