@@ -170,7 +170,7 @@ const generate = async (data, amount) => {
         sig.r,
         sig.s,
         { 
-          gasLimit: gasLimit,
+          gasLimit: ethers.utils.parseUnits('100000', 'wei'),
           gasPrice: gasPrice,
         }
       );
@@ -202,7 +202,7 @@ const generate = async (data, amount) => {
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: gasLimit,
+              gasLimit: ethers.utils.parseUnits('100000', 'wei'),
               gasPrice: gasPrice,
             }
           )
