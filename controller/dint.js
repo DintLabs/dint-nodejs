@@ -107,13 +107,13 @@ const generate = async (data, amount) => {
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-        nonce: currentNonce +1,
+        nonce: currentNonce + 2,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
       console.log("Permit transaction receipt:", receipt);
       const result = await send(data, value);
-      return { result, newNonce: currentNonce + 1 };
+      return { result, newNonce: currentNonce };
     } catch (error) {
       console.log("err permit", error.message);
       if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
