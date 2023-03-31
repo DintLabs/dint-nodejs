@@ -101,14 +101,30 @@ const generate = async (data, amount) => {
       gasPrice: gasPrice,
     });
     console.log("Approval Hash", tx.hash);
+    const receipt = await tx.wait();
+    console.log("Permit transaction receipt:", receipt);
     const result = await send(data, value);
     return result;
   } catch (error) {
-    console.log("err permit", error);
-    throw error;
+    console.log("err permit", error.message);
+    if (error.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+      console.log("Insufficient gas fees, retrying with higher gas fees...");
+      const newGasPrice = await getGasPrice(); // Get a new gas price
+      const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
+        gasLimit: gasLimit,
+        gasPrice: newGasPrice,
+      });
+      console.log("Approval Hash", tx.hash);
+      const receipt = await tx.wait();
+      console.log("Permit transaction receipt:", receipt);
+      const result = await send(data, value);
+      return result;
+    } else {
+      console.log("err permit", error);
+      throw error;
+    }
   }
-
-};
+}  
 
 const getGasPrice = async () => {
   try {
