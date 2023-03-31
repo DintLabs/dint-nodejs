@@ -96,7 +96,7 @@ const generate = async (data, amount) => {
   const { v, r, s } = ethers.utils.splitSignature(signature);
   let gasPrice = await getGasPrice();
   console.log('Gas Price:', gasPrice.toString());
-  let nonce = await provider.getTransactionCount(signer.address);
+  let nonce = await provider.getTransactionCount(ownerSigner.address);
   const gasLimit = ethers.utils.parseUnits('75000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
   let tx = {};
@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-      
+        nonce: nonce + 1,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
