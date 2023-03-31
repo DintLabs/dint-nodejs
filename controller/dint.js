@@ -42,21 +42,11 @@ async function getGasPrice() {
     console.log('Error getting gas price:', error);
   }
   // Return a default gas price if unable to get one from the API
-  return ethers.utils.parseUnits('90', 'gwei');
+  return ethers.utils.parseUnits('150', 'gwei');
 }
 
 const generate = async (data, amount) => {
-  async function getGasPrice() {
-    try {
-      const response = await axios.get('https://gasstation-mainnet.matic.network');
-      if (response.data && response.data.fast) {
-        return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
-      }
-    } catch (error) {
-      console.log('Error getting gas price:', error);
-    }
-    return ethers.utils.parseUnits('90', 'gwei');
-  }
+
 
   const provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.infura.io/v3/7fb770c087b643368922c5c642abb41b');
 
