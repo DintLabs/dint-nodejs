@@ -33,11 +33,11 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
-  const ownerSigner = new ethers.Wallet(data.ownerPrivateKey, provider);
+  const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
-    DintTokenAbBI,
-    provider
+      DintTokenAbBI,
+      ownerSigner
   );
   
   // Constants
@@ -69,7 +69,7 @@ const generate = async (data, amount) => {
     chainId,
   };
 
-  const currentApproval = await contract.allowance(account, spender);
+  const currentApproval = await contract.allowance(data.userAddress, DintDistributerAddress);
   console.log(`Current approval (${currentApproval}) `);
 
   const value = ethers.utils.parseEther(amount.toString());
