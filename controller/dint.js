@@ -73,7 +73,7 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval}) `);
 
   const value = BigInt(
-    Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+    Number(ethers.utils.formatUnits(amount.toString(), "ether"))
   );
   
   const currentNonce = await contract.nonces(account);
