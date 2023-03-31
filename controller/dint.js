@@ -87,7 +87,7 @@ const generate = async (data, amount) => {
   const value = ethers.utils.parseEther(amount.toString());
   const currentNonce = await provider.getTransactionCount(account, 'latest');
   console.log("Current nonce:", currentNonce);
-  const newNonce = currentNonce + 1;
+  const newNonce = currentNonce.toNumber();
   console.log("New nonce:", newNonce);
   const permit = {
     owner: account,
@@ -127,7 +127,7 @@ const generate = async (data, amount) => {
         console.log("Insufficient gas fees, retrying with higher gas fees...");
         gasPrice = gasPrice.mul(150).div(100); // Increase gas price by 1.5x
         gasLimit= gasLimit
-        nonce= newNonce + 2
+      
        } else {
         console.log("err permit", error);
         throw error;
