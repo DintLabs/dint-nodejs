@@ -88,8 +88,11 @@ const generate = async (data, amount) => {
 
   const value = ethers.utils.parseEther(amount.toString());
 
-  const currentNonce = await contract.nonces(account);
-  const newNonce = currentNonce.toNumber();
+  let currentNonce = await contract.nonces(account);
+  console.log("Current nonce:", currentNonce.toString());
+  
+// Increment nonce after each successful transaction
+const newNonce = currentNonce.add(1);
 
   const permit = {
     owner: account,
@@ -103,6 +106,9 @@ const generate = async (data, amount) => {
     { Permit: Permit },
     permit
   );
+
+  // Print signature for debugging purposes
+console.log("Signature:", signature);
 
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
