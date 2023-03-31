@@ -102,8 +102,9 @@ const generate = async (data, amount) => {
   const signature = await signer._signTypedData(domainType, Permit, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
-  let gasPrice = await getGasPrice();
-  console.log("Gas Price:", gasPrice.toString());
+// let gasPrice = await getGasPrice();
+let gasPrice = ethers.utils.parseUnits("100", "gwei"); // hardcoded gas price of 100 gwei
+console.log("Gas Price:", gasPrice.toString());
 
   let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
   console.log("Gas Limit:", gasLimit.toString());
