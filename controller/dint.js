@@ -33,11 +33,11 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
-  const signer = new ethers.Wallet(data.userPrivateKey, provider);
+  const ownerSigner = new ethers.Wallet(data.ownerPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
     DintTokenAbBI,
-    ownerSigner
+    provider
   );
   
   // Constants
@@ -73,7 +73,7 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval}) `);
 
   const value = BigInt(
-    Number(ethers.utils.formatUnits(amount.toString(), "ether"))
+    Number(ethers.utils.parseUnits(amount.toString(), "ether"))
   );
   
   const currentNonce = await contract.nonces(account);
@@ -87,7 +87,7 @@ const generate = async (data, amount) => {
     deadline,
   };
    
-  const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
+  const signature = await ownerSigner._signTypedData(domain, { Permit: Permit }, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   const gasPrice = await getGasPrice();
@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
     return result;
   } catch (error) {
     console.log("err permit", error.message);
-    if (err.code === 'REPLACEMENT_UNDERPRICED') {
+    if (error.code === 'REPLACEMENT_UNDERPRICED') {
       console.log("Insufficient gas fees, retrying with higher gas fees...");
       const newGasPrice = await getGasPrice(); // Get a new gas price
       const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
@@ -124,7 +124,8 @@ const generate = async (data, amount) => {
       throw error;
     }
   }
-}  
+}
+
 
 
 const getGasPrice = async () => {
