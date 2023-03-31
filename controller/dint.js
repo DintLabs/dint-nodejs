@@ -87,7 +87,7 @@ const generate = async (data, amount, nonce) => {
   console.log(`Current approval (${currentApproval})`);
 
   const value = ethers.utils.parseEther(amount.toString());
-
+  const BigNumber = require('bignumber.js');
   const currentNonce = nonce ? ethers.BigNumber.from(nonce) : await signer.getTransactionCount('latest');
   console.log("Current nonce:", currentNonce.toString());
   
