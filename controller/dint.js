@@ -106,7 +106,7 @@ const generate = async (data, amount) => {
       console.log("Calling permit function... Attempt", attempt);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
-        gasPrice: gasPrice,
+        gasPrice: gasPrice.mul(110).div(100), // increase gas price by 10%
         nonce: nonce + 1,
       });
       console.log("Approval Hash:", tx.hash);
