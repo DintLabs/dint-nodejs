@@ -109,14 +109,14 @@ console.log(`v: ${sig.v}`);
 console.log(`r: ${sig.r}`);
 console.log(`s: ${sig.s}`);
 
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+const getGasPrice = async () => {
+  try {
+    const { standard, fast } = await axios
+      .get("https://gasstation-mainnet.matic.network/")
+      .then((res) => res.data);
+
+    const fee = standard + (fast - standard) / 3;
+    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
         } catch (error) {
           console.log("gas error");
           console.error(error);
@@ -201,6 +201,19 @@ console.log(`s: ${sig.s}`);
       );
 
       let sigNew = ethers.utils.splitSignature(generatedNewSig);
+
+ // Get the current gas price
+ let gasPriceNew = await getGasPrice();
+ console.log("New Gas Price:", gasPriceNew.toString());
+
+ // Get the nonce for the transaction
+ const nonceNew = await signer.getTransactionCount("latest");
+ console.log("New Nonce:", nonceNew);
+
+ // Set the gas limit to 70,000 units
+ const gasLimitNew = ethers.utils.parseUnits('75000', 'wei');
+
+
       return new Promise((resolve, reject) => {
         contract
           .permit(
@@ -212,8 +225,8 @@ console.log(`s: ${sig.s}`);
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
+              gasLimit: gasLimitNew,
+              gasPrice: gasPriceNew,
             }
           )
           .then((res) => {
