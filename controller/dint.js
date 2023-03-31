@@ -89,7 +89,7 @@ const generate = async (data, amount) => {
     owner: account,
     spender,
     value,
-    nonce: newNonce,
+    nonce: newNonce + 1,
     deadline,
   };
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
