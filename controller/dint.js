@@ -98,7 +98,7 @@ const generate = async (data, amount) => {
   try {
     const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
       gasLimit: gasLimit,
-      gasPrice: ethers.utils.parseUnits("100", "gwei"),
+      gasPrice: ethers.utils.parseUnits("200", "gwei"),
     });
     console.log("Approval Hash", tx.hash);
     const receipt = await tx.wait();
