@@ -130,7 +130,7 @@ console.log("Signature:", signature);
   while (attempt <= 3) {
     try {
       console.log("Calling permit function... Attempt", attempt);
-      tx = await contract.permit(account.address, spender, value, deadline, v, r, s, {
+      tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
         nonce: newNonce,
