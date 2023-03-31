@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
     return result;
   } catch (error) {
     console.log("err permit", error.message);
-    if (error.code === ethers.utils.Logger.errors.UNPREDICTABLE_GAS_LIMIT) {
+    if (error.code === ethers.utils.Logger.errors.REPLACEMENT_UNDERPRICED) {
       console.log("Insufficient gas fees, retrying with higher gas fees...");
       const newGasPrice = await getGasPrice(); // Get a new gas price
       const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
