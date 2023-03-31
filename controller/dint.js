@@ -33,198 +33,98 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
+  const signer = new ethers.Wallet(data.userPrivateKey, provider);
+  const contract = new ethers.Contract(
+    DintTokenAddress.toLowerCase(),
+    DintTokenAbBI,
+    ownerSigner
+  );
+  
+  // Constants
+  const domainName = "Dint"; // token name
+  const domainVersion = "MMT_0.1";
+  const chainId = 137; // this is for the chain's ID.
+  const contractAddress = DintTokenAddress.toLowerCase();
+  const spender = DintDistributerAddress.toLowerCase();
+  const deadline = 2673329804;
+  const account = data.userAddress.toLowerCase();
+  const domainType = [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ];
+  const Permit = [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ];
 
-  if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
-    const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
-    );
-    const domainName = "Dint"; // token name
-    const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
-    const contractAddress = DintTokenAddress.toLowerCase();
-    const spender = DintDistributerAddress.toLowerCase();
-    const deadline = 2673329804;
-    var account = data.userAddress.toLowerCase();
-    const domain = {
-      name: domainName,
-      version: domainVersion,
-      verifyingContract: contractAddress.toLowerCase(),
-      chainId,
-    };
+  const domain = {
+    name: domainName,
+    version: domainVersion,
+    verifyingContract: contractAddress.toLowerCase(),
+    chainId,
+  };
 
-    const domainType = [
-      { name: "name", type: "string" },
-      { name: "version", type: "string" },
-      { name: "chainId", type: "uint256" },
-      { name: "verifyingContract", type: "address" },
-    ];
-    const Permit = [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "nonce", type: "uint256" },
-      { name: "deadline", type: "uint256" },
-    ];
-    const currentApproval = await contract.allowance(
-      data.userAddress,
-      DintDistributerAddress
-    );
+  const currentApproval = await contract.allowance(account, spender);
+  console.log(`Current approval (${currentApproval}) `);
 
-      console.log(`Current approval (${currentApproval}) `);
+  const value = BigInt(
+    Number(ethers.utils.parseUnits(amount.toString(), "ether"))
+  );
+  
+  const currentNonce = await contract.nonces(account);
+  const newNonce = currentNonce.toNumber();
+  
+  const permit = {
+    owner: account,
+    spender,
+    value,
+    nonce: newNonce,
+    deadline,
+  };
+   
+  const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
+  const { v, r, s } = ethers.utils.splitSignature(signature);
 
+  const gasPrice = await getGasPrice();
+  console.log("Gas Price:", gasPrice.toString());
 
-    if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
+  const gasLimit = ethers.utils.parseUnits("75000", "wei");
 
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
-
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('600000', 'wei');
-      
-      return new Promise(async (resolve, reject) => {
-        contract
-          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-          })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
+  try {
+    const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
+      gasLimit: gasLimit,
+      gasPrice: gasPrice,
+    });
+    console.log("Approval Hash", tx.hash);
+    const receipt = await tx.wait();
+    console.log("Permit transaction receipt:", receipt);
+    const result = await send(data, value);
+    return result;
+  } catch (error) {
+    console.log("err permit", error.message);
+    if (err.code === 'REPLACEMENT_UNDERPRICED') {
+      console.log("Insufficient gas fees, retrying with higher gas fees...");
+      const newGasPrice = await getGasPrice(); // Get a new gas price
+      const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
+        gasLimit: gasLimit,
+        gasPrice: newGasPrice,
       });
+      console.log("Approval Hash", tx.hash);
+      const receipt = await tx.wait();
+      console.log("Permit transaction receipt:", receipt);
+      const result = await send(data, value);
+      return result;
     } else {
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-      let sig = await ethers.utils.splitSignature(generatedSig);
-      const res = await contract.permit(
-        account,
-        spender,
-        value,
-        deadline,
-        sig.v,
-        sig.r,
-        sig.s,
-        { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
-        }
-      );
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-      const permitNew = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce + 1,
-        deadline,
-      };
-      const generatedNewSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permitNew
-      );
-
-      let sigNew = ethers.utils.splitSignature(generatedNewSig);
-      return new Promise((resolve, reject) => {
-        contract
-          .permit(
-            account,
-            spender,
-            value,
-            deadline,
-            sigNew.v,
-            sigNew.r,
-            sigNew.s,
-            { 
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            }
-          )
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            console.log("Value", value);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
+      console.log("err permit", error);
+      throw error;
     }
   }
-};
+}  
 
 
 const getGasPrice = async () => {
