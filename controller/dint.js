@@ -42,7 +42,7 @@ async function getGasPrice() {
     console.log('Error getting gas price:', error);
   }
   // Return a default gas price if unable to get one from the API
-  return ethers.utils.parseUnits('150', 'gwei');
+  return ethers.utils.parseUnits('200', 'gwei');
 }
 
 const generate = async (data, amount) => {
