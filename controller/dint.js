@@ -134,11 +134,13 @@ console.log("Signature:", signature);
       return result;
     } catch (error) {
       console.log("err permit", error.message);
-      if (error.code === 'REPLACEMENT_UNDERPRICED') {
+      if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+        console.log("Gas limit is unpredictable, increasing gas limit by 2x...");
+        gasLimit = gasLimit.mul(2); // Increase gas limit by 2x
+      } else if (error.code === 'REPLACEMENT_UNDERPRICED') {
         console.log("Insufficient gas fees, retrying with higher gas fees...");
         gasPrice = await getGasPrice(); // Get a new gas price
-        gasLimit = await tx.gasLimit.mul(2); // Increase gas limit by 2x
-        attempt++;
+        gasLimit = gasLimit.mul(2); // Increase gas limit by 2x
       } else {
         console.log("err permit", error);
         throw error;
