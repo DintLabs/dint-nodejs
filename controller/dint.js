@@ -36,7 +36,7 @@ const generate = async (data, amount) => {
 
   async function getGasPrice() {
     try {
-      const response = await axios.get('https://gasstation-api.ftm.tools/api/gasPriceOracle');
+      const response = await axios.get('https://gasstation-mainnet.matic.network');
       if (response.data && response.data.fast) {
         return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
       }
