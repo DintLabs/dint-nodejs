@@ -46,15 +46,12 @@ async function getGasPrice() {
 }
 
 const generate = async (data, amount) => {
-
-
   const provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.infura.io/v3/7fb770c087b643368922c5c642abb41b');
-
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
     DintTokenAbBI,
-    ownerSigner
+    signer
   );
   const domainName = "Dint"; // token name
   const domainVersion = "MMT_0.1";
@@ -62,14 +59,13 @@ const generate = async (data, amount) => {
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
   const deadline = 2673329804;
-  var account = data.userAddress.toLowerCase();
+  const account = data.userAddress.toLowerCase();
   const domain = {
     name: domainName,
     version: domainVersion,
-    verifyingContract: contractAddress.toLowerCase(),
     chainId,
+    verifyingContract: contractAddress.toLowerCase(),
   };
-
   const domainType = [
     { name: "name", type: "string" },
     { name: "version", type: "string" },
@@ -83,48 +79,25 @@ const generate = async (data, amount) => {
     { name: "nonce", type: "uint256" },
     { name: "deadline", type: "uint256" },
   ];
-  const currentApproval = await contract.allowance(
-    data.userAddress,
-    DintDistributerAddress
-  );
-
-
+  const currentApproval = await contract.allowance(account, spender);
   console.log(`Current approval (${currentApproval})`);
-
   const value = ethers.utils.parseEther(amount.toString());
-
-
-
-  const currentnonce = await contract.nonces(account);
-  console.log("Current nonce:", currentnonce.toString());
-  
-// Increment nonce after each successful transaction
-const newNonce = currentnonce.toNumber(); // convert currentNonce to a BigNumber object
-
+  const currentNonce = await contract.nonces(account);
+  console.log("Current nonce:", currentNonce.toString());
   const permit = {
     owner: account,
     spender,
     value,
-    nonce: newNonce +1,
+    nonce: currentNonce,
     deadline,
   };
-  const signature = await signer._signTypedData(
-    domain,
-    { Permit: Permit },
-    permit
-  );
-
-  // Print signature for debugging purposes
-console.log("Signature:", signature);
-
+  const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
+  console.log("Signature:", signature);
   const { v, r, s } = ethers.utils.splitSignature(signature);
-
   let gasPrice = await getGasPrice();
   console.log('Gas Price:', gasPrice.toString());
-
   const gasLimit = ethers.utils.parseUnits('75000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
-
   let tx = {};
   let attempt = 1;
   while (attempt <= 3) {
@@ -133,13 +106,13 @@ console.log("Signature:", signature);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-        nonce: newNonce,
+        nonce: currentNonce,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
       console.log("Permit transaction receipt:", receipt);
       const result = await send(data, value);
-      return { result, newNonce: newNonce + 1 };
+      return { result, newNonce: currentNonce + 1 };
     } catch (error) {
       console.log("err permit", error.message);
       if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
