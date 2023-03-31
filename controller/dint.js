@@ -44,7 +44,7 @@ const generate = async (data, amount) => {
       console.log('Error getting gas price:', error);
     }
     // Return a default gas price if unable to get one from the API
-    return ethers.utils.parseUnits('200', 'gwei');
+    return ethers.utils.parseUnits('90', 'gwei');
   }
 
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
