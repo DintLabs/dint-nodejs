@@ -83,7 +83,12 @@ const generate = async (data, amount, nonce) => {
     { name: "nonce", type: "uint256" },
     { name: "deadline", type: "uint256" },
   ];
-  const currentApproval = await contract.allowance(account, spender);
+  const currentApproval = await contract.allowance(
+    data.userAddress,
+    DintDistributerAddress
+  );
+
+
   console.log(`Current approval (${currentApproval})`);
 
   const value = ethers.utils.parseEther(amount.toString());
