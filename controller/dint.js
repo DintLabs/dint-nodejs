@@ -92,7 +92,7 @@ const generate = async (data, amount, nonce) => {
   console.log("Current nonce:", currentNonce.toString());
   
 // Increment nonce after each successful transaction
-let newNonce = currentNonce.toNumber();
+const newNonce = BigNumber.from(currentNonce).add(1); // convert currentNonce to a BigNumber object
 
   const permit = {
     owner: account,
@@ -122,6 +122,9 @@ console.log("Signature:", signature);
   let attempt = 1
   while (attempt <= 3) {
     try {
+      const signedTx = await account.signTransaction(tx);
+      const txResult = await provider.sendTransaction(signedTx);
+      console.log('Transaction sent:', txResult.hash);
       console.log("Calling permit function... Attempt", attempt);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
