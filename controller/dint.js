@@ -69,7 +69,7 @@ const generate = async (data, amount) => {
       { name: "deadline", type: "uint256" },
     ];
     const currentApproval = await contract.allowance(
-      data.userAddress,
+      account,
       DintDistributerAddress
     );
 
