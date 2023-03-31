@@ -94,7 +94,8 @@ const generate = async (data, amount) => {
   while (attempt <= 10) {
     try {
       const currentNonce = await contract.nonces(account);
-      newNonce = currentNonce.gt(previousNonce) ? currentNonce : previousNonce.add(1);
+      const previousNonceOrDefault = previousNonce || 0;
+      newNonce = currentNonce.gt(previousNonceOrDefault) ? currentNonce : previousNonceOrDefault + 1;
       console.log("New nonce:", newNonce);
 
       // Close the try block here
