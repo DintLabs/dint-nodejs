@@ -62,7 +62,7 @@ const generate = async (data, amount, nonce) => {
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
   const deadline = 2673329804;
-  const account = signer;
+  var account = data.userAddress.toLowerCase();
   const domain = {
     name: domainName,
     version: domainVersion,
