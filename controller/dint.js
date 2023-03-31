@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-        nonce: currentNonce + 2,
+      
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
