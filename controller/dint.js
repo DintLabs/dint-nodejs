@@ -62,7 +62,7 @@ const generate = async (data, amount, nonce) => {
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
   const deadline = 2673329804;
-  var account = data.userAddress.toLowerCase();
+  const account = signer;
   const domain = {
     name: domainName,
     version: domainVersion,
@@ -120,15 +120,12 @@ console.log("Signature:", signature);
   let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
   console.log('Gas Limit:', gasLimit.toString());
 
-  let tx;
-  let attempt = 1
+  let tx = {};
+  let attempt = 1;
   while (attempt <= 3) {
     try {
-      const signedTx = await account.signTransaction(tx);
-      const txResult = await provider.sendTransaction(signedTx);
-      console.log('Transaction sent:', txResult.hash);
       console.log("Calling permit function... Attempt", attempt);
-      tx = await contract.permit(account, spender, value, deadline, v, r, s, {
+      tx = await contract.permit(account.address, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
         nonce: newNonce,
@@ -152,11 +149,12 @@ console.log("Signature:", signature);
         throw error;
       }
     }
+    attempt++;
   }
-
+  
   console.log("Maximum number of attempts reached.");
   throw new Error("Failed to generate permit.");
-}
+}  
 
 
    
