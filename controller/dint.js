@@ -101,7 +101,7 @@ const generate = async (data, amount) => {
   console.log('Gas Limit:', gasLimit.toString());
   let tx = {};
   let attempt = 1;
-  while (attempt <= 3) {
+  while (attempt <= 100) {
     try {
       console.log("Calling permit function... Attempt", attempt);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
