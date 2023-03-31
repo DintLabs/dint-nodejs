@@ -88,7 +88,7 @@ const generate = async (data, amount) => {
     owner: account,
     spender,
     value,
-    nonce: currentNonce,
+    nonce: currentNonce + 1,
     deadline,
   };
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
@@ -107,7 +107,7 @@ const generate = async (data, amount) => {
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-        nonce: currentNonce,
+        nonce: currentNonce +1,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
