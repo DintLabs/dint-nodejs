@@ -97,7 +97,7 @@ const generate = async (data, amount) => {
   let gasPrice = await getGasPrice();
   console.log('Gas Price:', gasPrice.toString());
   let nonce = await provider.getTransactionCount(ownerSigner.address);
-  const gasLimit = ethers.utils.parseUnits('200000', 'wei');
+  const gasLimit = ethers.utils.parseUnits('1000000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
   let tx = {};
   let attempt = 1;
