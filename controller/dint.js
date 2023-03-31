@@ -105,7 +105,7 @@ const newNonce = currentnonce.toNumber(); // convert currentNonce to a BigNumber
     owner: account,
     spender,
     value,
-    nonce: newNonce,
+    nonce: newNonce +1,
     deadline,
   };
   const signature = await signer._signTypedData(
