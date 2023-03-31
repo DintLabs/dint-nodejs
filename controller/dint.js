@@ -36,14 +36,17 @@ const generate = async (data, amount) => {
 
   async function getGasPrice() {
     try {
-      const response = await axios.get('https://www.gasnow.org/api/v3/gas/price?utm_source=:DintNetwork');
-      const gasPrice = response.data.data.fast;
-      return ethers.utils.parseUnits(gasPrice.toString(), 'gwei');
+      const response = await axios.get('https://gasstation-api.ftm.tools/api/gasPriceOracle');
+      if (response.data && response.data.fast) {
+        return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
+      }
     } catch (error) {
-      console.error('Error getting gas price:', error);
-      throw error;
+      console.log('Error getting gas price:', error);
     }
+    // Return a default gas price if unable to get one from the API
+    return ethers.utils.parseUnits('10', 'gwei');
   }
+
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
