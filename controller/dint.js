@@ -102,24 +102,24 @@ const generate = async (data, amount) => {
     console.log(`r: ${sig.r}`);
     console.log(`s: ${sig.s}`);
 
-// Get the current gas price
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
-      .then((res) => res.data);
+    // Get the current gas price
+    const getGasPrice = async () => {
+      try {
+        const { standard, fast } = await axios
+          .get("https://gasstation-mainnet.matic.network/")
+          .then((res) => res.data);
 
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
+        const fee = standard + (fast - standard) / 3;
+        return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
+      } catch (error) {
+        console.log("gas error");
+        console.error(error);
+        return ethers.utils.parseUnits("200", "gwei");
+      }
+    };
+    // Get the current gas price
+    let gasPrice = await getGasPrice();
+    console.log("Gas Price:", gasPrice.toString());
 
  // Get the nonce for the transaction
  const nonce = await ownerSigner.getTransactionCount("latest");
@@ -128,27 +128,18 @@ const getGasPrice = async () => {
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('115368', 'wei');
       
-      return new Promise(async (resolve, reject) => {
-        contract
-          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-          })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
-          })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
+ try {
+  const tx = await contract.permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+    gasLimit: gasLimit,
+    gasPrice: gasPrice,
+  });
+  console.log("Approval Hash", tx.hash);
+  const result = await send(data, value);
+  return result;
+} catch (error) {
+  console.log("err permit", error);
+  throw error;
+}
     } else {
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
