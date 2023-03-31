@@ -128,7 +128,7 @@ console.log(`s: ${sig.s}`);
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
-            gasPrice: updatedGasPrice,
+            gasPrice: gasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
