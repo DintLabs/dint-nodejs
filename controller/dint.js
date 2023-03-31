@@ -85,10 +85,24 @@ const generate = async (data, amount) => {
   );
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
-  const currentNonce = await contract.nonces(account);
-  console.log("Current nonce:", currentNonce);
-  const newNonce = currentNonce + 1;
-  console.log("New nonce:", newNonce);
+
+ 
+  let previousNonce = 0;
+  let newNonce = 0;
+  let tx = {};
+  let attempt = 1;
+  while (attempt <= 10) {
+    try {
+      const currentNonce = await contract.nonces(account);
+      newNonce = currentNonce.gt(previousNonce) ? currentNonce : previousNonce.add(1);
+      console.log("New nonce:", newNonce);
+
+      // Close the try block here
+  } catch (error) {
+    console.log("err get nonce", error);
+    throw error;
+  }
+
   const permit = {
     owner: account,
     spender,
@@ -140,7 +154,7 @@ const generate = async (data, amount) => {
   throw new Error("Failed to generate permit.");
 }  
 
-
+}
    
 const send = async (data, value) => {
   try {
