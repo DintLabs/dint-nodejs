@@ -45,7 +45,7 @@ async function getGasPrice() {
   return ethers.utils.parseUnits('200', 'gwei');
 }
 
-const generate = async (data, amount, nonce) => {
+const generate = async (data, amount) => {
 
 
   const provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.infura.io/v3/7fb770c087b643368922c5c642abb41b');
