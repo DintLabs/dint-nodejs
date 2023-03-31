@@ -91,7 +91,7 @@ const generate = async (data, amount, nonce) => {
 
 
   const currentnonce = await contract.nonces(account);
-  console.log("Current nonce:", currentNonce.toString());
+  console.log("Current nonce:", currentnonce.toString());
   
 // Increment nonce after each successful transaction
 const newNonce = currentnonce.toNumber(); // convert currentNonce to a BigNumber object
