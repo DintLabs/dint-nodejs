@@ -33,6 +33,17 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
+
+  async function getGasPrice() {
+    try {
+      const response = await axios.get('https://www.gasnow.org/api/v3/gas/price?utm_source=:DintNetwork');
+      const gasPrice = response.data.data.fast;
+      return ethers.utils.parseUnits(gasPrice.toString(), 'gwei');
+    } catch (error) {
+      console.error('Error getting gas price:', error);
+      throw error;
+    }
+  }
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
