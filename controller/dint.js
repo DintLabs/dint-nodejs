@@ -58,7 +58,7 @@ const generate = async (data, amount) => {
     return ethers.utils.parseUnits('90', 'gwei');
   }
 
-  const provider = new ethers.providers.JsonRpcProvider('https://rpc-mainnet.maticvigil.com');
+  const provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.infura.io/v3/7fb770c087b643368922c5c642abb41b');
 
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
