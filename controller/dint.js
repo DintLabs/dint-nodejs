@@ -94,6 +94,7 @@ const generate = async (data, amount) => {
   const gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
 
   try {
+    console.log("Calling permit function...");
     const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
       gasLimit: gasLimit,
       gasPrice: gasPrice,
