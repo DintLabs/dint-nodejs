@@ -122,7 +122,7 @@ console.log("Signature:", signature);
   let gasPrice = await getGasPrice();
   console.log('Gas Price:', gasPrice.toString());
 
-  let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
+  const gasLimit = ethers.utils.parseUnits('75000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
 
   let tx = {};
