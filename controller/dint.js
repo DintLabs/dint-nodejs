@@ -82,14 +82,13 @@ const generate = async (data, amount) => {
   const currentApproval = await contract.allowance(account, spender);
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
-  const currentNonce = await contract.nonces(account);
-  const newNonce = currentNonce.toNumber();
+  const newNonce = (await contract.nonces(account)).toNumber() + 1;
   console.log("New nonce:", newNonce);
   const permit = {
     owner: account,
     spender,
     value,
-    nonce: newNonce + 1,
+    nonce: newNonce,
     deadline,
   };
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
@@ -108,7 +107,7 @@ const generate = async (data, amount) => {
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice.mul(110).div(100), // increase gas price by 10%
-        nonce: newNonce + 1,
+        nonce: newNonce,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
@@ -124,7 +123,7 @@ const generate = async (data, amount) => {
         console.log("Insufficient gas fees, retrying with higher gas fees...");
         gasPrice = gasPrice.mul(150).div(100); // Increase gas price by 1.5x
         gasLimit= gasLimit
-        nonce= newNonce + 2
+        nonce= newNonce
       } else {
         console.log("err permit", error);
         throw error;
