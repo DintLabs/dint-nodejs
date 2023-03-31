@@ -32,6 +32,9 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
+
+
+const generate = async (data, amount) => {
 // Get current gas price from the Matic network
 async function getGasPrice(provider) {
   try {
@@ -46,7 +49,8 @@ async function getGasPrice(provider) {
   return ethers.utils.parseUnits('90', 'gwei');
 }
 
-const generate = async (data, amount) => {
+
+
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
@@ -102,9 +106,8 @@ const generate = async (data, amount) => {
   const signature = await signer._signTypedData(domainType, Permit, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
-// let gasPrice = await getGasPrice();
-let gasPrice = ethers.utils.parseUnits("100", "gwei"); // hardcoded gas price of 100 gwei
-console.log("Gas Price:", gasPrice.toString());
+  let gasPrice = await getGasPrice();
+  console.log("Gas Price:", gasPrice.toString());
 
   let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
   console.log("Gas Limit:", gasLimit.toString());
