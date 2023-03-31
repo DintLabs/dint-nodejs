@@ -70,7 +70,7 @@ async function getGasPrice(provider) {
     { name: "name", type: "string" },
     { name: "version", type: "string" },
     { name: "chainId", type: "uint256" },
-    { name: "verifyingContract", type: "address" }
+    { name: "verifyingContract", type: "address" },
   ];
   const Permit = [
     { name: "owner", type: "address" },
@@ -79,13 +79,6 @@ async function getGasPrice(provider) {
     { name: "nonce", type: "uint256" },
     { name: "deadline", type: "uint256" },
   ];
-
-  const domain = {
-    name: domainName,
-    version: domainVersion,
-    verifyingContract: contractAddress.toLowerCase(),
-    chainId,
-  };
 
   const currentApproval = await contract.allowance(account, spender);
   console.log(`Current approval (${currentApproval})`);
