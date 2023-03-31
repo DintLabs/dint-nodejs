@@ -31,12 +31,8 @@ const web3 = new Web3(process.env.RPC_PROVIDER);
 const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
-
-
-
-const generate = async (data, amount) => {
 // Get current gas price from the Matic network
-async function getGasPrice(provider) {
+async function getGasPrice() {
   try {
     const response = await axios.get('https://gasstation-mainnet.matic.network');
     if (response.data && response.data.fast) {
@@ -49,8 +45,7 @@ async function getGasPrice(provider) {
   return ethers.utils.parseUnits('90', 'gwei');
 }
 
-
-
+const generate = async (data, amount, domainName, domainVersion) => {
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
@@ -59,9 +54,7 @@ async function getGasPrice(provider) {
   );
 
   // Constants
-  const domainName = "Dint"; // token name
-  const domainVersion = "MMT_0.1";
-  const chainId = 137; // this is for the chain's ID.
+  const chainId = await provider.getNetwork().then(network => network.chainId);
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
   const deadline = Math.floor(Date.now() / 1000) + 3600;
@@ -88,6 +81,13 @@ async function getGasPrice(provider) {
   const currentNonce = await contract.nonces(account);
   const newNonce = currentNonce.toNumber();
 
+  const domainData = {
+    name: domainName,
+    version: domainVersion,
+    chainId: chainId,
+    verifyingContract: contractAddress
+  };
+
   const permit = {
     owner: account,
     spender,
@@ -96,7 +96,7 @@ async function getGasPrice(provider) {
     deadline,
   };
 
-  const signature = await signer._signTypedData(domainType, Permit, permit);
+  const signature = await signer._signTypedData(domainType, { Permit }, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   let gasPrice = await getGasPrice();
