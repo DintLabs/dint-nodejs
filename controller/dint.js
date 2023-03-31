@@ -45,32 +45,47 @@ async function getGasPrice() {
   return ethers.utils.parseUnits('90', 'gwei');
 }
 
-const generate = async (data, amount, domainName, domainVersion) => {
+const generate = async (data, amount) => {
+  async function getGasPrice() {
+    try {
+      const response = await axios.get('https://gasstation-mainnet.matic.network');
+      if (response.data && response.data.fast) {
+        return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
+      }
+    } catch (error) {
+      console.log('Error getting gas price:', error);
+    }
+    return ethers.utils.parseUnits('90', 'gwei');
+  }
+
+  const provider = new ethers.providers.JsonRpcProvider('https://rpc-mainnet.maticvigil.com');
+
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
     DintTokenAbBI,
-    ownerSigner
+    provider.getSigner()
   );
 
-  // Constants
-  const chainId = await provider.getNetwork().then(network => network.chainId);
+  const domainName = 'Dint';
+  const domainVersion = 'MMT_0.1';
+  const chainId = 137;
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
   const deadline = Math.floor(Date.now() / 1000) + 3600;
   const account = data.userAddress.toLowerCase();
   const domainType = [
-    { name: "name", type: "string" },
-    { name: "version", type: "string" },
-    { name: "chainId", type: "uint256" },
-    { name: "verifyingContract", type: "address" },
+    { name: 'name', type: 'string' },
+    { name: 'version', type: 'string' },
+    { name: 'chainId', type: 'uint256' },
+    { name: 'verifyingContract', type: 'address' },
   ];
-  const Permit = [
-    { name: "owner", type: "address" },
-    { name: "spender", type: "address" },
-    { name: "value", type: "uint256" },
-    { name: "nonce", type: "uint256" },
-    { name: "deadline", type: "uint256" },
+  const permitType = [
+    { name: 'owner', type: 'address' },
+    { name: 'spender', type: 'address' },
+    { name: 'value', type: 'uint256' },
+    { name: 'nonce', type: 'uint256' },
+    { name: 'deadline', type: 'uint256' },
   ];
 
   const currentApproval = await contract.allowance(account, spender);
@@ -81,13 +96,6 @@ const generate = async (data, amount, domainName, domainVersion) => {
   const currentNonce = await contract.nonces(account);
   const newNonce = currentNonce.toNumber();
 
-  const domainData = {
-    name: domainName,
-    version: domainVersion,
-    chainId: chainId,
-    verifyingContract: contractAddress
-  };
-
   const permit = {
     owner: account,
     spender,
@@ -96,17 +104,17 @@ const generate = async (data, amount, domainName, domainVersion) => {
     deadline,
   };
 
-  const signature = await signer._signTypedData(domainType, { Permit }, permit);
+  const signature = await signer._signTypedData(domainType, permitType, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   let gasPrice = await getGasPrice();
-  console.log("Gas Price:", gasPrice.toString());
+  console.log('Gas Price:', gasPrice.toString());
 
   let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
-  console.log("Gas Limit:", gasLimit.toString());
+  console.log('Gas Limit:', gasLimit.toString());
 
   let tx;
-  let attempt = 1;
+  let attempt = 1
   while (attempt <= 3) {
     try {
       console.log("Calling permit function... Attempt", attempt);
