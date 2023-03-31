@@ -45,7 +45,7 @@ async function getGasPrice() {
   return ethers.utils.parseUnits('200', 'gwei');
 }
 
-const generate = async (data, amount) => {
+const generate = async (data, amount, nonce) => {
 
 
   const provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.infura.io/v3/7fb770c087b643368922c5c642abb41b');
@@ -88,7 +88,7 @@ const generate = async (data, amount) => {
 
   const value = ethers.utils.parseEther(amount.toString());
 
-  let currentNonce = await contract.nonces(account);
+  const currentNonce = nonce ? ethers.BigNumber.from(nonce) : await signer.getTransactionCount('latest');
   console.log("Current nonce:", currentNonce.toString());
   
 // Increment nonce after each successful transaction
@@ -126,12 +126,13 @@ console.log("Signature:", signature);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
+        nonce: newNonce,
       });
       console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
       console.log("Permit transaction receipt:", receipt);
       const result = await send(data, value);
-      return result;
+      return { result, newNonce: newNonce + 1 };
     } catch (error) {
       console.log("err permit", error.message);
       if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
