@@ -36,10 +36,10 @@ const generate = async (data, amount) => {
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
+    DintTokenAbBI,
+    ownerSigner
   );
-  
+
   // Constants
   const domainName = "Dint"; // token name
   const domainVersion = "MMT_0.1";
@@ -76,7 +76,7 @@ const generate = async (data, amount) => {
 
   const currentNonce = await contract.nonces(account);
   const newNonce = currentNonce.toNumber();
-  
+
   const permit = {
     owner: account,
     spender,
@@ -84,138 +84,45 @@ const generate = async (data, amount) => {
     nonce: newNonce,
     deadline,
   };
-   
-  const signature = await  signer._signTypedData(domain, { Permit: Permit }, permit);
+
+  const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   const gasPrice = await getGasPrice();
   console.log("Gas Price:", gasPrice.toString());
 
-  const gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
-
-  try {
-    console.log("Calling permit function...");
-    const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
-      gasLimit: gasLimit,
-      gasPrice: gasPrice,
-    });
-    console.log("Approval Hash", tx.hash);
-    const receipt = await tx.wait();
-    console.log("Permit transaction receipt:", receipt);
-    const result = await send(data, value);
-    return result;
-  } catch (error) {
-    console.log("err permit", error.message);
-    if (error.code === 'REPLACEMENT_UNDERPRICED') {
-      console.log("Insufficient gas fees, retrying with higher gas fees...");
-      const newGasPrice = await getGasPrice(); // Get a new gas price
-      const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
+  let gasLimit;
+  let tx;
+  let attempt = 1;
+  while (attempt <= 3) {
+    try {
+      console.log("Calling permit function... Attempt", attempt);
+      tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
-        gasPrice: newGasPrice,
+        gasPrice: gasPrice,
       });
       console.log("Approval Hash", tx.hash);
       const receipt = await tx.wait();
       console.log("Permit transaction receipt:", receipt);
       const result = await send(data, value);
       return result;
-    } else {
-      console.log("err permit", error);
-      throw error;
-    }
-  }
-}
-
-
-
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
-      .then((res) => res.data);
-
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("220", "gwei");
-  }
-};
-
-   
-const send = async (data, value) => {
-  try {
-    const priceInUSD = 1000000;
-    const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
-    let nonce = await ownerSigner.getTransactionCount('pending');
-    let gasPrice = await getGasPrice();
-    let attempt = 1;
-    let txHash = null;
-
-    while (!txHash) {
-      try {
-        const dintDistContract = new ethers.Contract(
-          DintDistributerAddress.toLowerCase(),
-          dintDistributerABI,
-          ownerSigner
-        );
-
-        const tx = await dintDistContract.sendDint(
-          data.userAddress,
-          data.recieverAddress,
-          value,
-          priceInUSD,
-          {
-            nonce: nonce,
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
-          }
-        );
-
-        console.log("Transaction Sent Successfully");
-        console.log("Transaction Hash:", tx.hash);
-        console.log("Dint Price:", priceInUSD);
-        txHash = tx.hash;
-
-        const receipt = await tx.wait();
-        gasPrice = receipt.effectiveGasPrice;
-
-        console.log("Transaction Receipt:", receipt);
-        console.log("Transaction completed successfully!");
-      } catch (error) {
-        console.log(`Attempt ${attempt}: ${error.message}`);
+    } catch (error) {
+      console.log("err permit", error.message);
+      if (error.code === 'REPLACEMENT_UNDERPRICED') {
+        console.log("Insufficient gas fees, retrying with higher gas fees...");
+        gasPrice = await getGasPrice(); // Get a new gas price
+        gasLimit = await tx.gasLimit.mul(2); // Increase gas limit by 2x
         attempt++;
-
-        if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
-          console.log("There was an issue with your transaction. Transaction was replaced");
-          return { error };
-        } else if (error.message.includes("replacement transaction underpriced")) {
-          gasPrice = await getGasPrice();
-          console.log("New Gas Price:", gasPrice.toString());
-        } else if (error.message.includes("nonce too low")) {
-          nonce = await ownerSigner.getTransactionCount('pending');
-          console.log("New Nonce:", nonce);
-        } else if (error.message.includes("insufficient funds")) {
-          console.log(`Error: ${error.message}`);
-          return { error };
-        } else if (error.message.includes("transfer amount exceeds allowance")) {
-          console.log(`Error: ${error.message}`);
-          return { error };
-      
-        } else {
-          throw error;
-        }
+      } else {
+        console.log("err permit", error);
+        throw error;
       }
     }
-
-    return { txHash };
-  } catch (error) {
-    console.log("There was an issue processing your transaction.");
-    console.log("Error:", error);
-    return { error };
   }
-};
 
+  console.log("Maximum number of attempts reached.");
+  throw new Error("Failed to generate permit.");
+}
 
 
 const getData = async (sender_id, reciever_id, amount) => {
