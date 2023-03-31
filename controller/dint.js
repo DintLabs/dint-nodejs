@@ -127,8 +127,8 @@ console.log(`s: ${sig.s}`);
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit,
-            gasPrice: updatedGasPrice
+            gasLimit: gasLimit,
+            gasPrice: updatedGasPrice,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -170,8 +170,8 @@ console.log(`s: ${sig.s}`);
         sig.r,
         sig.s,
         { 
-          gasLimit,
-          gasPrice: updatedGasPrice
+          gasLimit: gasLimit,
+          gasPrice: gasPrice,
         }
       );
       const value = BigInt(
@@ -202,8 +202,8 @@ console.log(`s: ${sig.s}`);
             sigNew.r,
             sigNew.s,
             { 
-              gasLimit,
-              gasPrice: updatedGasPrice
+              gasLimit: gasLimit,
+              gasPrice: gasPrice,
             }
           )
           .then((res) => {
