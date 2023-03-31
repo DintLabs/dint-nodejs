@@ -123,7 +123,7 @@ const generate = async (data, amount) => {
         console.log("Insufficient gas fees, retrying with higher gas fees...");
         gasPrice = gasPrice.mul(150).div(100); // Increase gas price by 1.5x
         gasLimit= gasLimit
-        nonce= nonce 
+        nonce= nonce + 2
       } else {
         console.log("err permit", error);
         throw error;
