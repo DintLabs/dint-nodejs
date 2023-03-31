@@ -121,7 +121,7 @@ const generate = async (data, amount) => {
         gasLimit = gasLimit.mul(2); // Increase gas limit by 2x
       } else if (error.code === 'REPLACEMENT_UNDERPRICED') {
         console.log("Insufficient gas fees, retrying with higher gas fees...");
-        gasPrice = await getGasPrice(); // Get a new gas price
+        gasPrice = ethers.utils.parseUnits('200', 'gwei');
         gasLimit = gasLimit.mul(2); // Increase gas limit by 2x
       } else {
         console.log("err permit", error);
