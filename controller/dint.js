@@ -108,8 +108,12 @@ const generate = async (data, amount) => {
     nonce: newNonce,
     deadline,
   };
+  const signature = await signer._signTypedData(
+    domain,
+    { Permit: Permit },
+    permit
+  );
 
-  const signature = await signer._signTypedData(domainType, Permit, Permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   let gasPrice = await getGasPrice();
