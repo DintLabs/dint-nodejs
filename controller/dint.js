@@ -99,6 +99,13 @@ const generate = async (data, amount) => {
 
       let sig = await ethers.utils.splitSignature(generatedSig);
 
+      console.log(`_spender: ${spender}`);
+console.log(`_value: ${value.toString()}`);
+console.log(`_exp: ${deadline}`);
+console.log(`v: ${sig.v}`);
+console.log(`r: ${sig.r}`);
+console.log(`s: ${sig.s}`);
+
       const getGasPrice = async () => {
         try {
           const { standard, fast } = await axios
