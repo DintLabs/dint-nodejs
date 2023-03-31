@@ -85,7 +85,7 @@ const generate = async (data, amount) => {
     deadline,
   };
    
-  const signature = await ownerSigner._signTypedData(domain, { Permit: Permit }, permit);
+  const signature = await  signer._signTypedData(domain, { Permit: Permit }, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
   const gasPrice = await getGasPrice();
