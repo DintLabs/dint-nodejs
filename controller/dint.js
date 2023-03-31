@@ -93,12 +93,12 @@ const generate = async (data, amount) => {
   const gasPrice = await getGasPrice();
   console.log("Gas Price:", gasPrice.toString());
 
-  const gasLimit = ethers.utils.parseUnits("100000", "wei");
+  const gasLimit = ethers.utils.parseUnits("75000", "wei");
 
   try {
     const tx = await contract.permit(account, spender, value, deadline, v, r, s, {
       gasLimit: gasLimit,
-      gasPrice: ethers.utils.parseUnits("200", "gwei"),
+      gasPrice: gasPrice,
     });
     console.log("Approval Hash", tx.hash);
     const receipt = await tx.wait();
