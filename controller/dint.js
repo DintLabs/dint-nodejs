@@ -33,82 +33,76 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
+  const signer = new ethers.Wallet(data.userPrivateKey, provider);
+  const contract = new ethers.Contract(
+    DintTokenAddress.toLowerCase(),
+    DintTokenAbBI,
+    ownerSigner
+  );
+  const domainName = "Dint"; // token name
+  const domainVersion = "MMT_0.1";
+  const chainId = 137; // this is for the chain's ID.
+  const contractAddress = DintTokenAddress.toLowerCase();
+  const spender = DintDistributerAddress.toLowerCase();
+  const deadline = 2673329804;
+  const account = data.userAddress.toLowerCase();
+  const domain = {
+    name: domainName,
+    version: domainVersion,
+    verifyingContract: contractAddress.toLowerCase(),
+    chainId,
+  };
 
-  if (amount >= 0) {
-    const signer = new ethers.Wallet(data.userPrivateKey, provider);
-    const contract = new ethers.Contract(
-      DintTokenAddress.toLowerCase(),
-      DintTokenAbBI,
-      ownerSigner
+  const domainType = [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ];
+  const Permit = [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ];
+
+  const currentApproval = await contract.allowance(
+    account,
+    spender
+  );
+  console.log(`Current approval (${currentApproval}) `);
+
+  if (Number(currentApproval) >= 0) {
+    const value = BigInt(
+      Number(ethers.utils.parseUnits(amount.toString(), "ether"))
     );
-    const domainName = "Dint"; // token name
-    const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
-    const contractAddress = DintTokenAddress.toLowerCase();
-    const spender = DintDistributerAddress.toLowerCase();
-    const deadline = 2673329804;
-    var account = data.userAddress.toLowerCase();
-    const domain = {
-      name: domainName,
-      version: domainVersion,
-      verifyingContract: contractAddress.toLowerCase(),
-      chainId,
+    const currentNonce = await contract.nonces(account);
+    const newNonce = currentNonce.toNumber();
+
+    const permit = {
+      owner: account,
+      spender,
+      value,
+      nonce: newNonce,
+      deadline,
     };
-
-    const domainType = [
-      { name: "name", type: "string" },
-      { name: "version", type: "string" },
-      { name: "chainId", type: "uint256" },
-      { name: "verifyingContract", type: "address" },
-    ];
-    const Permit = [
-      { name: "owner", type: "address" },
-      { name: "spender", type: "address" },
-      { name: "value", type: "uint256" },
-      { name: "nonce", type: "uint256" },
-      { name: "deadline", type: "uint256" },
-    ];
-    const currentApproval = await contract.allowance(
-      data.userAddress,
-      DintDistributerAddress
+    const generatedSig = await signer._signTypedData(
+      domain,
+      { Permit: Permit },
+      permit
     );
+    const sig = ethers.utils.splitSignature(generatedSig);
 
-      console.log(`Current approval (${currentApproval}) `);
+    console.log("owner:", account);
+    console.log(`_spender: ${spender}`);
+    console.log(`_value: ${value.toString()}`);
+    console.log(`_exp: ${deadline}`);
+    console.log(`v: ${sig.v}`);
+    console.log(`r: ${sig.r}`);
+    console.log(`s: ${sig.s}`);
 
-
-    if (Number(currentApproval) >= 0) {
-      const value = BigInt(
-        Number(ethers.utils.parseUnits(amount.toString(), "ether"))
-      );
-
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-
-      
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
-
-      console.log("owner:", account);
-      console.log(`_spender: ${spender}`);
-console.log(`_value: ${value.toString()}`);
-console.log(`_exp: ${deadline}`);
-console.log(`v: ${sig.v}`);
-console.log(`r: ${sig.r}`);
-console.log(`s: ${sig.s}`);
-
+// Get the current gas price
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
@@ -128,7 +122,7 @@ const getGasPrice = async () => {
  console.log("Gas Price:", gasPrice.toString());
 
  // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
+ const nonce = await ownerSigner.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
@@ -246,8 +240,7 @@ const getGasPrice = async () => {
           });
       });
     }
-  }
-};
+  };
 
 
 const getGasPrice = async () => {
