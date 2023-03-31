@@ -47,8 +47,6 @@ async function getGasPrice(provider) {
 }
 
 const generate = async (data, amount) => {
-
-
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
