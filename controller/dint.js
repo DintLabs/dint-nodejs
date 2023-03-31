@@ -128,7 +128,7 @@ const generate = async (data, amount) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
-            gasPrice: gasPrice,
+            gasPrice: ethers.utils.parseUnits('100', 'gwei'),
           })
           .then((res) => {
             console.log("Approval Hash Permit", res.hash);
@@ -171,7 +171,7 @@ const generate = async (data, amount) => {
         sig.s,
         { 
           gasLimit: ethers.utils.parseUnits('100000', 'wei'),
-          gasPrice: gasPrice,
+          gasPrice: ethers.utils.parseUnits('100', 'gwei'),
         }
       );
       const value = BigInt(
@@ -203,7 +203,7 @@ const generate = async (data, amount) => {
             sigNew.s,
             { 
               gasLimit: ethers.utils.parseUnits('100000', 'wei'),
-              gasPrice: gasPrice,
+              gasPrice: ethers.utils.parseUnits('100', 'gwei'),
             }
           )
           .then((res) => {
