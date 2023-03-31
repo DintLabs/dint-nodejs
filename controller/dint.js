@@ -64,7 +64,7 @@ const generate = async (data, amount) => {
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
     DintTokenAbBI,
-    provider.getSigner()
+    ownerSigner
   );
 
   const domainName = 'Dint';
