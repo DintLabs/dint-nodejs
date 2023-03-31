@@ -32,20 +32,22 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
+// Get current gas price from the Matic network
+async function getGasPrice(provider) {
+  try {
+    const response = await axios.get('https://gasstation-mainnet.matic.network');
+    if (response.data && response.data.fast) {
+      return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
+    }
+  } catch (error) {
+    console.log('Error getting gas price:', error);
+  }
+  // Return a default gas price if unable to get one from the API
+  return ethers.utils.parseUnits('90', 'gwei');
+}
+
 const generate = async (data, amount) => {
 
-  async function getGasPrice() {
-    try {
-      const response = await axios.get('https://gasstation-mainnet.matic.network');
-      if (response.data && response.data.fast) {
-        return ethers.utils.parseUnits(response.data.fast.toString(), 'gwei');
-      }
-    } catch (error) {
-      console.log('Error getting gas price:', error);
-    }
-    // Return a default gas price if unable to get one from the API
-    return ethers.utils.parseUnits('90', 'gwei');
-  }
 
   const signer = new ethers.Wallet(data.userPrivateKey, provider);
   const contract = new ethers.Contract(
@@ -60,7 +62,7 @@ const generate = async (data, amount) => {
   const chainId = 137; // this is for the chain's ID.
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
-  const deadline = 2673329804;
+  const deadline = Math.floor(Date.now() / 1000) + 3600;
   const account = data.userAddress.toLowerCase();
   const domainType = [
     { name: "name", type: "string" },
@@ -83,8 +85,8 @@ const generate = async (data, amount) => {
     chainId,
   };
 
-  const currentApproval = await contract.allowance(data.userAddress, DintDistributerAddress);
-  console.log(`Current approval (${currentApproval}) `);
+  const currentApproval = await contract.allowance(account, spender);
+  console.log(`Current approval (${currentApproval})`);
 
   const value = ethers.utils.parseEther(amount.toString());
 
@@ -99,13 +101,15 @@ const generate = async (data, amount) => {
     deadline,
   };
 
-  const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
+  const signature = await signer._signTypedData(domainType, { Permit }, permit);
   const { v, r, s } = ethers.utils.splitSignature(signature);
 
-  const gasPrice = await getGasPrice();
+  let gasPrice = await getGasPrice();
   console.log("Gas Price:", gasPrice.toString());
 
-  let gasLimit;
+  let gasLimit = await contract.estimateGas.permit(account, spender, value, deadline, v, r, s);
+  console.log("Gas Limit:", gasLimit.toString());
+
   let tx;
   let attempt = 1;
   while (attempt <= 3) {
@@ -115,7 +119,7 @@ const generate = async (data, amount) => {
         gasLimit: gasLimit,
         gasPrice: gasPrice,
       });
-      console.log("Approval Hash", tx.hash);
+      console.log("Approval Hash:", tx.hash);
       const receipt = await tx.wait();
       console.log("Permit transaction receipt:", receipt);
       const result = await send(data, value);
