@@ -66,28 +66,33 @@ const generate = async (data, amount) => {
     DintTokenAbBI,
     ownerSigner
   );
-
-  const domainName = 'Dint';
-  const domainVersion = 'MMT_0.1';
-  const chainId = 137;
+  const domainName = "Dint"; // token name
+  const domainVersion = "MMT_0.1";
+  const chainId = 137; // this is for the chain's ID.
   const contractAddress = DintTokenAddress.toLowerCase();
   const spender = DintDistributerAddress.toLowerCase();
-  const deadline = Math.floor(Date.now() / 1000) + 3600;
-  const account = data.userAddress.toLowerCase();
-  const domainType = [
-    { name: 'name', type: 'string' },
-    { name: 'version', type: 'string' },
-    { name: 'chainId', type: 'uint256' },
-    { name: 'verifyingContract', type: 'address' },
-  ];
-  const permitType = [
-    { name: 'owner', type: 'address' },
-    { name: 'spender', type: 'address' },
-    { name: 'value', type: 'uint256' },
-    { name: 'nonce', type: 'uint256' },
-    { name: 'deadline', type: 'uint256' },
-  ];
+  const deadline = 2673329804;
+  var account = data.userAddress.toLowerCase();
+  const domain = {
+    name: domainName,
+    version: domainVersion,
+    verifyingContract: contractAddress.toLowerCase(),
+    chainId,
+  };
 
+  const domainType = [
+    { name: "name", type: "string" },
+    { name: "version", type: "string" },
+    { name: "chainId", type: "uint256" },
+    { name: "verifyingContract", type: "address" },
+  ];
+  const Permit = [
+    { name: "owner", type: "address" },
+    { name: "spender", type: "address" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint256" },
+  ];
   const currentApproval = await contract.allowance(account, spender);
   console.log(`Current approval (${currentApproval})`);
 
