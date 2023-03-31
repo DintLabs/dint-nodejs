@@ -114,7 +114,7 @@ const generate = async (data, amount) => {
         }
       };
  // Get the current gas price
- let gasPrice = ethers.utils.parseUnits('100', 'gwei');
+ let gasPrice = ethers.utils.parseUnits('150', 'gwei');
  console.log("Gas Price Permit:", gasPrice.toString());
 
  // Get the nonce for the transaction
@@ -127,8 +127,8 @@ const generate = async (data, amount) => {
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: ethers.utils.parseUnits('100', 'gwei'),
+            gasLimit: ethers.utils.parseUnits('100000', 'wei'),
+            gasPrice: ethers.utils.parseUnits('130', 'gwei'),
           })
           .then((res) => {
             console.log("Approval Hash Permit", res.hash);
@@ -171,7 +171,7 @@ const generate = async (data, amount) => {
         sig.s,
         { 
           gasLimit: ethers.utils.parseUnits('100000', 'wei'),
-          gasPrice: ethers.utils.parseUnits('100', 'gwei'),
+          gasPrice: ethers.utils.parseUnits('130', 'gwei'),
         }
       );
       const value = BigInt(
@@ -203,7 +203,7 @@ const generate = async (data, amount) => {
             sigNew.s,
             { 
               gasLimit: ethers.utils.parseUnits('100000', 'wei'),
-              gasPrice: ethers.utils.parseUnits('100', 'gwei'),
+              gasPrice: ethers.utils.parseUnits('130', 'gwei'),
             }
           )
           .then((res) => {
