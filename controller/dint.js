@@ -37,7 +37,7 @@ const generate = async (data, amount) => {
   const contract = new ethers.Contract(
     DintTokenAddress.toLowerCase(),
     DintTokenAbBI,
-    signer
+    ownerSigner
   );
   
   // Constants
