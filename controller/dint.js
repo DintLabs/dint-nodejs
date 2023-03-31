@@ -90,11 +90,11 @@ const generate = async (data, amount, nonce) => {
 
 
 
-  const currentNonce = nonce ? ethers.BigNumber.from(nonce) : await signer.getTransactionCount('latest');
+  const currentnonce = await contract.nonces(account);
   console.log("Current nonce:", currentNonce.toString());
   
 // Increment nonce after each successful transaction
-const newNonce = BigNumber.from(currentNonce).add(1); // convert currentNonce to a BigNumber object
+const newNonce = currentnonce.toNumber(); // convert currentNonce to a BigNumber object
 
   const permit = {
     owner: account,
