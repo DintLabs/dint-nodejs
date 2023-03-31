@@ -79,10 +79,15 @@ const generate = async (data, amount) => {
     { name: "nonce", type: "uint256" },
     { name: "deadline", type: "uint256" },
   ];
-  const currentApproval = await contract.allowance(account, spender);
+  const currentApproval = await contract.allowance(
+    data.userAddress,
+    DintDistributerAddress
+  );
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
-  const newNonce = (await contract.nonces(account)).toNumber() + 1;
+  const currentNonce = await contract.nonces(account);
+  console.log("Current nonce:", currentNonce.toString());
+  const newNonce = currentNonce.toNumber() + 1;
   console.log("New nonce:", newNonce);
   const permit = {
     owner: account,
@@ -96,7 +101,6 @@ const generate = async (data, amount) => {
   const { v, r, s } = ethers.utils.splitSignature(signature);
   let gasPrice = await getGasPrice();
   console.log('Gas Price:', gasPrice.toString());
-  let nonce = await provider.getTransactionCount(ownerSigner.address);
   let gasLimit = ethers.utils.parseUnits('75000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
   let tx = {};
