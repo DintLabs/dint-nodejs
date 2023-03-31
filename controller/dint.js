@@ -92,7 +92,7 @@ const generate = async (data, amount, nonce) => {
   console.log("Current nonce:", currentNonce.toString());
   
 // Increment nonce after each successful transaction
-const newNonce = currentNonce.add(1);
+let newNonce = currentNonce.toNumber();
 
   const permit = {
     owner: account,
