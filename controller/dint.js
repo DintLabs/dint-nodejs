@@ -82,6 +82,7 @@ const generate = async (data, amount) => {
   const currentApproval = await contract.allowance(account, spender);
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
+  const currentNonce = await contract.nonces(account);
   const newNonce = currentNonce + 1;
   console.log("New nonce:", newNonce);
   const permit = {
