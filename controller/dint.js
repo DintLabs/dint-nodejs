@@ -98,8 +98,8 @@ const generate = async (data, amount) => {
 
 
       let sig = await ethers.utils.splitSignature(generatedSig);
-
-      console.log(`_owner: ${owner}`);
+      
+      console.log({ name: "owner", type: "address" });
       console.log(`_spender: ${spender}`);
 console.log(`_value: ${value.toString()}`);
 console.log(`_exp: ${deadline}`);
