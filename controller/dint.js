@@ -87,7 +87,7 @@ const generate = async (data, amount) => {
   const value = ethers.utils.parseEther(amount.toString());
   const currentNonce = await provider.getTransactionCount(account, 'latest');
   console.log("Current nonce:", currentNonce);
-  const newNonce = currentNonce.toNumber();
+  let newNonce = currentNonce.toNumber();
   console.log("New nonce:", newNonce);
   const permit = {
     owner: account,
