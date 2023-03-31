@@ -21,7 +21,7 @@ client.connect(function (err) {
   if (err) throw err;
   console.log("Connected!");
 });
-
+const BigNumber = require('bignumber.js');
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
@@ -87,7 +87,9 @@ const generate = async (data, amount, nonce) => {
   console.log(`Current approval (${currentApproval})`);
 
   const value = ethers.utils.parseEther(amount.toString());
-  const BigNumber = require('bignumber.js');
+
+
+
   const currentNonce = nonce ? ethers.BigNumber.from(nonce) : await signer.getTransactionCount('latest');
   console.log("Current nonce:", currentNonce.toString());
   
