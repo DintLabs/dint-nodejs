@@ -87,22 +87,22 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
 
-  let nonce = 0;
+
   let attempt = 1;
   while (attempt <= 10) {
     try {
-      const currentNonce = await contract.nonces(account);
-      const newNonce = currentNonce.toNumber();      
+      const nonce = await contract.nonces(account);
+      const newNonce = nonce.toNumber();      
       console.log("New nonce:", newNonce);
       previousNonce = newNonce;
       if (attempt === 1) {
-        const newNonce =   await contract.nonces(account); // call nonce to increase it by 1
+        newNonce + 1
       }
       if (attempt === 2) {
-        const newNonce =     await contract.nonces(account); // call nonce again to increase it by 1
+        newNonce + 2
       }
       if (attempt === 3) {
-        const newNonce =   await contract.nonces(account); // call nonce again to increase it by 1
+        newNonce + 3
       }
      
     } catch (error) {
