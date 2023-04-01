@@ -110,6 +110,7 @@ const generate = async (data, amount) => {
       throw error;
     }
   }
+  const newNonce = await web3.eth.getTransactionCount(account, "pending");
 
   const permit = {
     owner: account,
