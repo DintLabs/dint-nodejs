@@ -349,7 +349,7 @@ const getData = async (sender_id, reciever_id, amount) => {
           ttl: 0,
         });
         const userAddress = tokenUserAdd.decode();
-        const bufRecieverAdd = Buffer.from(reciever.wallet_address);
+        const bufRecieverAdd = Buffer.from(data.recieverAddress);
         const tokenRecieverAdd = new fernet.Token({
           secret: secret,
           token: bufRecieverAdd.toString(),
