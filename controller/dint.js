@@ -9,6 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
+const {nonce} = require('@ethersproject/account');
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -86,12 +87,11 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
 
-  let previousNonce = 0;
   let newNonce = 0;
   let attempt = 1;
   while (attempt <= 10) {
     try {
-      const currentNonce = await contract.nonces(account);
+      const currentNonce = await nonce(account, provider);
       const previousNonceOrDefault = previousNonce || currentNonce.toNumber() - 1;
       newNonce = currentNonce.toNumber() > previousNonceOrDefault ? currentNonce.toNumber() : previousNonceOrDefault + 1;
       console.log("New nonce:", newNonce);
