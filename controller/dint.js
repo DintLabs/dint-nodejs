@@ -163,7 +163,7 @@ const generate = async (data, amount) => {
   throw new Error("Failed to generate permit.");
 }  
 
-}
+
    
 const send = async (data, value) => {
   try {
