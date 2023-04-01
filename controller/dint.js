@@ -90,25 +90,24 @@ const generate = async (data, amount) => {
 
   let attempt = 1;
   while (attempt <= 10) {
-    try {
-      const nonce = await contract.nonces(account);
-      const newNonce = nonce.toNumber();      
-      console.log("New nonce:", newNonce);
-      previousNonce = newNonce;
-      if (attempt === 1) {
-        newNonce + 1
-      }
-      if (attempt === 2) {
-        newNonce + 2
-      }
-      if (attempt === 3) {
-        newNonce + 3
-      }
-     
-    } catch (error) {
-      console.log("err get nonce", error);
-      throw error;
-    }
+    let newNonce;
+try {
+  const nonce = await contract.nonces(account);
+  newNonce = nonce.toNumber();      
+  console.log("New nonce:", newNonce);
+  if (attempt === 1) {
+    newNonce + 1
+  }
+  if (attempt === 2) {
+    newNonce + 2
+  }
+  if (attempt === 3) {
+    newNonce + 3
+  }     
+} catch (error) {
+  console.log("err get nonce", error);
+  throw error;
+}
   
 
   }
