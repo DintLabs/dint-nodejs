@@ -86,22 +86,30 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
 
- 
   let previousNonce = 0;
   let newNonce = 0;
-  let tx = {};
   let attempt = 1;
   while (attempt <= 10) {
     try {
       const currentNonce = await contract.nonces(account);
-      const previousNonceOrDefault = previousNonce || 0;
-      newNonce = currentNonce.gt(previousNonceOrDefault) ? currentNonce : previousNonceOrDefault + 1;
+      const previousNonceOrDefault = previousNonce || currentNonce.toNumber() - 1;
+      newNonce = currentNonce.toNumber() > previousNonceOrDefault ? currentNonce.toNumber() : previousNonceOrDefault + 1;
       console.log("New nonce:", newNonce);
-
-      // Close the try block here
-  } catch (error) {
-    console.log("err get nonce", error);
-    throw error;
+      previousNonce = newNonce;
+      if (attempt === 1) {
+        await contract.nonces(account); // call nonce to increase it by 1
+      }
+      if (attempt === 2) {
+        await contract.nonces(account); // call nonce again to increase it by 1
+      }
+      if (attempt === 3) {
+        await contract.nonces(account); // call nonce again to increase it by 1
+      }
+      break;
+    } catch (error) {
+      console.log("err get nonce", error);
+      throw error;
+    }
   }
 
   const permit = {
@@ -119,8 +127,8 @@ const generate = async (data, amount) => {
   let gasLimit = ethers.utils.parseUnits('75000', 'wei');
   console.log('Gas Limit:', gasLimit.toString());
   let tx = {};
-  let attempt = 1;
-  while (attempt <= 10) {
+  let attempttx = 1;
+  while (attempttx <= 10) {
     try {
       console.log("Calling permit function... Attempt", attempt);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
@@ -148,7 +156,7 @@ const generate = async (data, amount) => {
         throw error;
       }
     }
-    attempt++;
+    attempttx++;
   }
   
   console.log("Maximum number of attempts reached.");
