@@ -89,18 +89,20 @@ const generate = async (data, amount) => {
 
 
   let attempt = 1;
+  // Get the nonce for the transaction
   const nonce = await signer.getTransactionCount("latest");
-  let newNonce = nonce.toNumber();
+  console.log("Nonce:", nonce);
+ 
   
   while (attempt <= 10) {
-    console.log("New nonce:", newNonce);
-    newNonce += attempt;
+    console.log("New nonce:", nonce);
+  nonce += attempt;
     try {
       const permit = {
         owner: account,
         spender,
         value,
-        nonce: newNonce,
+        nonce: nonce,
         deadline,
       };
       const tx = await contract.permit(permit);
@@ -117,6 +119,8 @@ const generate = async (data, amount) => {
     }
   }
 
+  const currentnonce = await contract.nonces(account);
+  const newNonce = currentnonce.toNumber();
 
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
   console.log("Signature:", signature);
