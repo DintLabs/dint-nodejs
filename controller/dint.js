@@ -89,6 +89,7 @@ const generate = async (data, amount) => {
 
 
   let attempt = 1;
+  const nonce = await signer.getTransactionCount("latest");
   let newNonce = nonce.toNumber();
   
   while (attempt <= 10) {
