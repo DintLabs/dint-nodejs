@@ -87,7 +87,7 @@ const generate = async (data, amount) => {
   console.log(`Current approval (${currentApproval})`);
   const value = ethers.utils.parseEther(amount.toString());
 
-  let newNonce = 0;
+  let nonce = 0;
   let attempt = 1;
   while (attempt <= 10) {
     try {
