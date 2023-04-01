@@ -118,7 +118,7 @@ const generate = async (data, amount) => {
  console.log("Gas Price:", gasPrice.toString());
 
  // Get the nonce for the transaction
- const nonce = await contract.getTransactionCount("latest");
+ const nonce = await ownerSigner.getTransactionCount("latest");
  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
