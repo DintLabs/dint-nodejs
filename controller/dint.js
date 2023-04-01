@@ -96,22 +96,22 @@ const generate = async (data, amount) => {
       console.log("New nonce:", newNonce);
       previousNonce = newNonce;
       if (attempt === 1) {
-        await contract.nonces(account); // call nonce to increase it by 1
+        const newNonce =   await contract.nonces(account); // call nonce to increase it by 1
       }
       if (attempt === 2) {
-        await contract.nonces(account); // call nonce again to increase it by 1
+        const newNonce =     await contract.nonces(account); // call nonce again to increase it by 1
       }
       if (attempt === 3) {
-        await contract.nonces(account); // call nonce again to increase it by 1
+        const newNonce =   await contract.nonces(account); // call nonce again to increase it by 1
       }
-      break;
+     
     } catch (error) {
       console.log("err get nonce", error);
       throw error;
     }
-  }
-  const newNonce = await web3.eth.getTransactionCount(account, "pending");
+  
 
+  }
   const permit = {
     owner: account,
     spender,
@@ -119,6 +119,7 @@ const generate = async (data, amount) => {
     nonce: newNonce,
     deadline,
   };
+
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
   console.log("Signature:", signature);
   const { v, r, s } = ethers.utils.splitSignature(signature);
