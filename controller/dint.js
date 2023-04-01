@@ -88,26 +88,34 @@ const generate = async (data, amount) => {
   const value = ethers.utils.parseEther(amount.toString());
 
 
-  let newNonce;
-  for (let attempt = 1; attempt <= 10; attempt++) {
+  let attempt = 1;
+  let newNonce = nonce.toNumber();
+  
+  while (attempt <= 10) {
+    console.log("New nonce:", newNonce);
+    newNonce += attempt;
     try {
-      const nonce = await contract.nonces(account);
-      newNonce = nonce.toNumber() + attempt;
-      console.log("New nonce:", newNonce);
-      break; // exit loop if nonce is successfully retrieved
+      const permit = {
+        owner: account,
+        spender,
+        value,
+        nonce: newNonce,
+        deadline,
+      };
+      const tx = await contract.permit(permit);
+      console.log("Transaction sent:", tx.hash);
+      return tx.hash;
     } catch (error) {
-      console.log("err get nonce", error);
-      throw error;
+      console.log("Error sending transaction:", error);
+      if (error.message.includes("nonce too low")) {
+        console.log("Retrying with new nonce...");
+        continue;
+      } else {
+        throw error;
+      }
     }
   }
-  
-  const permit = {
-    owner: account,
-    spender,
-    value,
-    nonce: newNonce,
-    deadline,
-  };
+
 
   const signature = await signer._signTypedData(domain, { Permit: Permit }, permit);
   console.log("Signature:", signature);
