@@ -88,31 +88,19 @@ const generate = async (data, amount) => {
   const value = ethers.utils.parseEther(amount.toString());
 
 
-  let attempt = 1;
-  let newNonce = nonce.toNumber();
-while (attempt <= 10) {
-  console.log("New nonce:", newNonce);
-  newNonce += attempt;
-try {
-  const nonce = await contract.nonces(account);
-  newNonce = nonce.toNumber();      
-  console.log("New nonce:", newNonce);
-  if (attempt === 1) {
-    newNonce + 1
+  let newNonce;
+  for (let attempt = 1; attempt <= 10; attempt++) {
+    try {
+      const nonce = await contract.nonces(account);
+      newNonce = nonce.toNumber() + attempt;
+      console.log("New nonce:", newNonce);
+      break; // exit loop if nonce is successfully retrieved
+    } catch (error) {
+      console.log("err get nonce", error);
+      throw error;
+    }
   }
-  if (attempt === 2) {
-    newNonce + 2
-  }
-  if (attempt === 3) {
-    newNonce + 3
-  }     
-} catch (error) {
-  console.log("err get nonce", error);
-  throw error;
-}
   
-
-  }
   const permit = {
     owner: account,
     spender,
