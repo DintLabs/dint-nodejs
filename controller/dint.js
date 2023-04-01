@@ -9,7 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
-const {nonce} = require('@ethersproject/account');
+
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
