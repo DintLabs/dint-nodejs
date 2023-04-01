@@ -120,7 +120,6 @@ const generate = async (data, amount) => {
   let attempttx = 1;
   while (attempttx <= 10) {
     try {
-      console.log("Calling permit function... Attempt", attempt);
       tx = await contract.permit(account, spender, value, deadline, v, r, s, {
         gasLimit: gasLimit,
         gasPrice: gasPrice.mul(110).div(100), // increase gas price by 10%
