@@ -7,7 +7,6 @@ const { Client } = require("pg");
 const dintDistributerABI = require("../DintDistributerABI.json");
 const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
-const axios = require('axios');
 
 const client = new Client({
   user: process.env.DB_USER,
@@ -33,8 +32,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const approval = async (data, amount) => {
-
- 
+  const nonce = 0;
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -44,7 +42,7 @@ const approval = async (data, amount) => {
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
-    const chainId = 137; // this is for the chain's ID.
+    const chainId = 80001; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = ownerAddress.toLowerCase();
     const deadline = 2673329804;
@@ -76,7 +74,7 @@ const approval = async (data, amount) => {
 
     console.log("currentApproval", currentApproval);
 
-    if (Number(currentApproval) >= 0) {
+    if (Number(currentApproval) == 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
@@ -95,42 +93,12 @@ const approval = async (data, amount) => {
         { Permit: Permit },
         permit
       );
-
-
       let sig = await ethers.utils.splitSignature(generatedSig);
-      
-      
-      const getGasPrice = async () => {
-        try {
-          const { standard, fast } = await axios
-            .get("https://gasstation-mainnet.matic.network/")
-            .then((res) => res.data);
-      
-          const fee = standard + (fast - standard) / 3;
-          return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-        } catch (error) {
-          console.log("gas error");
-          console.error(error);
-          return ethers.utils.parseUnits("200", "gwei");
-        }
-      };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
-
- // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
-
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('600000', 'wei');
-      
-      
       return new Promise((resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
-            gasLimit: gasLimit,
-            gasPrice: gasPrice,
+            gasLimit: 1000000,
+            gasPrice: 30000000000,
           })
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -171,10 +139,7 @@ const approval = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { 
-          gasLimit: gasLimit,
-          gasPrice: gasPrice,
-        }
+        { gasLimit: 1000000, gasPrice: 30000000000 }
       );
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
@@ -203,10 +168,7 @@ const approval = async (data, amount) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { 
-              gasLimit: gasLimit,
-              gasPrice: gasPrice,
-            }
+            { gasLimit: 1000000, gasPrice: 30000000000 }
           )
           .then((res) => {
             console.log("Approval Hash", res.hash);
@@ -227,100 +189,52 @@ const approval = async (data, amount) => {
   }
 };
 
-
-const getGasPrice = async () => {
-  try {
-    const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
-      .then((res) => res.data);
-
-    const fee = standard + (fast - standard) / 3;
-    return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
-  } catch (error) {
-    console.log("gas error");
-    console.error(error);
-    return ethers.utils.parseUnits("220", "gwei");
-  }
-};
-
 const send = async (data, value) => {
-    try {
-        const priceInUSD = 1000000;
-        const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
-        let nonce = await ownerSigner.getTransactionCount('pending');
-        let gasPrice = await getGasPrice();
-        let attempt = 1;
-        let txHash = null;
-    
-        while (!txHash) {
-          try {
-            const dintDistContract = new ethers.Contract(
-              DintDistributerAddress.toLowerCase(),
-              dintDistributerABI,
-              ownerSigner
-            );
-    
-            const tx = await dintDistContract.sendDint(
-              data.userAddress,
-              data.recieverAddress,
-              value,
-              priceInUSD,
-              {
-                nonce: nonce,
-                gasLimit: gasLimit,
-                gasPrice: gasPrice,
-              }
-            );
-    
-            console.log("Transaction Sent Successfully");
-            console.log("Transaction Hash:", tx.hash);
-            console.log("Dint Price:", priceInUSD);
-            txHash = tx.hash;
-    
-            const receipt = await tx.wait();
-            gasPrice = receipt.effectiveGasPrice;
-    
-            console.log("Transaction Receipt:", receipt);
-    
-            if (receipt.status == 1) {
-              console.log("Successful 201 response sent");
-              return { status: 201, message: "Transaction completed successfully!", Hash: tx.hash};
-            } else {
-              console.log("Transaction failed");
-              return { status: 500, message: "Transaction failed", Hash: tx.hash };
-            }
-          } catch (error) {
-            console.log(`Attempt ${attempt}: ${error.message}`);
-            attempt++;
-    
-            if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
-              console.log("There was an issue with your transaction. Transaction was replaced");
-              return { error };
-            } else if (error.message.includes("replacement transaction underpriced")) {
-              gasPrice = await getGasPrice();
-              console.log("New Gas Price:", gasPrice.toString());
-            } else if (error.message.includes("nonce too low")) {
-              nonce = await ownerSigner.getTransactionCount('pending');
-              console.log("New Nonce:", nonce);
-            } else if (error.message.includes("insufficient funds")) {
-              console.log(`Error: ${error.message}`);
-              return { error };
-            } else if (error.message.includes("transfer amount exceeds allowance")) {
-              console.log(`Error: ${error.message}`);
-              return { error };
-            } else {
-              throw error;
-            }
-          }
+  const contract = new ethers.Contract(
+    DintTokenAddress.toLowerCase(),
+    DintTokenAbBI,
+    ownerSigner
+  );
+  return new Promise((resolve, reject) => {
+    contract
+      .transferFrom(data.userAddress, DintDistributerAddress, value, {
+        gasLimit: 1000000,
+        gasPrice: 30000000000,
+      })
+
+      .then(
+        async (res) => {
+          console.log("Transaction Hashes payouts", res);
+
+          // const filter = {
+          //   address: DintDistributerAddress,
+          //   topics: [
+          //     "0x94793dae1b41ddf18877c1fd772483f743aaa443d4d9052721cef45379dca65f",
+          //   ],
+          // };
+          // provider.on(filter, async (data, err) => {
+          //   console.log("data123", data);
+          //   console.log("errrr", err);
+          //   const txnResponse = data;
+          //   resolve(txnResponse);
+          //   // const add = ethers.utils.defaultAbiCoder.decode(
+          //   //   ["address", "address"],
+          //   //   data.data
+          //   // );
+          //   // console.log("event=====", add);
+          // });
+          resolve({ res, data });
+        },
+        (err) => {
+          console.log("err", err);
         }
-    
-      } catch (error) {
-        console.log("There was an issue processing your transaction.");
-        console.log("Error:", error);
-        return { error };
-      }
-    };
-    
+      )
+      .catch((err) => {
+        console.log("err", err);
+        reject(err);
+      });
+  });
+};
 
 const getUserData = async (user_id, amount) => {
   return new Promise((resolve, reject) => {
