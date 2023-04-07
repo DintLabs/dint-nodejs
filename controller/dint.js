@@ -83,6 +83,7 @@ const generate = async (data, amount) => {
 
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
+      console.log("newNonce:", newNonce);
       const permit = {
         owner: account,
         spender,
@@ -110,16 +111,14 @@ const generate = async (data, amount) => {
         } catch (error) {
           console.log("gas error");
           console.error(error);
-          return ethers.utils.parseUnits("150", "gwei");
+          return ethers.utils.parseUnits("200", "gwei");
         }
       };
  // Get the current gas price
  let gasPrice = await getGasPrice();
  console.log("Gas Price:", gasPrice.toString());
 
- // Get the nonce for the transaction
- const nonce = await ownerSigner.getTransactionCount("latest");
- console.log("Nonce:", nonce);
+
 
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('600000', 'wei');
@@ -300,9 +299,6 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
-          return { error };
-        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
-          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
