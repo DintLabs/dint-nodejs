@@ -229,7 +229,7 @@ const generate = async (data, amount) => {
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
-      .get("https://gasstation-mainnet.matic.network/")
+      .get("https://gasstation-mumbai.matic.today")
       .then((res) => res.data);
 
     const fee = standard + (fast - standard) / 3;
