@@ -52,11 +52,11 @@ app.use((err, req, res, next) => {
   res.send("get your ip whitelisted for accessing this");
 });
 
-app.listen(PORT, (error) => {
-  if (!error)
-    console.log(
-      "Server is Successfully Running, and App is listening on port " + PORT
-    );
-  else console.log("Error occurred, server can't start", error);
+const server = app.listen(PORT, (error) => {
+  if (!error) {
+    console.log("Server is Successfully Running, and App is listening on port " + PORT);
+    server.setTimeout(180000);
+  } else {
+    console.log("Error occurred, server can't start", error);
+  }
 });
-

@@ -22,19 +22,6 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
-const noncesClient = new Client({
-  user: process.env.NONCES_DB_USER,
-  host: process.env.NONCES_DB_HOST,
-  database: process.env.NONCES_DB_NAME,
-  password: process.env.NONCES_DB_PASSWORD,
-  port: process.env.NONCES_DB_PORT,
-});
-
-noncesClient.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to nonces database!');
-});
-
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
@@ -56,7 +43,7 @@ const generate = async (data, amount) => {
     );
     const domainName = "Dint"; // token name
     const domainVersion = "MMT_0.1";
-    const chainId = 80001; // this is for the chain's ID.
+    const chainId = 137; // this is for the chain's ID.
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
@@ -96,7 +83,6 @@ const generate = async (data, amount) => {
 
       const currentnonce = await contract.nonces(account);
       const newNonce = currentnonce.toNumber();
-      console.log("newNonce:", newNonce);
       const permit = {
         owner: account,
         spender,
@@ -131,7 +117,9 @@ const generate = async (data, amount) => {
  let gasPrice = await getGasPrice();
  console.log("Gas Price:", gasPrice.toString());
 
-
+ // Get the nonce for the transaction
+ const nonce = await signer.getTransactionCount("latest");
+ console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('600000', 'wei');
@@ -242,7 +230,7 @@ const generate = async (data, amount) => {
 const getGasPrice = async () => {
   try {
     const { standard, fast } = await axios
-      .get("https://gasstation-mumbai.matic.today")
+      .get("https://gasstation-mainnet.matic.network/")
       .then((res) => res.data);
 
     const fee = standard + (fast - standard) / 3;
@@ -312,6 +300,9 @@ const send = async (data, value) => {
           return { error };
         } else if (error.message.includes("transfer amount exceeds allowance")) {
           console.log(`Error: ${error.message}`);
+          return { error };
+        } else if (Array.isArray(pendingTxs) && pendingTxs.filter((tx) => tx.nonce === nonce).length > 0) {
+          console.log(`Error: Another transaction with the same nonce (${nonce}) is pending`);
           return { error };
         } else {
           throw error;
