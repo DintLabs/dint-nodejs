@@ -9,6 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
+const { getNonce } = require("./dint-nonce");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -22,18 +23,18 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
-const noncesClient = new Client({
-  user: process.env.NONCES_DB_USER,
-  host: process.env.NONCES_DB_HOST,
-  database: process.env.NONCES_DB_NAME,
-  password: process.env.NONCES_DB_PASSWORD,
-  port: process.env.NONCES_DB_PORT,
-});
+// const noncesClient = new Client({
+//   user: process.env.NONCES_DB_USER,
+//   host: process.env.NONCES_DB_HOST,
+//   database: process.env.NONCES_DB_NAME,
+//   password: process.env.NONCES_DB_PASSWORD,
+//   port: process.env.NONCES_DB_PORT,
+// });
 
-noncesClient.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to nonces database!');
-});
+// noncesClient.connect((err) => {
+//   if (err) throw err;
+//   console.log('Connected to nonces database!');
+// });
 
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
@@ -86,7 +87,7 @@ const generate = async (data, amount) => {
       DintDistributerAddress
     );
 
-      console.log(`Current approval (${currentApproval}) `);
+    console.log(`Current approval (${currentApproval}) `);
 
 
     if (Number(currentApproval) >= 0) {
@@ -94,14 +95,17 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
+      // const currentnonce = await contract.nonces(account);
+      const newNonce = await getNonce(account);
+
+      
+      // const newNonce = currentnonce.toNumber();
       console.log("newNonce:", newNonce);
       const permit = {
         owner: account,
         spender,
         value,
-        nonce: newNonce,
+        nonce: newNonce+1,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -118,7 +122,7 @@ const generate = async (data, amount) => {
           const { standard, fast } = await axios
             .get("https://gasstation-mainnet.matic.network/")
             .then((res) => res.data);
-      
+
           const fee = standard + (fast - standard) / 3;
           return ethers.utils.parseUnits(fee.toFixed(2).toString(), "gwei");
         } catch (error) {
@@ -127,15 +131,15 @@ const generate = async (data, amount) => {
           return ethers.utils.parseUnits("200", "gwei");
         }
       };
- // Get the current gas price
- let gasPrice = await getGasPrice();
- console.log("Gas Price:", gasPrice.toString());
+      // Get the current gas price
+      let gasPrice = await getGasPrice();
+      console.log("Gas Price:", gasPrice.toString());
 
 
 
- // Set the gas limit to 70,000 units
- const gasLimit = ethers.utils.parseUnits('600000', 'wei');
-      
+      // Set the gas limit to 70,000 units
+      const gasLimit = ethers.utils.parseUnits('600000', 'wei');
+
       return new Promise(async (resolve, reject) => {
         contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
@@ -158,13 +162,13 @@ const generate = async (data, amount) => {
           });
       });
     } else {
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
+      const newNonce = await getNonce(account);
+      // const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
         spender,
         value,
-        nonce: newNonce,
+        nonce: newNonce+1,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -181,7 +185,7 @@ const generate = async (data, amount) => {
         sig.v,
         sig.r,
         sig.s,
-        { 
+        {
           gasLimit: gasLimit,
           gasPrice: gasPrice,
         }
@@ -213,7 +217,7 @@ const generate = async (data, amount) => {
             sigNew.v,
             sigNew.r,
             sigNew.s,
-            { 
+            {
               gasLimit: gasLimit,
               gasPrice: gasPrice,
             }
@@ -254,7 +258,7 @@ const getGasPrice = async () => {
   }
 };
 
-   
+
 const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
