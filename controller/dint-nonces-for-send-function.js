@@ -26,7 +26,7 @@ const latestNonces = new Map();
 // Define a function to retrieve the latest nonce for an address from the database
 function getLatestNonce(address) {
   return new Promise((resolve, reject) => {
-    const query = `SELECT nonce FROM walletNonces WHERE address = '${address}'`;
+    const query = `SELECT nonce FROM walletnonce WHERE address = '${address}'`;
     client.query(query, (error, results) => {
       if (error) {
         reject(error);
@@ -43,7 +43,7 @@ function getLatestNonce(address) {
 }
 // Define a function to update the latest nonce for an address in the database
 function updateLatestNonce(address, nonce) {
-  const query = `UPDATE walletNonces SET nonce = ${nonce} WHERE address = '${address}'`;
+  const query = `UPDATE walletnonce SET nonce = ${nonce} WHERE address = '${address}'`;
   client.query(query, (error, results) => {
     if (error) {
       console.error(error);
