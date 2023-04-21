@@ -23,18 +23,6 @@ client.connect(function (err) {
   console.log("Connected!");
 });
 
-// const noncesClient = new Client({
-//   user: process.env.NONCES_DB_USER,
-//   host: process.env.NONCES_DB_HOST,
-//   database: process.env.NONCES_DB_NAME,
-//   password: process.env.NONCES_DB_PASSWORD,
-//   port: process.env.NONCES_DB_PORT,
-// });
-
-// noncesClient.connect((err) => {
-//   if (err) throw err;
-//   console.log('Connected to nonces database!');
-// });
 
 const DintTokenAddress = process.env.DINT_TOKEN_ADDRESS;
 const DintDistributerAddress = process.env.DINT_DIST_ADDRESS;
