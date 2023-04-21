@@ -10,6 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
 const { getNonce } = require("./dint-nonce");
+const { getWalletNonce } = require("./dint-nonces-for-send-function");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -251,7 +252,7 @@ const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
-    let nonce = await ownerSigner.getTransactionCount('pending');
+    let nonce =  await getWalletNonce(ownerSigner.address)
     let gasPrice = await getGasPrice();
     let attempt = 1;
     let txHash = null;
