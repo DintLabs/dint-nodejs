@@ -9,6 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
+const {getNonce} = require("./dint-nonce");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -33,7 +34,7 @@ const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_PROVIDER);
 const ownerSigner = new ethers.Wallet(ownerPrivateKey, provider);
 
 const generate = async (data, amount) => {
-  const nonce = await ownerSigner.getTransactionCount("latest");
+  // const nonce = await ownerSigner.getTransactionCount("latest");
   if (amount >= 0) {
     const signer = new ethers.Wallet(data.userPrivateKey, provider);
     const contract = new ethers.Contract(
@@ -80,13 +81,13 @@ const generate = async (data, amount) => {
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
+      const newNonce = await getNonce(account);
+      // const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
         spender,
         value,
-        nonce: newNonce,
+        nonce: newNonce+1,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -117,8 +118,8 @@ const generate = async (data, amount) => {
  console.log("Gas Price:", gasPrice.toString());
 
  // Get the nonce for the transaction
- const nonce = await signer.getTransactionCount("latest");
- console.log("Nonce:", nonce);
+//  const nonce = await signer.getTransactionCount("latest");
+//  console.log("Nonce:", nonce);
 
  // Set the gas limit to 70,000 units
  const gasLimit = ethers.utils.parseUnits('70000', 'wei');
@@ -145,13 +146,13 @@ const generate = async (data, amount) => {
           });
       });
     } else {
-      const currentnonce = await contract.nonces(account);
-      const newNonce = currentnonce.toNumber();
+      const newNonce = await getNonce(account);
+      // const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
         spender,
         value: 0,
-        nonce: newNonce,
+        nonce: newNonce+1,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -160,6 +161,7 @@ const generate = async (data, amount) => {
         permit
       );
       let sig = await ethers.utils.splitSignature(generatedSig);
+
       const res = await contract.permit(
         account,
         spender,
@@ -180,7 +182,7 @@ const generate = async (data, amount) => {
         owner: account,
         spender,
         value,
-        nonce: newNonce + 1,
+        nonce: newNonce,
         deadline,
       };
       const generatedNewSig = await signer._signTypedData(
@@ -245,8 +247,8 @@ const send = async (data, value) => {
     const priceInUSD = 1000000;
 
         // Get the nonce for the transaction
-    const nonce = await ownerSigner.getTransactionCount("latest");
-    console.log("Nonce:", nonce);
+    // const nonce = await ownerSigner.getTransactionCount("latest");
+    // console.log("Nonce:", nonce);
     
     // Set the gas limit to 70,000 units
     const gasLimit = ethers.utils.parseUnits('70000', 'wei');
@@ -264,12 +266,9 @@ const send = async (data, value) => {
       data.recieverAddress,
       value,
       priceInUSD,
-      nonce,
       {
-     
         gasLimit: gasLimit,
         gasPrice: gasPrice,
-     
       }
     );
     console.log("Transaction Hash", tx.hash);

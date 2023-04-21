@@ -13,8 +13,6 @@ sendDint.use(
 );
 sendDint.use(bodyParser.json());
 
-
-
 sendDint.post("/send-dint", async (req, res, next) => {
   res.setTimeout(180000); // Set timeout to 180 seconds
   if (req.headers.apikey !== process.env.SECURITY_KEY) {
