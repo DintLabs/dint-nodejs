@@ -50,7 +50,15 @@ async function checkStorageExistForAddress(address) {
  */
 async function getNextNonce(address) {
     const hasValue = await checkStorageExistForAddress(address)
-    const nextNonce = (hasValue ? await getNonce(address) : await getTransactionCount(address)) + 1;
+    var nextNonce;
+    if(!hasValue) {
+        nextNonce = await getTransactionCount(address);
+        if(nextNonce>0) {
+            nextNonce = nextNonce + 1
+        } 
+    } else {
+        nextNonce = await getNonce(address) + 1
+    }
     await incrementNonce(address, nextNonce )
     return nextNonce;
 }

@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { initRedisConnection, disconnectRedisConnection, getNextNonce, getNonce, clearRedisCache } = require("../utils/nonceManager");
-const myAddress = "0xcB4461A0CE317DD7e4D9A552E7e121260131526A";
+const myAddress = "0x2852d9C13A989457f4Cf035a1CB172A02FF57F07";
 
 beforeEach(async () => {
    await initRedisConnection()
@@ -19,6 +19,6 @@ describe("Check Nonce function", () => {
     it("get next nonce for address ", async () => {
           const nonce = await getNextNonce(myAddress)
           console.log("new nonce ", nonce)
-          expect(nonce).toBeGreaterThan(0);
+          expect(nonce).not.toBeLessThan(0);
     });
 });
