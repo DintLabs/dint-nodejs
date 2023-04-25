@@ -18,10 +18,6 @@ async function disconnectRedisConnection() {
     await client.disconnect();
 }
 
-async function clearRedisCache() {
-    await client.flushAll();
-}
-
 /**
  * This is the function which used to get nonce from redis for particular address
  */
@@ -78,7 +74,6 @@ async function getTransactionCount(address) {
 module.exports = {
     initRedisConnection,
     disconnectRedisConnection,
-    clearRedisCache,
     getNonce,
     incrementNonce,
     checkStorageExistForAddress,
