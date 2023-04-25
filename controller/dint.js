@@ -9,8 +9,7 @@ const fernet = require("fernet");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
-const { getNonce } = require("./dint-nonce");
-const { getWalletNonce } = require("./dint-nonces-for-send-function");
+const { getNextNonce } = require("../utils/nonceManager");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -85,7 +84,7 @@ const generate = async (data, amount) => {
       );
 
       // const currentnonce = await contract.nonces(account);
-      const newNonce = await getNonce(account);
+      const newNonce = await getNextNonce(account);
 
       
       // const newNonce = currentnonce.toNumber();
@@ -94,7 +93,7 @@ const generate = async (data, amount) => {
         owner: account,
         spender,
         value,
-        nonce: newNonce+1,
+        nonce: newNonce,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -151,13 +150,13 @@ const generate = async (data, amount) => {
           });
       });
     } else {
-      const newNonce = await getNonce(account);
+      const newNonce = await getNextNonce(account);
       // const newNonce = currentnonce.toNumber();
       const permit = {
         owner: account,
         spender,
         value,
-        nonce: newNonce+1,
+        nonce: newNonce,
         deadline,
       };
       const generatedSig = await signer._signTypedData(
@@ -252,7 +251,7 @@ const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
-    let nonce =  await getWalletNonce(ownerSigner.address)
+    let nonce =  await getNextNonce(ownerSigner.address)
     let gasPrice = await getGasPrice();
     let attempt = 1;
     let txHash = null;
