@@ -131,6 +131,7 @@ const generate = async (data, amount) => {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
           })
+          await permitResult.wait(6)
       } catch (error) {
         const newNonce = (await contract.nonces(account)).toNumber();
         const updatedNonce = await incrementNonce(account, newNonce.toString()) // Update nonce in nonce manager
@@ -152,11 +153,11 @@ const generate = async (data, amount) => {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
           })
+          await permitResult.wait(6)
       }
 
       try {
-        console.log("Approval Hash", permitResult.hash);
-        await permitResult.wait(6)
+        console.log("Approval Hash", permitResult.hash);  
         const sendDintResult = await send(data, value)
         return sendDintResult
       } catch (err) {
