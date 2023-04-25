@@ -1,14 +1,14 @@
-const express = require("express");
-// require("dotenv").config({ path: `.env.local`, override: true });
 require("dotenv").config();
+const express = require("express");
 const cors = require("cors");
 const { Client } = require("pg");
-
-
-const app = express();
-app.use(cors());
+const { initRedisConnection } = require("./utils/nonceManager");
 const stripeApp = require("./routes/payment");
 const sendDint = require("./routes/dint");
+
+initRedisConnection();
+const app = express();
+app.use(cors());
 
 app.use("/api/webhooks", stripeApp);
 app.use("/api", sendDint);
