@@ -326,7 +326,7 @@ const send = async (data, value) => {
           return { error };
         } else {
           console.log(error);
-          throw error;
+          return { error };
         }
       }
     }
