@@ -10,6 +10,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const axios = require('axios');
 const express = require("express");
 const { getNextNonce } = require("../utils/nonceManager");
+const { incrementNonce, getTransactionCount } = require("../utils/nonceManager");
 const app = express();
 const client = new Client({
   user: process.env.DB_USER,
@@ -49,7 +50,7 @@ const generate = async (data, amount) => {
     const contractAddress = DintTokenAddress.toLowerCase();
     const spender = DintDistributerAddress.toLowerCase();
     const deadline = 2673329804;
-    var account = data.userAddress.toLowerCase();
+    const account = data.userAddress.toLowerCase();
     const domain = {
       name: domainName,
       version: domainVersion,
@@ -77,33 +78,13 @@ const generate = async (data, amount) => {
 
     console.log(`Current approval (${currentApproval}) `);
 
-
     if (Number(currentApproval) >= 0) {
       const value = BigInt(
         Number(ethers.utils.parseUnits(amount.toString(), "ether"))
       );
 
-      // const currentnonce = await contract.nonces(account);
-      const newNonce = await getNextNonce(account);
-
-      
-      // const newNonce = currentnonce.toNumber();
-      console.log("newNonce:", newNonce);
-      const permit = {
-        owner: account,
-        spender,
-        value,
-        nonce: newNonce,
-        deadline,
-      };
-      const generatedSig = await signer._signTypedData(
-        domain,
-        { Permit: Permit },
-        permit
-      );
-
-
-      let sig = await ethers.utils.splitSignature(generatedSig);
+      const newNonce = await getNextNonce(account, contract);
+      console.log("newNonce:", newNonce.toString());
 
       const getGasPrice = async () => {
         try {
@@ -123,35 +104,70 @@ const generate = async (data, amount) => {
       let gasPrice = await getGasPrice();
       console.log("Gas Price:", gasPrice.toString());
 
-
-
       // Set the gas limit to 70,000 units
       const gasLimit = ethers.utils.parseUnits('600000', 'wei');
 
-      return new Promise(async (resolve, reject) => {
-        contract
+      const permit = {
+        owner: account,
+        spender,
+        value,
+        nonce: newNonce,
+        deadline,
+      };
+
+      let permitResult
+      try {
+        const generatedSig = await signer._signTypedData(
+          domain,
+          { Permit: Permit },
+          permit
+        );
+        let sig = ethers.utils.splitSignature(generatedSig);
+
+        // Nonce should be increased
+        await getNextNonce(ownerSigner.address)
+        permitResult = await contract
           .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
             gasLimit: gasLimit,
             gasPrice: gasPrice,
           })
-          .then((res) => {
-            console.log("Approval Hash", res.hash);
-            send(data, value)
-              .then((data) => {
-                resolve(data);
-              })
-              .catch((err) => {
-                reject(err);
-              });
+          await permitResult.wait(6)
+      } catch (error) {
+        const newNonce = (await contract.nonces(account)).toNumber();
+        const updatedNonce = await incrementNonce(account, newNonce.toString()) // Update nonce in nonce manager
+        console.log(updatedNonce);
+        console.log("New Nonce:", newNonce);
+
+        permit.nonce = newNonce
+        const generatedSig = await signer._signTypedData(
+          domain,
+          { Permit: Permit },
+          permit
+        );
+        let sig = ethers.utils.splitSignature(generatedSig);
+
+        // Nonce should be increased
+        await getNextNonce(ownerSigner.address)
+        permitResult = await contract
+          .permit(account, spender, value, deadline, sig.v, sig.r, sig.s, {
+            gasLimit: gasLimit,
+            gasPrice: gasPrice,
           })
-          .catch((err) => {
-            console.log("err permit", err);
-            reject(err);
-          });
-      });
+          await permitResult.wait(6)
+      }
+
+      try {
+        console.log("Approval Hash", permitResult.hash);  
+        const sendDintResult = await send(data, value)
+        return sendDintResult
+      } catch (err) {
+        console.log("err permit", err);
+        return err;
+      }
     } else {
-      const newNonce = await getNextNonce(account);
-      // const newNonce = currentnonce.toNumber();
+      const currentnonce = await contract.nonces(account);
+      const newNonce = currentnonce
+
       const permit = {
         owner: account,
         spender,
@@ -164,7 +180,7 @@ const generate = async (data, amount) => {
         { Permit: Permit },
         permit
       );
-      let sig = await ethers.utils.splitSignature(generatedSig);
+      let sig = ethers.utils.splitSignature(generatedSig);
       const res = await contract.permit(
         account,
         spender,
@@ -251,13 +267,14 @@ const send = async (data, value) => {
   try {
     const priceInUSD = 1000000;
     const gasLimit = ethers.utils.parseUnits('2500000', 'wei');
-    let nonce =  await getNextNonce(ownerSigner.address)
     let gasPrice = await getGasPrice();
     let attempt = 1;
     let txHash = null;
 
     while (!txHash) {
       try {
+        let nonce = (await getNextNonce(ownerSigner.address))
+        console.log(nonce, await getTransactionCount(ownerSigner.address));
         const dintDistContract = new ethers.Contract(
           DintDistributerAddress.toLowerCase(),
           dintDistributerABI,
@@ -290,15 +307,17 @@ const send = async (data, value) => {
         console.log(`Attempt ${attempt}: ${error.message}`);
         attempt++;
 
+        const newNonce = (await getTransactionCount(ownerSigner.address)) - 1;
+        const updatedNonce = await incrementNonce(ownerSigner.address, newNonce.toString()) // Update nonce in nonce manager
+        console.log(updatedNonce);
+        console.log("Owner new Nonce:", newNonce);
+
         if (error.reason === 'replacement' || error.code === 'TRANSACTION_REPLACED') {
           console.log("There was an issue with your transaction. Transaction was replaced");
           return { error };
         } else if (error.message.includes("replacement transaction underpriced")) {
           gasPrice = await getGasPrice();
           console.log("New Gas Price:", gasPrice.toString());
-        } else if (error.message.includes("nonce too low")) {
-          nonce = await ownerSigner.getTransactionCount('pending');
-          console.log("New Nonce:", nonce);
         } else if (error.message.includes("insufficient funds")) {
           console.log(`Error: ${error.message}`);
           return { error };
@@ -306,7 +325,8 @@ const send = async (data, value) => {
           console.log(`Error: ${error.message}`);
           return { error };
         } else {
-          throw error;
+          console.log(error);
+          return { error };
         }
       }
     }
