@@ -23,8 +23,8 @@ async function disconnectRedisConnection() {
  */
 async function getNonce(address) {
     try {
-        const value =  await client.get(address);
-        return value !==null ? parseInt(value) : 0
+        const value = await client.get(address);
+        return value !== null ? parseInt(value) : 0
     } catch (error) {
         return 0;
     }
@@ -34,32 +34,36 @@ async function getNonce(address) {
  * This is the function which used to increment nonce from redis for particular address
  */
 async function incrementNonce(address, nonce) {
-    await client.set(address, nonce);
+    return await client.set(address, nonce);
 }
 
 /**
  * This is the function which used to check whether nonce available for particular address
  */
 async function checkStorageExistForAddress(address) {
-   const result = await client.get(address) 
-   return result !== null
+    const result = await client.get(address)
+    return result !== null
 }
 
 /**
  * This is the function public function which provide next nonce for user address
  */
-async function getNextNonce(address) {
+async function getNextNonce(address, contract = null) {
     const hasValue = await checkStorageExistForAddress(address)
-    var nextNonce;
-    if(!hasValue) {
-        nextNonce = await getTransactionCount(address);
-        if(nextNonce>0) {
+    let nextNonce;
+    if (!hasValue) {
+        if (contract) {
+            nextNonce = (await contract.nonces).toString()
+        } else {
+            nextNonce = await getTransactionCount(address);
+        }
+        if (nextNonce > 0) {
             nextNonce = nextNonce + 1
-        } 
+        }
     } else {
         nextNonce = await getNonce(address) + 1
     }
-    await incrementNonce(address, nextNonce )
+    await incrementNonce(address, nextNonce)
     return nextNonce;
 }
 
@@ -85,6 +89,7 @@ module.exports = {
     getNonce,
     incrementNonce,
     checkStorageExistForAddress,
-    getNextNonce
+    getNextNonce,
+    getTransactionCount
 }
 
